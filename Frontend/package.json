@@ -1,0 +1,31 @@
+{
+  "name": "meyer-online",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.2.1",
+    "@mui/material": "^6.2.1",
+    "bootstrap": "^5.2.3",
+    "flag-icons": "^7.2.3",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^7.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@types/react-native": "^0.72.8",
+    "@vitejs/plugin-react": "^3.1.0",
+    "react-pro-sidebar": "^1.1.0",
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0"
+  }
+}
