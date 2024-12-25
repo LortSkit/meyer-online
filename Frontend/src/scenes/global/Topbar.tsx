@@ -23,8 +23,6 @@ const Topbar = () => {
         flexBasis: "100%",
         height: "13%",
       }}
-      // TODO: Find a WAYYYY better way to keep right-most icons stuck in place
-      //width={isCollapsed ? "calc(100vw - 75px)" : "calc(100vw - 250px)"}
     >
       {/* SEARCH BAR */}
       <Box display="flex" bgcolor={colors.primary[800]} borderRadius="3px">
