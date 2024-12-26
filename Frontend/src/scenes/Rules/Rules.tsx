@@ -22,9 +22,8 @@ const Rules = ({ isDanish, setIsDanish }: Props) => {
             variant="h1"
             color={colors.blueAccent[100]}
             fontWeight="bold"
-          >
-            Rules
-          </Typography>
+            children={isDanish ? "Regler" : "Rules"}
+          />
         </Box>
         <CasinoOutlined sx={{ display: "flex" }} />
       </Box>

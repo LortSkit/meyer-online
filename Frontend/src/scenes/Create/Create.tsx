@@ -22,9 +22,8 @@ const Create = ({ isDanish, setIsDanish }: Props) => {
             variant="h1"
             color={colors.blueAccent[100]}
             fontWeight="bold"
-          >
-            Create
-          </Typography>
+            children={isDanish ? "Opret et spil" : "Start a game"}
+          />
         </Box>
         <CasinoOutlined sx={{ display: "flex" }} />
       </Box>

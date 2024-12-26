@@ -111,7 +111,7 @@ const SidebarComp = ({
           </Box>
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
-              title={isDanish ? "Start et spil" : "Create game"}
+              title={isDanish ? "Opret et spil" : "Start a game"}
               to="/create"
               icon={<CasinoOutlined />}
               selected={selected}

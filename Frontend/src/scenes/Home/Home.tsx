@@ -22,9 +22,8 @@ const Home = ({ isDanish, setIsDanish }: Props) => {
             variant="h1"
             color={colors.blueAccent[100]}
             fontWeight="bold"
-          >
-            Meyer
-          </Typography>
+            children={"Meyer"}
+          />
         </Box>
         <CasinoOutlined sx={{ display: "flex" }} />
       </Box>
