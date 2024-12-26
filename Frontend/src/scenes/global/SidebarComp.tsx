@@ -8,56 +8,34 @@ import { HomeOutlined, MenuOutlined } from "@mui/icons-material";
 import { PeopleOutlined } from "@mui/icons-material";
 import { CasinoOutlined } from "@mui/icons-material";
 import { HelpOutlined } from "@mui/icons-material";
-import { Link, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import Item from "../../components/Item";
 import creator from "../../assets/alek.jpg";
-
-interface ItemProps {
-  title: string;
-  to: string;
-  icon: ReactNode;
-  selected: string;
-  setSelected: React.Dispatch<React.SetStateAction<string>>;
-}
-
-const Item = ({ title, to, icon, selected, setSelected }: ItemProps) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-
-  return (
-    <MenuItem
-      active={selected === title}
-      style={{ color: colors.grey[100] }}
-      onClick={() => setSelected(title)}
-      icon={icon}
-      component={"span"}
-    >
-      <Typography>{title}</Typography>
-      <Link to={to} />
-    </MenuItem>
-  );
-};
 
 interface Props {
   children: ReactNode;
   isCollapsed: boolean;
   setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  isDanish: boolean;
+  setIsDanish: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const SidebarComp = ({ children, isCollapsed, setIsCollapsed }: Props) => {
+const SidebarComp = ({
+  children,
+  isCollapsed,
+  setIsCollapsed,
+  isDanish,
+  setIsDanish,
+}: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [selected, setSelected] = useState("");
   return (
-    <Box display="flex">
+    <Box display="flex" flexShrink="1" flexGrow="0">
       <Sidebar
         collapsed={isCollapsed}
         backgroundColor={colors.primary[700]}
         collapsedWidth="75px"
-        style={{
-          display: "flex",
-          flexShrink: "1",
-          flexGrow: "0",
-        }}
         rootStyles={{
           [`.${sidebarClasses.container}`]: {
             height: "100vh !important",
@@ -72,7 +50,6 @@ const SidebarComp = ({ children, isCollapsed, setIsCollapsed }: Props) => {
             icon={isCollapsed ? <MenuOutlined /> : undefined}
             style={{
               margin: "10px 0 20px 0",
-              //color: colors.grey[900],
             }}
           >
             {!isCollapsed && (
@@ -112,16 +89,20 @@ const SidebarComp = ({ children, isCollapsed, setIsCollapsed }: Props) => {
                 >
                   Alexander Laukamp
                 </Typography>
-                <Typography variant="h5" color={colors.blackAccent[100]}>
-                  Creator of this page
-                </Typography>
+                <Typography
+                  variant="h5"
+                  color={colors.blackAccent[100]}
+                  children={
+                    isDanish ? "Sideudvikleren" : "Creator of this page"
+                  }
+                />
               </Box>
             </Box>
           )}
           {/* MENU ITEMS */}
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
-              title="Home"
+              title={isDanish ? "Hjem" : "Home"}
               to="/"
               icon={<HomeOutlined />}
               selected={selected}
@@ -130,8 +111,8 @@ const SidebarComp = ({ children, isCollapsed, setIsCollapsed }: Props) => {
           </Box>
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
-              title="Create Game"
-              to="/"
+              title={isDanish ? "Start et spil" : "Create game"}
+              to="/create"
               icon={<CasinoOutlined />}
               selected={selected}
               setSelected={setSelected}
@@ -139,8 +120,8 @@ const SidebarComp = ({ children, isCollapsed, setIsCollapsed }: Props) => {
           </Box>
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
-              title="Find Games"
-              to="/"
+              title={isDanish ? "Find spil" : "Find games"}
+              to="/find"
               icon={<PeopleOutlined />}
               selected={selected}
               setSelected={setSelected}
@@ -148,8 +129,8 @@ const SidebarComp = ({ children, isCollapsed, setIsCollapsed }: Props) => {
           </Box>
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
-              title="Rules"
-              to="/"
+              title={isDanish ? "Regler" : "Rules"}
+              to="/rules"
               icon={<HelpOutlined />}
               selected={selected}
               setSelected={setSelected}
