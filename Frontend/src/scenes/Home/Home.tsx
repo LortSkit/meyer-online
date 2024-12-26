@@ -29,7 +29,7 @@ const Home = ({ isDanish }: Props) => {
 
       {/* USER NAME */}
       <Box display="flex" justifyContent="center">
-        <Box display="flex" bgcolor={colors.primary[800]}>
+        <Box display="flex" bgcolor={colors.primary[600]}>
           <InputBase
             id="username-bar"
             sx={{

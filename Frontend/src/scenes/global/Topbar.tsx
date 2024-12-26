@@ -34,7 +34,7 @@ const Topbar = ({ children, isDanish, setIsDanish }: Props) => {
       marginBottom="auto"
     >
       {/* SEARCH BAR */}
-      <Box display="flex" bgcolor={colors.primary[800]} borderRadius="3px">
+      <Box display="flex" bgcolor={colors.primary[600]} borderRadius="3px">
         <InputBase
           id="search-bar"
           sx={{ ml: 2, flex: 1, color: colors.grey[400] }}

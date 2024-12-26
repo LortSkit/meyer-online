@@ -72,15 +72,15 @@ export const tokens = (mode: PaletteMode) => ({
             900: "#e0e0e0",
         },
         primary: {
-            100: "#040509",
-            200: "#080b12",
-            300: "#0c101b",
-            400: "#101624",
-            500: "#141b2d",
-            600: "#434957",
-            700: "#727681",
-            800: "#a1a4ab",
-            900: "#d0d1d5",
+          100: "#fefdfb",
+          200: "#fdfbf6",
+          300: "#fdf9f2",
+          400: "#fcf7ed",
+          500: "#fbf5e9",
+          600: "#c9c4ba",
+          700: "#97938c",
+          800: "#64625d",
+          900: "#32312f"
         },
         blackAccent: {
             100: "#020204",
@@ -142,7 +142,7 @@ export const themeSettings = (mode: PaletteMode) => {
                         default: colors.primary[500],
                     }
                 } : {primary: {
-                    main: colors.primary[100],
+                    main: colors.primary[500],
                 },
                 secondary: {
                     main: colors.blackAccent[500],
@@ -153,7 +153,7 @@ export const themeSettings = (mode: PaletteMode) => {
                     light: colors.grey[100]
                 },
                 background: {
-                    default: "1f1f1c", // very light grey
+                    default: "#FBF5E9", // very light grey
                 }}
             )
         },
