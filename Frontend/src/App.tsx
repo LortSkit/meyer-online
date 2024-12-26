@@ -24,35 +24,23 @@ const App = () => {
             isCollapsed={isCollapsed}
             setIsCollapsed={setIsCollapsed}
             isDanish={isDanish}
-            setIsDanish={setIsDanish}
           >
             <main className="content">
               <Topbar isDanish={isDanish} setIsDanish={setIsDanish}>
                 <Box display="flex" flexBasis="100%">
                   <Routes>
-                    <Route
-                      path="/"
-                      element={
-                        <Home isDanish={isDanish} setIsDanish={setIsDanish} />
-                      }
-                    />
+                    <Route path="/" element={<Home isDanish={isDanish} />} />
                     <Route
                       path="/create"
-                      element={
-                        <Create isDanish={isDanish} setIsDanish={setIsDanish} />
-                      }
+                      element={<Create isDanish={isDanish} />}
                     />
                     <Route
                       path="/find"
-                      element={
-                        <Find isDanish={isDanish} setIsDanish={setIsDanish} />
-                      }
+                      element={<Find isDanish={isDanish} />}
                     />
                     <Route
                       path="/rules"
-                      element={
-                        <Rules isDanish={isDanish} setIsDanish={setIsDanish} />
-                      }
+                      element={<Rules isDanish={isDanish} />}
                     />
                   </Routes>
                 </Box>

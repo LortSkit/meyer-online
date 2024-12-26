@@ -17,7 +17,6 @@ interface Props {
   isCollapsed: boolean;
   setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
   isDanish: boolean;
-  setIsDanish: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SidebarComp = ({
@@ -25,7 +24,6 @@ const SidebarComp = ({
   isCollapsed,
   setIsCollapsed,
   isDanish,
-  setIsDanish,
 }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);

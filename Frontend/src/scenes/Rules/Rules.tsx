@@ -5,10 +5,9 @@ import { Outlet } from "react-router-dom";
 
 interface Props {
   isDanish: boolean;
-  setIsDanish: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Rules = ({ isDanish, setIsDanish }: Props) => {
+const Rules = ({ isDanish }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
