@@ -153,7 +153,7 @@ export const themeSettings = (mode: PaletteMode) => {
                     light: colors.grey[100]
                 },
                 background: {
-                    default: "#FBF5E9", // very light grey
+                    default: colors.primary[500],
                 }}
             )
         },
