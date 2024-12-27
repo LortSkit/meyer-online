@@ -11,7 +11,13 @@ type TurnState = {
   turn: Int32;
 };
 
-type Actions = "Check" | "Roll" | "Truth" | "Bluff" | "SameRollOrHigher";
+export type Action =
+  | "Check"
+  | "Roll"
+  | "Truth"
+  | "Bluff"
+  | "SameRollOrHigher"
+  | "Error";
 
 export class Meyer {
   private readonly allPossibleRollsOrdered: Int32[] = [
@@ -36,17 +42,17 @@ export class Meyer {
     awaitingAction: false,
     bluffing: false,
     sameRollOrHigher: false,
-    turn: 0,
+    turn: 1,
   };
-  private round: Int32 = 0;
+  private round: Int32 = 1;
 
-  constructor(np: Int32) {
-    if (np < 2 || np > 10) {
+  constructor(numberOfPlayers: Int32) {
+    if (numberOfPlayers < 2 || numberOfPlayers > 10) {
       throw new Error(
         "Number of players has to be between 2 and 10 (inclusive)"
       );
     }
-    this.numberOfPlayers = np;
+    this.numberOfPlayers = numberOfPlayers;
     for (let i = 0; i < this.allPossibleRollsOrdered.length; i++) {
       this.healths.push(6);
     }
@@ -75,7 +81,7 @@ export class Meyer {
       if (nextplayer > this.numberOfPlayers) {
         nextplayer = 1;
       }
-    } while (this.healths[nextplayer - 1] != 0);
+    } while (this.healths[nextplayer - 1] == 0);
     return nextplayer;
   }
 
@@ -156,6 +162,25 @@ export class Meyer {
     return this.turnState.turn;
   }
 
+  public getActionChoices(): Action[] {
+    if (this.roll == -1) {
+      if (this.getTurn() == 1) {
+        return ["Roll"];
+      }
+      return ["Check", "Roll"];
+    } else if (this.roll == 32) {
+      return [];
+    }
+    if (this.getTurn() == 1) {
+      return ["Truth", "Bluff"];
+    } else if (
+      this.isGreaterThanEqualTo(this.roll, this.previousDeclaredRoll)
+    ) {
+      return ["Truth", "Bluff", "SameRollOrHigher"];
+    }
+    return ["Bluff", "SameRollOrHigher"];
+  }
+
   public getBluffChoices(): Int32[] {
     //Mostly for frontend stuff
     if (this.roll == -1) {
@@ -176,8 +201,12 @@ export class Meyer {
   }
 
   public getCurrentPlayer(): Int32 {
-    //TODO: This is a dev testing function, should be deleted before final version
+    //TODO: Does this cause information leakage?
     return this.currentPlayer;
+  }
+
+  public getCurrentPlayerHealth(): Int32 {
+    return this.healths[this.currentPlayer - 1];
   }
 
   public advanceTurn(): void {
@@ -203,11 +232,13 @@ export class Meyer {
     }
   }
 
-  public takeAction(action: Actions): void {
+  public takeAction(action: Action): void {
     switch (action) {
       case "Check":
         if (this.roll != -1) {
           throw new Error("Cannot check previous player's roll after rolling!");
+        } else if (this.getTurn() == 1) {
+          throw new Error("Cannot check in first round!");
         }
         this.turnState.canAdvanceTurn = true;
         return;
@@ -226,7 +257,10 @@ export class Meyer {
         if (this.roll == -1) {
           throw new Error("You have to roll first!");
         }
-        if (this.isLessThan(this.roll, this.previousDeclaredRoll)) {
+        if (
+          this.getTurn() > 1 &&
+          this.isLessThan(this.roll, this.previousDeclaredRoll)
+        ) {
           throw new Error(
             "Cannot be truthful if your roll is lower than the previous!"
           );
@@ -243,14 +277,18 @@ export class Meyer {
       case "SameRollOrHigher":
         if (this.roll == -1) {
           throw new Error("You have to roll first!");
+        } else if (this.getTurn() == 1) {
+          throw new Error("Cannot same roll or higher in first round!");
         }
         this.roll = getRoll();
         this.turnState.sameRollOrHigher = true;
         this.turnState.canAdvanceTurn = true;
         return;
+      case "Error":
+        throw new Error('"Error" is not a valid action!');
     }
   }
-  public undoTruthOrBluff(): void {
+  public undoBluffChoice(): void {
     //TODO: needed?
     this.declaredRoll = -1;
     this.turnState.canAdvanceTurn = false;
