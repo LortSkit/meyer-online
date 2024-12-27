@@ -3,7 +3,7 @@ import { Dice } from "../components/icons/DiceIcons";
 import { Box, SxProps, Theme } from "@mui/material";
 
 //From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
-function _getRandomInt(min: Int32, max: Int32) {
+export function _getRandomInt(min: Int32, max: Int32) {
   const minCeiled = Math.ceil(min);
   const maxFloored = Math.floor(max);
   return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
