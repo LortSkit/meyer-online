@@ -107,28 +107,3 @@ export const Dice6 = ({ color, sideLength }: DiceXProps) => (
     </g>
   </DiceIcons>
 );
-
-interface DiceProps {
-  eyes: Int32;
-  color: string;
-  sideLength: Int32;
-}
-
-export const Dice = ({ eyes, color, sideLength }: DiceProps) => {
-  switch (eyes) {
-    case 1:
-      return Dice1({ color, sideLength });
-    case 2:
-      return Dice2({ color, sideLength });
-    case 3:
-      return Dice3({ color, sideLength });
-    case 4:
-      return Dice4({ color, sideLength });
-    case 5:
-      return Dice5({ color, sideLength });
-    case 6:
-      return Dice6({ color, sideLength });
-    default:
-      return Dice0({ color, sideLength });
-  }
-};

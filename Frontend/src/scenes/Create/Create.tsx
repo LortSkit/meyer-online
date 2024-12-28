@@ -9,6 +9,8 @@ import { tokens } from "../../theme";
 import { Meyer, Action } from "../../utils/gameLogic";
 import { ChangeEvent, useState } from "react";
 import { RollWithName } from "../../utils/diceUtils";
+import { Dice } from "../../utils/diceUtils";
+import { ActionChoices, BluffChoices } from "./GameElements";
 
 interface Props {
   isDanish: boolean;
@@ -22,49 +24,13 @@ const Create = ({ isDanish }: Props) => {
   const [canStartNewGame, setCanStartNewGame] = useState(true);
   const [inGame, setInGame] = useState(false);
   const [chosenAction, setChosenAction] = useState("Error" as Action);
-  const translateActions: { [action: string]: string } = {
-    ["Check"]: isDanish ? "Tjek" : "Check",
-    ["Roll"]: isDanish ? "Rul" : "Roll",
-    ["Truth"]: isDanish ? "Sandhed" : "Truth",
-    ["Bluff"]: isDanish ? "Bluf" : "Bluff",
-    ["SameRollOrHigher"]: isDanish
-      ? "Det eller derover"
-      : "Same roll or higher",
-  };
-  const actions = (roll: number) =>
-    roll == 32 ? [isDanish ? "SKÅL!" : "CHEERS!"] : meyer.getActionChoices();
-  const choices = actions(meyer.getRoll()).map((action) => (
-    <Box
-      display="flex"
-      flexBasis={`${100 / meyer.getActionChoices().length}%`}
-      justifyContent="center"
-      key={action}
-    >
-      <Box display="flex" justifyContent="center" bgcolor={colors.primary[700]}>
-        <IconButton
-          onClick={() => {
-            meyer.getRoll() != 32
-              ? setChosenAction(action as Action)
-              : undefined;
-            let justnowPlayer = meyer.getCurrentPlayer();
-            meyer.getRoll() != 32
-              ? meyer.takeAction(action as Action)
-              : undefined;
-            meyer.advanceTurn();
-            if (justnowPlayer != meyer.getCurrentPlayer()) {
-              setChosenAction("Error");
-            }
-          }}
-        >
-          <Typography
-            fontSize="20px"
-            children={translateActions[action as string]}
-          />
-        </IconButton>
-      </Box>
-      <Box display="flex" justifyContent="center" />
-    </Box>
-  ));
+  const [showBluffs, setShowBluffs] = useState(false);
+  const [bluffs, setBluffs] = useState([22]); //Temporary value
+  const [roll, setRoll] = useState(-1);
+  const [round, setRound] = useState(1);
+  const [turn, setTurn] = useState(1);
+  const [healths, setHealths] = useState([-1]); //Temporary value //TODO: Use this, but needs round loser
+  const [currentPlayer, setCurrentPlayer] = useState(1); //TODO: Use this but needs nextplayer
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setNumberOfPlayers(Number(event.target.value));
@@ -93,19 +59,17 @@ const Create = ({ isDanish }: Props) => {
       </Box>
       {/* INTRODUCTION */}
       {/* TODO: WRITE IT */}
-      {/* GAME LOGIC */}
-      {/* TODO: MOVE LATER */}
-      {/* TODO: MAKE LANGUAGE WORK ON IT */}
+
+      {/* START NEW GAME */}
       {canStartNewGame && (
         <Box display="flex" justifyContent="center" flexDirection="column">
           <Box display="flex" justifyContent="center">
-            <Box display="flex" justifyContent="center" flexBasis="30%">
+            <Box display="flex" justifyContent="center">
               {isDanish ? "Antallet af spillere:" : "Number of players:"}
             </Box>
             <Box
               display="flex"
               justifyContent="center"
-              flexBasis="10%"
               bgcolor={colors.primary[600]}
             >
               <InputBase
@@ -149,6 +113,8 @@ const Create = ({ isDanish }: Props) => {
             </IconButton>
           </Box>
         )}
+
+        {/* IN GAME */}
         {inGame && (
           <Box display="flex" justifyContent="center" flexDirection="column">
             <Box display="flex" justifyContent="center" flexDirection="column">
@@ -158,8 +124,8 @@ const Create = ({ isDanish }: Props) => {
                 justifyContent="center"
                 children={
                   isDanish
-                    ? `Runde ${meyer.getRound()}, tur ${meyer.getTurn()}`
-                    : `Round ${meyer.getRound()}, turn ${meyer.getTurn()}`
+                    ? `Runde ${round}, tur ${turn}`
+                    : `Round ${round}, turn ${turn}`
                 }
               />
               <Typography
@@ -173,23 +139,71 @@ const Create = ({ isDanish }: Props) => {
                 }
               />
             </Box>
-            {chosenAction == "Error" && (
-              <Box display="flex" justifyContent="center">
-                {choices}
-              </Box>
+            {roll == -1 && !showBluffs && (
+              <ActionChoices
+                isDanish={isDanish}
+                meyer={meyer}
+                setChosenAction={setChosenAction}
+                setBluffs={setBluffs}
+                roll={roll}
+                setTurn={setTurn}
+                setRoll={setRoll}
+                setRound={setRound}
+                setShowBluffs={setShowBluffs}
+              />
             )}
-            {chosenAction != "Error" && (
+            {roll != -1 && (
               <Box display="flex" flexDirection="column">
                 <RollWithName
-                  roll={meyer.getRoll()}
+                  roll={roll}
                   color={colors.blueAccent[100]}
                   sideLength={12}
                 />
-                <Box display="flex" justifyContent="center">
-                  {choices}
-                </Box>
+                {!showBluffs && (
+                  <ActionChoices
+                    isDanish={isDanish}
+                    meyer={meyer}
+                    setChosenAction={setChosenAction}
+                    setBluffs={setBluffs}
+                    roll={roll}
+                    setTurn={setTurn}
+                    setRoll={setRoll}
+                    setRound={setRound}
+                    setShowBluffs={setShowBluffs}
+                  />
+                )}
+                {showBluffs && (
+                  <BluffChoices
+                    bluffs={bluffs}
+                    meyer={meyer}
+                    setChosenAction={setChosenAction}
+                    setShowBluffs={setShowBluffs}
+                  />
+                )}
               </Box>
             )}
+            {/* HEALTH */}
+            <Box display="flex" justifyContent="center" flexDirection="column">
+              <Box p={1} />
+              <Box display="flex" justifyContent="center" flexDirection="row">
+                {meyer.getCurrentHealths().map((health, index) => (
+                  <Box display="flex" key={index}>
+                    <Typography
+                      display="flex"
+                      fontSize="14px"
+                      children={`Player ${index + 1}: `}
+                    />
+                    <Box marginRight="3px" />
+                    <Dice
+                      eyes={health}
+                      color={colors.blueAccent[100]}
+                      sideLength={20}
+                    />
+                    <Box p={1} />
+                  </Box>
+                ))}
+              </Box>
+            </Box>
           </Box>
         )}
       </Box>

@@ -1,8 +1,42 @@
 import { Int32 } from "react-native/Libraries/Types/CodegenTypes";
-import { Dice } from "../components/icons/DiceIcons";
+import {
+  Dice0,
+  Dice1,
+  Dice2,
+  Dice3,
+  Dice4,
+  Dice5,
+  Dice6,
+} from "../components/icons/DiceIcons";
 import { Box, SxProps, Theme } from "@mui/material";
 
 //From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+
+interface DiceProps {
+  eyes: Int32;
+  color: string;
+  sideLength: Int32;
+}
+
+export const Dice = ({ eyes, color, sideLength }: DiceProps) => {
+  switch (eyes) {
+    case 1:
+      return Dice1({ color, sideLength });
+    case 2:
+      return Dice2({ color, sideLength });
+    case 3:
+      return Dice3({ color, sideLength });
+    case 4:
+      return Dice4({ color, sideLength });
+    case 5:
+      return Dice5({ color, sideLength });
+    case 6:
+      return Dice6({ color, sideLength });
+    default:
+      return Dice0({ color, sideLength });
+  }
+};
+
 export function _getRandomInt(min: Int32, max: Int32) {
   const minCeiled = Math.ceil(min);
   const maxFloored = Math.floor(max);
@@ -34,12 +68,13 @@ interface RollProps {
 
 export const Roll = ({ roll, color, sideLength, sx }: RollProps) => {
   return (
-    <Box sx={sx}>
+    <Box sx={sx} display="flex" flexDirection="row">
       <Dice
         eyes={Math.floor(roll / 10)}
         color={color}
         sideLength={sideLength}
       />
+      <Box marginLeft="3px" />
       <Dice eyes={roll % 10} color={color} sideLength={sideLength} />
     </Box>
   );

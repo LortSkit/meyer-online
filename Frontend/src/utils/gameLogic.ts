@@ -46,6 +46,8 @@ export class Meyer {
   };
   private round: Int32 = 1;
 
+  private lastAction: Action = "Error"; //TODO: Use this instead of turnState
+
   constructor(numberOfPlayers: Int32) {
     if (numberOfPlayers < 2 || numberOfPlayers > 10) {
       throw new Error(
@@ -53,7 +55,7 @@ export class Meyer {
       );
     }
     this.numberOfPlayers = numberOfPlayers;
-    for (let i = 0; i < this.allPossibleRollsOrdered.length; i++) {
+    for (let i = 0; i < this.numberOfPlayers; i++) {
       this.healths.push(6);
     }
   }
@@ -67,21 +69,36 @@ export class Meyer {
   }
 
   public isGreaterThanEqualTo(roll1: Int32, roll2: Int32): boolean {
-    return this.getRollsGreaterThanEqualTo(roll2).includes(roll1);
+    return this.getRollsGreaterThanEqualTo(roll2).includes(roll1) || roll2 <= 0;
   }
 
   public isLessThan(roll1: Int32, roll2: Int32): boolean {
     return !this.isGreaterThanEqualTo(roll1, roll2);
   }
 
+  public isEqualTo(roll1: Int32, roll2: Int32): boolean {
+    return (
+      this.getRollsGreaterThanEqualTo(roll2).includes(roll1) &&
+      this.getRollsGreaterThanEqualTo(roll1).includes(roll2)
+    );
+  }
+
+  public isLessThanEqualTo(roll1: Int32, roll2: Int32): boolean {
+    return this.isEqualTo(roll1, roll2) || this.isLessThan(roll1, roll2);
+  }
+
   private getNextPlayer(player: Int32): Int32 {
-    let nextplayer = -1;
-    do {
-      nextplayer = player + 1;
+    let nextplayer = player + 1;
+    if (nextplayer > this.numberOfPlayers) {
+      nextplayer = 1;
+    }
+    while (this.healths[nextplayer - 1] <= 0) {
+      nextplayer = nextplayer + 1;
       if (nextplayer > this.numberOfPlayers) {
         nextplayer = 1;
       }
-    } while (this.healths[nextplayer - 1] == 0);
+      console.log(nextplayer, this.healths[nextplayer - 1]);
+    }
     return nextplayer;
   }
 
@@ -96,7 +113,9 @@ export class Meyer {
 
   private updateRolls(): void {
     this.previousRoll = this.roll;
-    this.previousDeclaredRoll = this.declaredRoll;
+    if (this.declaredRoll != -1) {
+      this.previousDeclaredRoll = this.declaredRoll;
+    }
     this.declaredRoll = -1;
     this.roll = -1;
   }
@@ -126,7 +145,7 @@ export class Meyer {
       awaitingAction: false,
       bluffing: false,
       sameRollOrHigher: true,
-      turn: 0,
+      turn: 1,
     };
   }
 
@@ -134,13 +153,18 @@ export class Meyer {
     this.endRoundBase();
     let currentHealth = this.healths[this.currentPlayer - 1];
     this.healths[this.currentPlayer - 1] = this.decreaseHealth(currentHealth);
+    this.healths[this.currentPlayer - 1] != 0
+      ? undefined
+      : (this.currentPlayer = this.getNextPlayer(this.currentPlayer));
   }
 
   private endRoundPreviousPlayerLost(): void {
     this.endRoundBase();
     let currentHealth = this.healths[this.previousPlayer - 1];
     this.healths[this.previousPlayer - 1] = this.decreaseHealth(currentHealth);
-    this.currentPlayer = this.previousPlayer;
+    this.healths[this.previousPlayer - 1] != 0
+      ? (this.currentPlayer = this.previousPlayer)
+      : (this.currentPlayer = this.getNextPlayer(this.currentPlayer));
   }
 
   public getRoll(): Int32 {
@@ -173,6 +197,9 @@ export class Meyer {
     }
     if (this.getTurn() == 1) {
       return ["Truth", "Bluff"];
+    } else if (this.roll == 21 && this.previousDeclaredRoll == 21) {
+      //Edge case: Cannote bluff if the previous declared roll was a meyer and the player rolled a meyer
+      return ["Truth", "SameRollOrHigher"];
     } else if (
       this.isGreaterThanEqualTo(this.roll, this.previousDeclaredRoll)
     ) {
@@ -184,19 +211,33 @@ export class Meyer {
   public getBluffChoices(): Int32[] {
     //Mostly for frontend stuff
     if (this.roll == -1) {
-      throw new Error("Cannot bluff if you haven't rolled!");
+      return []; //TODO: remove this if possible
     }
-    let bluffchoices = this.allPossibleRollsOrdered;
+    let bluffchoices = this.allPossibleRollsOrdered.slice(
+      0,
+      this.allPossibleRollsOrdered.length
+    );
+    bluffchoices = bluffchoices.filter((value): value is number =>
+      this.isGreaterThanEqualTo(value, this.previousDeclaredRoll)
+    );
     bluffchoices.pop(); //remove 32 (roll of cheers)
     let index = bluffchoices.indexOf(this.roll);
     if (index == bluffchoices.length - 1) {
       //Bluffing when roll is 21 (what a nice thing to do :) )
       bluffchoices.pop();
       return bluffchoices;
+    } else if (
+      this.getTurn() > 1 &&
+      this.isLessThanEqualTo(this.roll, this.previousDeclaredRoll)
+    ) {
+      console.log("why are we here?", this.roll, this.previousDeclaredRoll);
+      bluffchoices = bluffchoices.slice(index + 1, bluffchoices.length);
+    } else {
+      bluffchoices = bluffchoices
+        .slice(0, index)
+        .concat(bluffchoices.slice(index + 1, bluffchoices.length));
     }
-    bluffchoices = bluffchoices
-      .slice(0, index)
-      .concat(bluffchoices.slice(index + 1, bluffchoices.length));
+    console.log(this.roll, bluffchoices);
     return bluffchoices;
   }
 
@@ -205,8 +246,13 @@ export class Meyer {
     return this.currentPlayer;
   }
 
-  public getCurrentPlayerHealth(): Int32 {
-    return this.healths[this.currentPlayer - 1];
+  public getLastAction(): Action {
+    //TODO: Does this cause information leakage?
+    return this.lastAction;
+  }
+
+  public getCurrentHealths(): Int32[] {
+    return this.healths;
   }
 
   public advanceTurn(): void {
@@ -233,6 +279,7 @@ export class Meyer {
   }
 
   public takeAction(action: Action): void {
+    this.lastAction = action;
     switch (action) {
       case "Check":
         if (this.roll != -1) {
@@ -241,6 +288,8 @@ export class Meyer {
           throw new Error("Cannot check in first round!");
         }
         this.turnState.canAdvanceTurn = true;
+        this.turnState.sameRollOrHigher = false;
+        this.turnState.bluffing = false;
         return;
 
       case "Roll":
@@ -251,6 +300,8 @@ export class Meyer {
         this.turnState.awaitingCheckRoll = false;
         this.turnState.canAdvanceTurn = true;
         this.turnState.awaitingCheckCheers = true;
+        this.turnState.sameRollOrHigher = false;
+        this.turnState.bluffing = false;
         return;
 
       case "Truth":
@@ -267,12 +318,15 @@ export class Meyer {
         }
         this.declaredRoll = this.roll;
         this.turnState.canAdvanceTurn = true;
+        this.turnState.sameRollOrHigher = false;
+        this.turnState.bluffing = false;
         return;
       case "Bluff":
         if (this.roll == -1) {
           throw new Error("You have to roll first!");
         }
         this.turnState.bluffing = true;
+        this.turnState.sameRollOrHigher = false;
         return;
       case "SameRollOrHigher":
         if (this.roll == -1) {
@@ -281,8 +335,9 @@ export class Meyer {
           throw new Error("Cannot same roll or higher in first round!");
         }
         this.roll = getRoll();
-        this.turnState.sameRollOrHigher = true;
         this.turnState.canAdvanceTurn = true;
+        this.turnState.sameRollOrHigher = true;
+        this.turnState.bluffing = false;
         return;
       case "Error":
         throw new Error('"Error" is not a valid action!');
