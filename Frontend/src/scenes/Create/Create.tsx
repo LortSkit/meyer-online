@@ -134,8 +134,8 @@ const Create = ({ isDanish }: Props) => {
                 justifyContent="center"
                 children={
                   isDanish
-                    ? `Spiller ${meyer.getCurrentPlayer()}'s tur`
-                    : `Player ${meyer.getCurrentPlayer()}'s turn`
+                    ? `Spiller ${currentPlayer}'s tur`
+                    : `Player ${currentPlayer}'s turn`
                 }
               />
             </Box>
@@ -144,6 +144,7 @@ const Create = ({ isDanish }: Props) => {
                 isDanish={isDanish}
                 meyer={meyer}
                 setChosenAction={setChosenAction}
+                setCurrentPlayer={setCurrentPlayer}
                 setBluffs={setBluffs}
                 roll={roll}
                 setTurn={setTurn}
@@ -163,6 +164,7 @@ const Create = ({ isDanish }: Props) => {
                   <ActionChoices
                     isDanish={isDanish}
                     meyer={meyer}
+                    setCurrentPlayer={setCurrentPlayer}
                     setChosenAction={setChosenAction}
                     setBluffs={setBluffs}
                     roll={roll}

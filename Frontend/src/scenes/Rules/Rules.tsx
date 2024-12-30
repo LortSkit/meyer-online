@@ -1,9 +1,7 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import { Box, Button, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { CasinoOutlined } from "@mui/icons-material";
 import { Outlet } from "react-router-dom";
-import { Dice } from "../../components/icons/DiceIcons";
-import { getRoll, Roll, RollWithName } from "../../utils/diceUtils";
+import { getDiceRoll, RollWithName } from "../../utils/diceUtils";
 import { useState } from "react";
 import { HEADING, HOOK, INTRODUCTION } from "./TextSections";
 import { POSSIBLEROLLS } from "./PossibleRoles";
@@ -45,7 +43,7 @@ const Rules = ({ isDanish }: Props) => {
             variant="contained"
             color="secondary"
             onClick={() => {
-              setRoll(getRoll());
+              setRoll(getDiceRoll());
             }}
           >
             Roll!

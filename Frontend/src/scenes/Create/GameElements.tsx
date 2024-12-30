@@ -8,6 +8,7 @@ interface ActionProps {
   isDanish: boolean;
   meyer: Meyer;
   setChosenAction: React.Dispatch<React.SetStateAction<Action>>;
+  setCurrentPlayer: React.Dispatch<React.SetStateAction<number>>;
   setBluffs: React.Dispatch<React.SetStateAction<number[]>>;
   roll: number;
   setTurn: React.Dispatch<React.SetStateAction<number>>;
@@ -20,6 +21,7 @@ export const ActionChoices = ({
   isDanish,
   meyer,
   setChosenAction,
+  setCurrentPlayer,
   setBluffs,
   roll,
   setTurn,
@@ -29,7 +31,7 @@ export const ActionChoices = ({
 }: ActionProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [actionChoices, setActionChoices] = useState(["Roll"]); //Temporary value
+  const [actionChoices, setActionChoices] = useState(["Roll" as Action]); //Temporary value
   const translateActions: { [action: string]: string } = {
     ["Check"]: isDanish ? "Tjek" : "Check",
     ["Roll"]: isDanish ? "Rul" : "Roll",
@@ -39,27 +41,26 @@ export const ActionChoices = ({
       ? "Det eller derover"
       : "Same roll or higher",
     ["Cheers"]: isDanish ? "SKÅL!" : "CHEERS!",
+    ["Error"]: isDanish ? "FEJL!" : "ERROR!",
   };
 
-  const onClick = (action: string) => () => {
+  const onClick = (action: Action) => () => {
     let trueRoll = roll;
     if (action == "Roll") {
       trueRoll = meyer.getRoll();
       setRoll(trueRoll);
     }
     //Handles in-game actions
-    if (trueRoll == 32 && action != "Cheers") {
-      setActionChoices(["Cheers"]);
-    } else {
-      setActionChoices(meyer.getActionChoices());
+    setActionChoices(meyer.getActionChoices());
+    if (action != "Error") {
+      console.log("Wtf?", action);
+      setChosenAction(action); //Help!
+      meyer.takeAction(action); //Help!
     }
-    action != "Cheers" ? setChosenAction(action as Action) : undefined;
-    action != "Cheers" ? meyer.takeAction(action as Action) : undefined;
-    if (action != "Bluff" && (trueRoll != 32 || action == "Cheers")) {
+    if (action != "Bluff" && action != "Error") {
+      console.log("advance!");
       meyer.advanceTurn();
 
-      // I don't understand why, but if I remove the below,
-      // then I no longer force an update to display...
       if (action == "Roll") {
         setRoll(meyer.getRoll());
       }
@@ -67,26 +68,27 @@ export const ActionChoices = ({
       setBluffs(meyer.getBluffChoices());
       setShowBluffs(true);
     }
-    if (action != "Cheers") {
-      setActionChoices(meyer.getActionChoices());
-    }
+    setActionChoices(meyer.getActionChoices());
     if (
       action == "Truth" ||
       action == "SameRollOrHigher" ||
       action == "Cheers" ||
       action == "Check"
     ) {
-      setTurn((t) => t + 1);
+      setTurn(meyer.getTurn());
       setChosenAction("Error");
       setRoll(-1);
     }
-    if (action == "Check") {
-      setTurn(1);
-      setRound((r) => r + 1);
+    if (action == "Check" || action == "Cheers") {
+      setRound(meyer.getRound());
     }
+    setCurrentPlayer(meyer.getCurrentPlayer());
   };
 
   const choices = () => {
+    useEffect(() => {
+      setCurrentPlayer(() => meyer.getCurrentPlayer());
+    }, []);
     useEffect(() => {
       setRoll(() => meyer.getRoll());
     }, []);
@@ -94,17 +96,18 @@ export const ActionChoices = ({
       setRound(() => meyer.getRound());
     }, []);
     useEffect(() => {
-      const lastAction = meyer.getLastAction();
+      setTurn(() => meyer.getTurn());
+    }, []);
+    useEffect(() => {
+      const lastAction = meyer.getCurrentAction();
       setChosenAction(() => lastAction);
       if (lastAction == "Bluff") {
         setBluffs(meyer.getBluffChoices());
       }
     }, []);
     useEffect(() => {
-      roll != 32
-        ? setActionChoices(meyer.getActionChoices())
-        : setActionChoices(["Cheers"]);
-    }, [roll]);
+      setActionChoices(meyer.getActionChoices());
+    }, []);
 
     return actionChoices.map((action) => (
       <Box

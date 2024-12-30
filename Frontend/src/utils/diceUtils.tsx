@@ -55,7 +55,7 @@ function _determineRoll(roll: [Int32, Int32]): Int32 {
   }
 }
 
-export function getRoll() {
+export function getDiceRoll() {
   return _determineRoll(_getRoll());
 }
 
