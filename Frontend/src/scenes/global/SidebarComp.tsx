@@ -29,17 +29,11 @@ const SidebarComp = ({
   const colors = tokens(theme.palette.mode);
   const [selected, setSelected] = useState("");
   return (
-    <Box display="flex" flexShrink="1" flexGrow="0">
+    <Box display="flex" minHeight="100vh">
       <Sidebar
         collapsed={isCollapsed}
         backgroundColor={colors.primary[700]}
         collapsedWidth="75px"
-        rootStyles={{
-          [`.${sidebarClasses.container}`]: {
-            height: "100vh !important",
-          },
-          [`.${sidebarClasses.root}`]: {},
-        }}
       >
         <Menu>
           {/* LOGO AND MENU ICON */}

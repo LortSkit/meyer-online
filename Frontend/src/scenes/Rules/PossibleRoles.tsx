@@ -9,6 +9,7 @@ interface LangProps {
 export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const space = "5px";
   return (
     <Box display="flex" justifyContent="center" flexDirection="column">
       <Box display="flex" justifyContent="center">
@@ -54,35 +55,35 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={55}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={44}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={33}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={22}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={11}
           color={colors.blueAccent[100]}
@@ -105,28 +106,28 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={64}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={63}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={62}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={61}
           color={colors.blueAccent[100]}
@@ -134,28 +135,28 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
         />
 
         {/* 50s */}
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={54}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={53}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={52}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={51}
           color={colors.blueAccent[100]}
@@ -163,21 +164,21 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
         />
 
         {/* 40s */}
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={43}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={42}
           color={colors.blueAccent[100]}
           sideLength={12}
         />
 
-        <Box marginLeft="3px" />
+        <Box marginLeft={space} />
         <RollWithName
           roll={41}
           color={colors.blueAccent[100]}

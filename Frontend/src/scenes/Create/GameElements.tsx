@@ -1,4 +1,4 @@
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import { Action, Meyer } from "../../utils/gameLogic";
 import { tokens } from "../../theme";
 import { RollWithName } from "../../utils/diceUtils";
@@ -112,31 +112,33 @@ export const ActionChoices = ({
     }, []);
 
     return actionChoices.map((action) => (
-      <Box
-        display="flex"
-        flexBasis={`${100 / actionChoices.length}%`}
-        justifyContent="center"
-        key={action}
-      >
+      <Box display="flex" justifyContent="center" key={action} flexWrap="wrap">
         <Box
           display="flex"
           justifyContent="center"
           bgcolor={colors.primary[700]}
         >
-          <IconButton onClick={onClick(action)}>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={onClick(action)}
+          >
             <Typography
               fontSize="20px"
+              fontStyle="normal"
+              textTransform="none"
               children={translateActions[action as string]}
             />
-          </IconButton>
+          </Button>
         </Box>
+        <Box marginLeft="3px" />
         <Box display="flex" justifyContent="center" />
       </Box>
     ));
   };
 
   return (
-    <Box display="flex" justifyContent="center">
+    <Box display="flex" justifyContent="center" flexWrap="wrap">
       {choices()}
     </Box>
   );
@@ -158,33 +160,30 @@ export const BluffChoices = ({
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const bluffChoices = bluffs.map((bluff) => (
-    <Box
-      display="flex"
-      flexBasis={`${100 / bluffs.length}%`}
-      justifyContent="center"
-      key={bluff}
-    >
-      <Box display="flex" justifyContent="center" bgcolor={colors.primary[700]}>
-        <IconButton
-          onClick={() => {
-            setShowBluffs(false);
-            meyer.chooseBluff(bluff);
-            meyer.advanceTurn();
-            setChosenAction("Error");
-          }}
-        >
+    <Box display="flex" justifyContent="center" key={bluff} flexWrap="wrap">
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() => {
+          setShowBluffs(false);
+          meyer.chooseBluff(bluff);
+          meyer.advanceTurn();
+          setChosenAction("Error");
+        }}
+      >
+        <Typography fontSize="20px" fontStyle="normal" textTransform="none">
           <RollWithName
             roll={bluff}
             color={colors.blueAccent[100]}
             sideLength={12}
           />
-        </IconButton>
-      </Box>
-      <Box display="flex" justifyContent="center" />
+        </Typography>
+      </Button>
+      <Box marginLeft="3px" />
     </Box>
   ));
   return (
-    <Box display="flex" justifyContent="center">
+    <Box display="flex" justifyContent="center" flexWrap="wrap">
       {bluffChoices}
     </Box>
   );

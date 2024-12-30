@@ -85,9 +85,9 @@ export const Roll = ({ roll, color, sideLength, sx }: RollProps) => {
 };
 
 export const RollWithName = ({ roll, color, sideLength, sx }: RollProps) => (
-  <Box display="flex" flexDirection="column">
+  <Box display="flex" flexDirection="column" sx={sx}>
     <Box display="flex" justifyContent="center">
-      <Roll roll={roll} color={color} sideLength={sideLength} sx={sx} />
+      <Roll roll={roll} color={color} sideLength={sideLength} />
     </Box>
     <Box display="flex" justifyContent="center">
       {roll}

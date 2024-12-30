@@ -174,7 +174,12 @@ const Create = ({ isDanish }: Props) => {
             {/* HEALTH */}
             <Box display="flex" justifyContent="center" flexDirection="column">
               <Box p={1} />
-              <Box display="flex" justifyContent="center" flexDirection="row">
+              <Box
+                display="flex"
+                justifyContent="center"
+                flexDirection="row"
+                flexWrap="wrap"
+              >
                 {meyer.getCurrentHealths().map((health, index) => (
                   <Box display="flex" key={index}>
                     <Typography
