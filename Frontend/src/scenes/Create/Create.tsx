@@ -1,10 +1,4 @@
-import {
-  Box,
-  IconButton,
-  InputBase,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Box, Button, InputBase, Typography, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 import { Meyer, Action } from "../../utils/gameLogic";
 import { ChangeEvent, useState } from "react";
@@ -98,7 +92,9 @@ const Create = ({ isDanish }: Props) => {
       <Box display="flex" justifyContent="center">
         {canStartNewGame && (
           <Box bgcolor={colors.primary[700]}>
-            <IconButton
+            <Button
+              variant="contained"
+              color="secondary"
               onClick={() => {
                 setCanStartNewGame(false);
                 setMeyer(new Meyer(numberOfPlayers));
@@ -110,7 +106,7 @@ const Create = ({ isDanish }: Props) => {
                 fontSize="20px"
                 children={isDanish ? "Opret nyt spil!" : "Create new game!"}
               />
-            </IconButton>
+            </Button>
           </Box>
         )}
 
