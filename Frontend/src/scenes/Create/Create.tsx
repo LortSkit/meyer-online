@@ -29,7 +29,7 @@ const Create = ({ isDanish }: Props) => {
   const [roll, setRoll] = useState(-1);
   const [round, setRound] = useState(1);
   const [turn, setTurn] = useState(1);
-  const [healths, setHealths] = useState([-1]); //Temporary value //TODO: Use this, but needs round loser
+  const [currentHealths, setCurrentHealths] = useState([-1]); //Temporary value //TODO: Use this, but needs round loser
   const [currentPlayer, setCurrentPlayer] = useState(1); //TODO: Use this but needs nextplayer
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -139,51 +139,38 @@ const Create = ({ isDanish }: Props) => {
                 }
               />
             </Box>
-            {roll == -1 && !showBluffs && (
-              <ActionChoices
-                isDanish={isDanish}
-                meyer={meyer}
-                setChosenAction={setChosenAction}
-                setCurrentPlayer={setCurrentPlayer}
-                setBluffs={setBluffs}
-                roll={roll}
-                setTurn={setTurn}
-                setRoll={setRoll}
-                setRound={setRound}
-                setShowBluffs={setShowBluffs}
-              />
-            )}
-            {roll != -1 && (
-              <Box display="flex" flexDirection="column">
+            <Box display="flex" flexDirection="column">
+              {roll != -1 && (
                 <RollWithName
                   roll={roll}
                   color={colors.blueAccent[100]}
                   sideLength={12}
                 />
-                {!showBluffs && (
-                  <ActionChoices
-                    isDanish={isDanish}
-                    meyer={meyer}
-                    setCurrentPlayer={setCurrentPlayer}
-                    setChosenAction={setChosenAction}
-                    setBluffs={setBluffs}
-                    roll={roll}
-                    setTurn={setTurn}
-                    setRoll={setRoll}
-                    setRound={setRound}
-                    setShowBluffs={setShowBluffs}
-                  />
-                )}
-                {showBluffs && (
-                  <BluffChoices
-                    bluffs={bluffs}
-                    meyer={meyer}
-                    setChosenAction={setChosenAction}
-                    setShowBluffs={setShowBluffs}
-                  />
-                )}
-              </Box>
-            )}
+              )}
+              {!showBluffs && (
+                <ActionChoices
+                  isDanish={isDanish}
+                  meyer={meyer}
+                  setCurrentPlayer={setCurrentPlayer}
+                  setCurrentHealths={setCurrentHealths}
+                  setChosenAction={setChosenAction}
+                  setBluffs={setBluffs}
+                  roll={roll}
+                  setTurn={setTurn}
+                  setRoll={setRoll}
+                  setRound={setRound}
+                  setShowBluffs={setShowBluffs}
+                />
+              )}
+              {showBluffs && (
+                <BluffChoices
+                  bluffs={bluffs}
+                  meyer={meyer}
+                  setChosenAction={setChosenAction}
+                  setShowBluffs={setShowBluffs}
+                />
+              )}
+            </Box>
             {/* HEALTH */}
             <Box display="flex" justifyContent="center" flexDirection="column">
               <Box p={1} />

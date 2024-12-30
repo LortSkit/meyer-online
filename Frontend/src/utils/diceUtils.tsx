@@ -37,14 +37,18 @@ export const Dice = ({ eyes, color, sideLength }: DiceProps) => {
   }
 };
 
-export function _getRandomInt(min: Int32, max: Int32) {
+function _getRandomInt(min: Int32, max: Int32) {
   const minCeiled = Math.ceil(min);
   const maxFloored = Math.floor(max);
   return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
 }
 
+export function getDiceRoll(): Int32 {
+  return _getRandomInt(1, 7);
+}
+
 function _getRoll(): [Int32, Int32] {
-  return [_getRandomInt(1, 7), _getRandomInt(1, 7)];
+  return [getDiceRoll(), getDiceRoll()];
 }
 
 function _determineRoll(roll: [Int32, Int32]): Int32 {
@@ -55,7 +59,7 @@ function _determineRoll(roll: [Int32, Int32]): Int32 {
   }
 }
 
-export function getDiceRoll() {
+export function getMeyerRoll() {
   return _determineRoll(_getRoll());
 }
 

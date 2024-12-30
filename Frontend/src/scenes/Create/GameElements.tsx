@@ -8,6 +8,7 @@ interface ActionProps {
   isDanish: boolean;
   meyer: Meyer;
   setChosenAction: React.Dispatch<React.SetStateAction<Action>>;
+  setCurrentHealths: React.Dispatch<React.SetStateAction<number[]>>;
   setCurrentPlayer: React.Dispatch<React.SetStateAction<number>>;
   setBluffs: React.Dispatch<React.SetStateAction<number[]>>;
   roll: number;
@@ -21,6 +22,7 @@ export const ActionChoices = ({
   isDanish,
   meyer,
   setChosenAction,
+  setCurrentHealths,
   setCurrentPlayer,
   setBluffs,
   roll,
@@ -33,15 +35,16 @@ export const ActionChoices = ({
   const colors = tokens(theme.palette.mode);
   const [actionChoices, setActionChoices] = useState(["Roll" as Action]); //Temporary value
   const translateActions: { [action: string]: string } = {
+    ["Error"]: isDanish ? "FEJL!" : "ERROR!",
     ["Check"]: isDanish ? "Tjek" : "Check",
+    ["HealthRoll"]: isDanish ? "Rul nyt liv" : "Roll new health",
     ["Roll"]: isDanish ? "Rul" : "Roll",
-    ["Truth"]: isDanish ? "Sandhed" : "Truth",
-    ["Bluff"]: isDanish ? "Bluf" : "Bluff",
+    ["Cheers"]: isDanish ? "SKÅL!" : "CHEERS!",
     ["SameRollOrHigher"]: isDanish
       ? "Det eller derover"
       : "Same roll or higher",
-    ["Cheers"]: isDanish ? "SKÅL!" : "CHEERS!",
-    ["Error"]: isDanish ? "FEJL!" : "ERROR!",
+    ["Truth"]: isDanish ? "Sandhed" : "Truth",
+    ["Bluff"]: isDanish ? "Bluf" : "Bluff",
   };
 
   const onClick = (action: Action) => () => {
@@ -53,12 +56,10 @@ export const ActionChoices = ({
     //Handles in-game actions
     setActionChoices(meyer.getActionChoices());
     if (action != "Error") {
-      console.log("Wtf?", action);
-      setChosenAction(action); //Help!
-      meyer.takeAction(action); //Help!
+      setChosenAction(action);
+      meyer.takeAction(action);
     }
     if (action != "Bluff" && action != "Error") {
-      console.log("advance!");
       meyer.advanceTurn();
 
       if (action == "Roll") {
@@ -70,17 +71,19 @@ export const ActionChoices = ({
     }
     setActionChoices(meyer.getActionChoices());
     if (
-      action == "Truth" ||
-      action == "SameRollOrHigher" ||
+      action == "Check" ||
+      action == "HealthRoll" ||
       action == "Cheers" ||
-      action == "Check"
+      action == "SameRollOrHigher" ||
+      action == "Truth"
     ) {
       setTurn(meyer.getTurn());
       setChosenAction("Error");
       setRoll(-1);
     }
-    if (action == "Check" || action == "Cheers") {
+    if (action == "Check" || action == "Cheers" || action == "HealthRoll") {
       setRound(meyer.getRound());
+      setCurrentHealths(meyer.getCurrentHealths());
     }
     setCurrentPlayer(meyer.getCurrentPlayer());
   };
@@ -99,14 +102,13 @@ export const ActionChoices = ({
       setTurn(() => meyer.getTurn());
     }, []);
     useEffect(() => {
-      const lastAction = meyer.getCurrentAction();
-      setChosenAction(() => lastAction);
-      if (lastAction == "Bluff") {
-        setBluffs(meyer.getBluffChoices());
-      }
+      setBluffs(meyer.getBluffChoices());
     }, []);
     useEffect(() => {
       setActionChoices(meyer.getActionChoices());
+    }, []);
+    useEffect(() => {
+      setCurrentHealths(meyer.getCurrentHealths());
     }, []);
 
     return actionChoices.map((action) => (

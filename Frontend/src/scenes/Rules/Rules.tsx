@@ -1,7 +1,7 @@
 import { Box, Button, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 import { Outlet } from "react-router-dom";
-import { getDiceRoll, RollWithName } from "../../utils/diceUtils";
+import { getMeyerRoll, RollWithName } from "../../utils/diceUtils";
 import { useState } from "react";
 import { HEADING, HOOK, INTRODUCTION } from "./TextSections";
 import { POSSIBLEROLLS } from "./PossibleRoles";
@@ -43,7 +43,7 @@ const Rules = ({ isDanish }: Props) => {
             variant="contained"
             color="secondary"
             onClick={() => {
-              setRoll(getDiceRoll());
+              setRoll(getMeyerRoll());
             }}
           >
             Roll!
