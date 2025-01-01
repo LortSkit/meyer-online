@@ -42,6 +42,8 @@ export class Meyer {
   private currentAction: Action = "Error";
   private lastAction: Action = "Error";
 
+  private turnTable: string[] = []; //Used for frontend to show information about the current turn
+
   constructor(numberOfPlayers: Int32) {
     if (numberOfPlayers < 2 || numberOfPlayers > 10) {
       throw new Error(
@@ -50,7 +52,7 @@ export class Meyer {
     }
     this.numberOfPlayers = numberOfPlayers;
     for (let i = 0; i < this.numberOfPlayers; i++) {
-      this.healths.push(6);
+      this.healths.push(4);
       this.hasHealthRolled.push(false);
     }
   }
@@ -97,6 +99,7 @@ export class Meyer {
       canAdvanceTurn: false,
       turn: this.turnState.turn + 1,
     };
+    this.turnTable = [this.turnTable[this.turnTable.length - 1]];
   }
 
   private endTurnCheersOnCheck(): void {
@@ -130,6 +133,8 @@ export class Meyer {
       canAdvanceTurn: false,
       turn: 1,
     };
+    let length = this.turnTable.length;
+    this.turnTable = this.turnTable.slice(length - 3, length);
   }
 
   private endRoundCurrentPlayerLost(): void {
@@ -212,6 +217,10 @@ export class Meyer {
     return this.turnState.turn;
   }
 
+  public getTurnTable(): string[] {
+    return this.turnTable;
+  }
+
   public getActionChoices(): Action[] {
     //TODO: Maybe use internally? More readable
     if (
@@ -273,24 +282,15 @@ export class Meyer {
 
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%GAME STATE%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
   public advanceTurn(): void {
-    console.log(
-      this.lastAction == "SameRollOrHigher" &&
-        this.isGreaterThanEqualTo(this.previousRoll, this.previousDeclaredRoll)
-    );
-    console.log(
-      "Last action: ",
-      this.lastAction,
-      "Previous declared roll:",
-      this.previousDeclaredRoll,
-      "previous roll",
-      this.previousRoll
-    );
     if (!this.turnState.canAdvanceTurn) {
       throw new Error(`Cannot advance in state ${this.turnState}!`);
     } else if (this.currentAction == "Error") {
       throw new Error("Cannot advance state when no action has been taken!");
     } else if (this.currentAction == "Check") {
+      let textToChange = this.turnTable[this.turnTable.length - 1];
       if (this.previousRoll == 32) {
+        textToChange += `, but Player ${this.previousPlayer} rolled a 32!`;
+        this.turnTable[this.turnTable.length - 1] = textToChange;
         this.endTurnCheersOnCheck(); //Previous player rolled a 32 in a "Same roll or higher"
         return;
       }
@@ -305,7 +305,19 @@ export class Meyer {
             this.previousDeclaredRoll
           ))
       ) {
+        if (this.lastAction == "SameRollOrHigher") {
+          textToChange = `Player ${this.previousPlayer} had declared "Same roll or higher" and had to roll at least ${this.previousDeclaredRoll} their roll was ${this.previousRoll}`;
+        } else {
+          textToChange = `Player ${this.previousPlayer} had declared ${this.previousDeclaredRoll} and their roll was indeed ${this.previousRoll}`;
+        }
+        this.turnTable[this.turnTable.length - 1] += "...";
+        this.turnTable.push(textToChange);
         this.decreaseHealth(this.currentPlayer, healthToLose);
+        this.turnTable.push(
+          `Player ${this.currentPlayer} lost ${
+            healthToLose == 2 ? "2 lives" : "1 life"
+          }`
+        );
         if (
           this.healths[this.currentPlayer - 1] == 3 &&
           !this.hasHealthRolled[this.currentPlayer - 1]
@@ -315,7 +327,19 @@ export class Meyer {
         }
         this.endRoundCurrentPlayerLost();
       } else {
+        if (this.lastAction == "SameRollOrHigher") {
+          textToChange = `Player ${this.previousPlayer} had declared "Same roll or higher" and had to roll at least ${this.previousDeclaredRoll} but their roll was only ${this.previousRoll}...`;
+        } else {
+          textToChange = `Player ${this.previousPlayer} had declared ${this.previousDeclaredRoll} and their roll was actually ${this.previousRoll}`;
+        }
+        this.turnTable[this.turnTable.length - 1] += "...";
+        this.turnTable.push(textToChange);
         this.decreaseHealth(this.previousPlayer, healthToLose);
+        this.turnTable.push(
+          `Player ${this.previousPlayer} lost ${
+            healthToLose == 2 ? "2 lives" : "1 life"
+          }`
+        );
         if (
           this.healths[this.previousPlayer - 1] == 3 &&
           !this.hasHealthRolled[this.previousPlayer - 1]
@@ -345,7 +369,6 @@ export class Meyer {
   }
 
   public takeAction(action: Action): void {
-    console.log("Action was:", action, "Last action is now:", this.lastAction);
     if (action != "SameRollOrHigher") {
       //Otherwise cannot check if a roll has been made
       this.currentAction = action;
@@ -365,6 +388,10 @@ export class Meyer {
         } else if (this.getTurn() == 1) {
           throw new Error("Cannot check in first round!");
         }
+
+        this.turnTable.push(
+          `Player ${this.currentPlayer} chose to check Player ${this.previousPlayer}'s roll`
+        );
         return;
 
       case "HealthRoll":
@@ -375,8 +402,12 @@ export class Meyer {
         } else if (this.hasHealthRolled[this.currentPlayer - 1]) {
           throw new Error("Cannot health roll more than once!");
         }
-        this.healths[this.currentPlayer - 1] = getDiceRoll();
+        let healthRoll = getDiceRoll();
+        this.healths[this.currentPlayer - 1] = healthRoll;
         this.hasHealthRolled[this.currentPlayer - 1] = true;
+        this.turnTable.push(
+          `Player ${this.currentPlayer} rolled their health of 3 into ${healthRoll}`
+        );
         return;
 
       case "Roll":
@@ -384,6 +415,7 @@ export class Meyer {
           throw new Error("Cannot roll again!");
         }
         this.roll = getMeyerRoll();
+        this.turnTable.push(`Player ${this.currentPlayer} chose to roll...`);
         return;
 
       case "Cheers":
@@ -392,6 +424,7 @@ export class Meyer {
             "You can only say Cheers if you rolled the Roll of Cheers!"
           );
         }
+        this.turnTable.push(`Player ${this.currentPlayer} said "Cheers!"`);
         return;
 
       case "SameRollOrHigher":
@@ -402,6 +435,9 @@ export class Meyer {
         }
         this.currentAction = action;
         this.roll = getMeyerRoll();
+        this.turnTable.push(
+          `Player ${this.currentPlayer} declared "Same roll or higher"`
+        );
         return;
 
       case "Truth":
@@ -417,6 +453,9 @@ export class Meyer {
           );
         }
         this.declaredRoll = this.getRoll();
+        this.turnTable.push(
+          `Player ${this.currentPlayer} declared ${this.getRoll()}`
+        );
         return;
 
       case "Bluff":
@@ -435,6 +474,9 @@ export class Meyer {
     }
     this.declaredRoll = choice;
     this.turnState.canAdvanceTurn = true;
+    this.turnTable.push(
+      `Player ${this.currentPlayer} declared ${this.declaredRoll}`
+    );
   }
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
   /////////////////////////////////////////////////////////////////////////////////

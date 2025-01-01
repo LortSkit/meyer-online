@@ -112,87 +112,111 @@ const Create = ({ isDanish }: Props) => {
 
         {/* IN GAME */}
         {inGame && (
-          <Box display="flex" justifyContent="center" flexDirection="column">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="flex-start"
+            flexWrap="wrap"
+            flexBasis="100%"
+          >
+            <Box flex="1" />
             <Box display="flex" justifyContent="center" flexDirection="column">
-              <Typography
-                fontSize="30px"
-                display="flex"
-                justifyContent="center"
-                children={
-                  isDanish
-                    ? `Runde ${round}, tur ${turn}`
-                    : `Round ${round}, turn ${turn}`
-                }
-              />
-              <Typography
-                fontSize="20px"
-                display="flex"
-                justifyContent="center"
-                children={
-                  isDanish
-                    ? `Spiller ${currentPlayer}'s tur`
-                    : `Player ${currentPlayer}'s turn`
-                }
-              />
-            </Box>
-            <Box display="flex" flexDirection="column">
-              {roll != -1 && (
-                <RollWithName
-                  roll={roll}
-                  color={colors.blueAccent[100]}
-                  sideLength={12}
-                />
-              )}
-              {!showBluffs && (
-                <ActionChoices
-                  isDanish={isDanish}
-                  meyer={meyer}
-                  setCurrentPlayer={setCurrentPlayer}
-                  setCurrentHealths={setCurrentHealths}
-                  setChosenAction={setChosenAction}
-                  setBluffs={setBluffs}
-                  roll={roll}
-                  setTurn={setTurn}
-                  setRoll={setRoll}
-                  setRound={setRound}
-                  setShowBluffs={setShowBluffs}
-                />
-              )}
-              {showBluffs && (
-                <BluffChoices
-                  bluffs={bluffs}
-                  meyer={meyer}
-                  setChosenAction={setChosenAction}
-                  setShowBluffs={setShowBluffs}
-                />
-              )}
-            </Box>
-            {/* HEALTH */}
-            <Box display="flex" justifyContent="center" flexDirection="column">
-              <Box p={1} />
               <Box
                 display="flex"
                 justifyContent="center"
-                flexDirection="row"
-                flexWrap="wrap"
+                flexDirection="column"
               >
-                {meyer.getCurrentHealths().map((health, index) => (
-                  <Box display="flex" key={index}>
-                    <Typography
-                      display="flex"
-                      fontSize="14px"
-                      children={`Player ${index + 1}: `}
-                    />
-                    <Box marginRight="3px" />
-                    <Dice
-                      eyes={health}
-                      color={colors.blueAccent[100]}
-                      sideLength={20}
-                    />
-                    <Box p={1} />
-                  </Box>
-                ))}
+                <Typography
+                  fontSize="30px"
+                  display="flex"
+                  justifyContent="center"
+                  children={
+                    isDanish
+                      ? `Runde ${round}, tur ${turn}`
+                      : `Round ${round}, turn ${turn}`
+                  }
+                />
+                <Typography
+                  fontSize="20px"
+                  display="flex"
+                  justifyContent="center"
+                  children={
+                    isDanish
+                      ? `Spiller ${currentPlayer}'s tur`
+                      : `Player ${currentPlayer}'s turn`
+                  }
+                />
               </Box>
+              <Box display="flex" flexDirection="column">
+                {roll != -1 && (
+                  <RollWithName
+                    roll={roll}
+                    color={colors.blueAccent[100]}
+                    sideLength={12}
+                  />
+                )}
+                {!showBluffs && (
+                  <ActionChoices
+                    isDanish={isDanish}
+                    meyer={meyer}
+                    setCurrentPlayer={setCurrentPlayer}
+                    setCurrentHealths={setCurrentHealths}
+                    setChosenAction={setChosenAction}
+                    setBluffs={setBluffs}
+                    roll={roll}
+                    setTurn={setTurn}
+                    setRoll={setRoll}
+                    setRound={setRound}
+                    setShowBluffs={setShowBluffs}
+                  />
+                )}
+                {showBluffs && (
+                  <BluffChoices
+                    bluffs={bluffs}
+                    meyer={meyer}
+                    setChosenAction={setChosenAction}
+                    setShowBluffs={setShowBluffs}
+                  />
+                )}
+              </Box>
+              {/* HEALTH */}
+              <Box
+                display="flex"
+                justifyContent="center"
+                flexDirection="column"
+              >
+                <Box p={1} />
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  flexDirection="row"
+                  flexWrap="wrap"
+                >
+                  {meyer.getCurrentHealths().map((health, index) => (
+                    <Box display="flex" key={index}>
+                      <Typography
+                        display="flex"
+                        fontSize="14px"
+                        children={`Player ${index + 1}: `}
+                      />
+                      <Box marginRight="3px" />
+                      <Dice
+                        eyes={health}
+                        color={colors.blueAccent[100]}
+                        sideLength={20}
+                      />
+                      <Box p={1} />
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            </Box>
+            <Box display="flex" flex="1" flexDirection="column">
+              {meyer.getTurnTable().map((value: string, index: number) => (
+                <Box key={index} display="flex" justifyContent="right">
+                  {value}
+                </Box>
+              ))}
             </Box>
           </Box>
         )}
