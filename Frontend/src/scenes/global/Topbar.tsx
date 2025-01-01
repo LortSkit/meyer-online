@@ -3,12 +3,12 @@
 import { Box, InputBase, IconButton, useTheme } from "@mui/material";
 import { ReactNode, useContext, useState } from "react";
 import { ColorModeContext, tokens } from "../../theme";
-import { LightModeOutlined } from "@mui/icons-material";
-import { DarkModeOutlined } from "@mui/icons-material";
-import { Search } from "@mui/icons-material";
+import {
+  LightModeOutlined,
+  DarkModeOutlined,
+  Search,
+} from "@mui/icons-material";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
-import { Outlet } from "react-router-dom";
-import Home from "../Home/Home";
 
 interface Props {
   children: ReactNode;
@@ -46,7 +46,15 @@ const Topbar = ({ children, isDanish, setIsDanish }: Props) => {
       </Box>
       {/* ICONS */}
       <Box display="flex">
-        <IconButton onClick={colorMode.toggleColorMode}>
+        <IconButton
+          onClick={() => {
+            localStorage.setItem(
+              "mode",
+              localStorage.getItem("mode") === "dark" ? "light" : "dark"
+            );
+            colorMode.toggleColorMode();
+          }}
+        >
           {theme.palette.mode === "dark" ? (
             <DarkModeOutlined />
           ) : (
@@ -55,6 +63,7 @@ const Topbar = ({ children, isDanish, setIsDanish }: Props) => {
         </IconButton>
         <IconButton
           onClick={() => {
+            localStorage.setItem("isDanish", String(!isDanish));
             setIsDanish(!isDanish);
             setJustClicked(true);
           }}
@@ -71,7 +80,6 @@ const Topbar = ({ children, isDanish, setIsDanish }: Props) => {
           )}
         </IconButton>
       </Box>
-      <Outlet />
       {children}
     </Box>
   ); //css properties directly

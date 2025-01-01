@@ -117,6 +117,7 @@ export const ActionChoices = ({
           display="flex"
           justifyContent="center"
           bgcolor={colors.primary[700]}
+          borderRadius="3px"
         >
           <Button
             variant="contained"
@@ -160,7 +161,13 @@ export const BluffChoices = ({
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const bluffChoices = bluffs.map((bluff) => (
-    <Box display="flex" justifyContent="center" key={bluff} flexWrap="wrap">
+    <Box
+      display="flex"
+      justifyContent="center"
+      key={bluff}
+      flexWrap="wrap"
+      borderRadius="3px"
+    >
       <Button
         variant="contained"
         color="secondary"

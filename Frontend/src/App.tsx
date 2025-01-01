@@ -11,9 +11,14 @@ import Find from "./scenes/Find/Find";
 import Rules from "./scenes/Rules/Rules";
 
 const App = () => {
+  const initIsCollapsed = localStorage.getItem("isCollapsed") === "true";
+
+  const getIsDanish = localStorage.getItem("isDanish");
+  const initIsDanish = getIsDanish != null ? getIsDanish === "true" : true;
+
   const [theme, colorMode] = useMode();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isDanish, setIsDanish] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(initIsCollapsed);
+  const [isDanish, setIsDanish] = useState(initIsDanish);
 
   return (
     <ColorModeContext.Provider value={colorMode}>

@@ -91,7 +91,7 @@ const Create = ({ isDanish }: Props) => {
       <Box p={1} />
       <Box display="flex" justifyContent="center">
         {canStartNewGame && (
-          <Box bgcolor={colors.primary[700]}>
+          <Box bgcolor={colors.primary[700]} borderRadius="3px">
             <Button
               variant="contained"
               color="secondary"

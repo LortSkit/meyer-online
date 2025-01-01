@@ -1,14 +1,16 @@
 //Stolen from https://github.com/ed-roh/react-admin-dashboard
 
 import { ReactNode, useState } from "react";
-import { Sidebar, Menu, MenuItem, sidebarClasses } from "react-pro-sidebar";
+import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import {
+  HomeOutlined,
+  MenuOutlined,
+  PeopleOutlined,
+  CasinoOutlined,
+  HelpOutlined,
+} from "@mui/icons-material";
 import { tokens } from "../../theme";
-import { HomeOutlined, MenuOutlined } from "@mui/icons-material";
-import { PeopleOutlined } from "@mui/icons-material";
-import { CasinoOutlined } from "@mui/icons-material";
-import { HelpOutlined } from "@mui/icons-material";
-import { Outlet } from "react-router-dom";
 import Item from "../../components/Item";
 import creator from "../../assets/alek.jpg";
 
@@ -38,7 +40,10 @@ const SidebarComp = ({
         <Menu>
           {/* LOGO AND MENU ICON */}
           <MenuItem
-            onClick={() => setIsCollapsed(!isCollapsed)}
+            onClick={() => {
+              localStorage.setItem("isCollapsed", String(!isCollapsed));
+              setIsCollapsed(!isCollapsed);
+            }}
             icon={isCollapsed ? <MenuOutlined /> : undefined}
             style={{
               margin: "10px 0 20px 0",
@@ -130,7 +135,6 @@ const SidebarComp = ({
           </Box>
         </Menu>
       </Sidebar>
-      <Outlet />
       {children}
     </Box>
   );
