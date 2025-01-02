@@ -36,6 +36,13 @@ const SidebarComp = ({
         collapsed={isCollapsed}
         backgroundColor={colors.primary[700]}
         collapsedWidth="75px"
+        style={{
+          position: "sticky",
+          minHeight: "100vh",
+          height: "100%",
+          top: "0",
+          background: colors.primary[700],
+        }}
       >
         <Menu>
           {/* LOGO AND MENU ICON */}

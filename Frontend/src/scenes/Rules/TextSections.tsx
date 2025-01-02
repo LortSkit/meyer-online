@@ -9,7 +9,7 @@ export const HEADING = ({ isDanish }: LangProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   return (
-    <Box display="flex" justifyContent="center" p={2}>
+    <Box display="flex" justifyContent="center">
       <Typography
         variant="h1"
         color={colors.blueAccent[100]}
@@ -24,7 +24,7 @@ export const HOOK = ({ isDanish }: LangProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   return (
-    <Box display="flex" justifyContent="center" p={2}>
+    <Box display="flex" justifyContent="center">
       <Typography
         variant="h5"
         color={colors.primary[100]}
@@ -67,7 +67,7 @@ export const INTRODUCTION = ({ isDanish }: LangProps) => {
     : "If their roll doesn't correspond with what they said then they lose a life, otherwise you do.";
 
   return (
-    <Box display="flex" justifyContent="center" p={2} flexDirection="column">
+    <Box display="flex" justifyContent="center" flexDirection="column">
       <Typography
         children={
           sentence1 + sentence2 + sentence3 + sentence4 + sentence5 + sentence6

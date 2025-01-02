@@ -43,7 +43,7 @@ const Create = ({ isDanish }: Props) => {
   return (
     <Box display="flex" flexBasis="100%" flexDirection="column">
       {/* HEADING */}
-      <Box display="flex" justifyContent="center" p={2}>
+      <Box display="flex" justifyContent="center">
         <Typography
           variant="h1"
           color={colors.blueAccent[100]}
