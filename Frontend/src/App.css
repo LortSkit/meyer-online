@@ -1,4 +1,62 @@
-.content {
+.app {
+  display: flex;
+}
+.app > div:first-child {
+  display: none;
+}
+
+.sidebarMobileWrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.sidebarMobileOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: gray;
+  opacity: 0.5;
+  pointer-events: fill;
+}
+
+.sidebarMobile {
+  position: fixed;
+  height: 100%;
+  top: 0;
+  z-index: 1;
+  flex: 1;
+  flex-direction: column;
+  pointer-events: auto;
+  overflow-y: auto;
+}
+
+.menuButtonMobile {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.rest {
+  display: flex;
+  flex-direction: column;
+  flex-basis: 100%;
+  padding-bottom: 10px;
+}
+
+@media only screen and (min-width: 1200px) {
+  .app {
     display: flex;
-    width: 100%;
+  }
+  .app > div:first-child {
+    display: flex;
+  }
+  .menuButtonMobile {
+    display: none;
+  }
+  .sidebarMobile {
+    display: none;
+  }
+  .sidebarMobileWrapper {
+    display: none;
+  }
 }

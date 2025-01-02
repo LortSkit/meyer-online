@@ -1,6 +1,6 @@
 //Stolen from https://github.com/ed-roh/react-admin-dashboard
 
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import {
@@ -15,34 +15,28 @@ import Item from "../../components/Item";
 import creator from "../../assets/alek.jpg";
 
 interface Props {
-  children: ReactNode;
   isCollapsed: boolean;
   setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
   isDanish: boolean;
 }
 
-const SidebarComp = ({
-  children,
-  isCollapsed,
-  setIsCollapsed,
-  isDanish,
-}: Props) => {
+const SidebarDesktop = ({ isCollapsed, setIsCollapsed, isDanish }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [selected, setSelected] = useState("");
   return (
-    <Box display="flex" minHeight="100vh">
+    <Box
+      position="sticky"
+      height="100%"
+      top="0"
+      bgcolor={colors.primary[700]}
+      zIndex={1}
+    >
       <Sidebar
         collapsed={isCollapsed}
         backgroundColor={colors.primary[700]}
         collapsedWidth="75px"
-        style={{
-          position: "sticky",
-          minHeight: "100vh",
-          height: "100%",
-          top: "0",
-          background: colors.primary[700],
-        }}
+        style={{ minHeight: "100vh" }}
       >
         <Menu>
           {/* LOGO AND MENU ICON */}
@@ -74,7 +68,7 @@ const SidebarComp = ({
           </MenuItem>
           {/* USER */}
           {!isCollapsed && (
-            <Box mb="25px">
+            <Box>
               <Box display="flex" justifyContent="center" alignItems="center">
                 <img
                   alt="profile-user"
@@ -142,9 +136,8 @@ const SidebarComp = ({
           </Box>
         </Menu>
       </Sidebar>
-      {children}
     </Box>
   );
 };
 
-export default SidebarComp;
+export default SidebarDesktop;

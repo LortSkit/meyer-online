@@ -52,7 +52,7 @@ export class Meyer {
     }
     this.numberOfPlayers = numberOfPlayers;
     for (let i = 0; i < this.numberOfPlayers; i++) {
-      this.healths.push(4);
+      this.healths.push(6);
       this.hasHealthRolled.push(false);
     }
   }

@@ -2,7 +2,8 @@ import { useState } from "react";
 import { ColorModeContext, useMode } from "./theme";
 import { Box, CssBaseline, ThemeProvider } from "@mui/material";
 import Topbar from "./scenes/global/Topbar";
-import SidebarComp from "./scenes/global/SidebarComp";
+import SidebarDesktop from "./scenes/global/SidebarDesktop";
+import SidebarMobile from "./scenes/global/SidebarMobile";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import Home from "./scenes/Home/Home";
@@ -18,6 +19,7 @@ const App = () => {
 
   const [theme, colorMode] = useMode();
   const [isCollapsed, setIsCollapsed] = useState(initIsCollapsed);
+  const [isVisible, setIsVisible] = useState(false);
   const [isDanish, setIsDanish] = useState(initIsDanish);
 
   return (
@@ -25,33 +27,43 @@ const App = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <div className="app">
-          <SidebarComp
+          <SidebarDesktop
             isCollapsed={isCollapsed}
             setIsCollapsed={setIsCollapsed}
             isDanish={isDanish}
-          >
+          />
+          <div className="sidebarMobileWrapper">
+            <SidebarMobile
+              isVisible={isVisible}
+              setIsVisible={setIsVisible}
+              isDanish={isDanish}
+            />
+            {isVisible && <div className="sidebarMobileOverlay"></div>}
+          </div>
+          <div className="rest">
+            <Topbar
+              isVisible={isVisible}
+              setIsVisible={setIsVisible}
+              isDanish={isDanish}
+              setIsDanish={setIsDanish}
+            />
             <main className="content">
-              <Topbar isDanish={isDanish} setIsDanish={setIsDanish}>
-                <Box display="flex" flexBasis="100%">
-                  <Routes>
-                    <Route path="/" element={<Home isDanish={isDanish} />} />
-                    <Route
-                      path="/create"
-                      element={<Create isDanish={isDanish} />}
-                    />
-                    <Route
-                      path="/find"
-                      element={<Find isDanish={isDanish} />}
-                    />
-                    <Route
-                      path="/rules"
-                      element={<Rules isDanish={isDanish} />}
-                    />
-                  </Routes>
-                </Box>
-              </Topbar>
+              <Box display="flex" flexBasis="100%">
+                <Routes>
+                  <Route path="/" element={<Home isDanish={isDanish} />} />
+                  <Route
+                    path="/create"
+                    element={<Create isDanish={isDanish} />}
+                  />
+                  <Route path="/find" element={<Find isDanish={isDanish} />} />
+                  <Route
+                    path="/rules"
+                    element={<Rules isDanish={isDanish} />}
+                  />
+                </Routes>
+              </Box>
             </main>
-          </SidebarComp>
+          </div>
         </div>
       </ThemeProvider>
     </ColorModeContext.Provider>
