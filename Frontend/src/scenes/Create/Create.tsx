@@ -4,7 +4,7 @@ import { Meyer, Action } from "../../utils/gameLogic";
 import { ChangeEvent, useState } from "react";
 import { RollWithName } from "../../utils/diceUtils";
 import { Dice } from "../../utils/diceUtils";
-import { ActionChoices, BluffChoices } from "./GameElements";
+import { ActionChoices, BluffChoices, Healths } from "./GameElements";
 
 interface Props {
   isDanish: boolean;
@@ -14,17 +14,17 @@ const Create = ({ isDanish }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [numberOfPlayers, setNumberOfPlayers] = useState(-1);
-  const [meyer, setMeyer] = useState(new Meyer(2)); //Temporary instance
+  const [meyer, setMeyer] = useState(null as unknown as Meyer); //Temporary instance
   const [canStartNewGame, setCanStartNewGame] = useState(true);
   const [inGame, setInGame] = useState(false);
   const [chosenAction, setChosenAction] = useState("Error" as Action);
   const [showBluffs, setShowBluffs] = useState(false);
-  const [bluffs, setBluffs] = useState([22]); //Temporary value
+  const [bluffs, setBluffs] = useState([] as number[]);
   const [roll, setRoll] = useState(-1);
   const [round, setRound] = useState(1);
   const [turn, setTurn] = useState(1);
   const [currentHealths, setCurrentHealths] = useState([-1]); //Temporary value //TODO: Use this, but needs round loser
-  const [currentPlayer, setCurrentPlayer] = useState(1); //TODO: Use this but needs nextplayer
+  const [currentPlayer, setCurrentPlayer] = useState(1);
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setNumberOfPlayers(Number(event.target.value));
@@ -48,7 +48,7 @@ const Create = ({ isDanish }: Props) => {
           variant="h1"
           color={colors.blueAccent[100]}
           fontWeight="bold"
-          children={isDanish ? "Opret et spil" : "Start a game"}
+          children={isDanish ? "Opret et spil" : "Create a game"}
         />
       </Box>
       {/* INTRODUCTION */}
@@ -89,7 +89,7 @@ const Create = ({ isDanish }: Props) => {
         </Box>
       )}
       <Box p={1} />
-      <Box display="flex" justifyContent="center">
+      <Box display="flex" justifyContent="center" flexBasis="100%">
         {canStartNewGame && (
           <Box bgcolor={colors.primary[700]} borderRadius="3px">
             <Button
@@ -116,10 +116,9 @@ const Create = ({ isDanish }: Props) => {
             display="flex"
             justifyContent="space-between"
             alignItems="flex-start"
-            flexWrap="wrap"
             flexBasis="100%"
           >
-            <Box flex="1" />
+            <Box display="flex" minWidth="17%" />
             <Box display="flex" justifyContent="center" flexDirection="column">
               <Box
                 display="flex"
@@ -179,45 +178,19 @@ const Create = ({ isDanish }: Props) => {
                   />
                 )}
               </Box>
-              {/* HEALTH */}
-              <Box
-                display="flex"
-                justifyContent="center"
-                flexDirection="column"
-              >
-                <Box p={1} />
-                <Box
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="row"
-                  flexWrap="wrap"
-                >
-                  {meyer.getCurrentHealths().map((health, index) => (
-                    <Box display="flex" key={index}>
-                      <Typography
-                        display="flex"
-                        fontSize="14px"
-                        children={`Player ${index + 1}: `}
-                      />
-                      <Box marginRight="3px" />
-                      <Dice
-                        eyes={health}
-                        color={colors.blueAccent[100]}
-                        sideLength={20}
-                      />
-                      <Box p={1} />
+              <Box p={1} />
+              <Box display="flex" justifyContent="center">
+                <Box display="flex" flexDirection="column">
+                  {meyer.getTurnTable().map((value: string, index: number) => (
+                    <Box key={index} display="flex" justifyContent="center">
+                      {value}
                     </Box>
                   ))}
                 </Box>
               </Box>
+              {/* HEALTH */}
             </Box>
-            <Box display="flex" flex="1" flexDirection="column">
-              {meyer.getTurnTable().map((value: string, index: number) => (
-                <Box key={index} display="flex" justifyContent="right">
-                  {value}
-                </Box>
-              ))}
-            </Box>
+            <Healths meyer={meyer} />
           </Box>
         )}
       </Box>

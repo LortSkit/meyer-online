@@ -109,7 +109,7 @@ const SidebarDesktop = ({ isCollapsed, setIsCollapsed, isDanish }: Props) => {
           </Box>
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
-              title={isDanish ? "Opret et spil" : "Start a game"}
+              title={isDanish ? "Opret et spil" : "Create a game"}
               to="/create"
               icon={<CasinoOutlined />}
               selected={selected}

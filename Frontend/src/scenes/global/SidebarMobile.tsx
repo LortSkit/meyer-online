@@ -96,7 +96,7 @@ const SidebarMobile = ({ isVisible, setIsVisible, isDanish }: Props) => {
             </Box>
             <Box>
               <Item
-                title={isDanish ? "Opret et spil" : "Start a game"}
+                title={isDanish ? "Opret et spil" : "Create a game"}
                 to="/create"
                 icon={<CasinoOutlined />}
                 selected={selected}

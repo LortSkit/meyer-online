@@ -1,7 +1,7 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { Action, Meyer } from "../../utils/gameLogic";
 import { tokens } from "../../theme";
-import { RollWithName } from "../../utils/diceUtils";
+import { Dice, RollWithName } from "../../utils/diceUtils";
 import { useEffect, useState } from "react";
 
 interface ActionProps {
@@ -192,6 +192,40 @@ export const BluffChoices = ({
   return (
     <Box display="flex" justifyContent="center" flexWrap="wrap">
       {bluffChoices}
+    </Box>
+  );
+};
+
+interface HealthsProps {
+  meyer: Meyer;
+}
+
+export const Healths = ({ meyer }: HealthsProps) => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
+  return (
+    <Box display="flex" justifyContent="flex-start" minWidth="17%">
+      <Box display="flex" flexDirection="column">
+        {meyer.getCurrentHealths().map(
+          (health, index) =>
+            health > 0 && (
+              <Box display="flex" key={index}>
+                <Typography
+                  display="flex"
+                  fontSize="14px"
+                  children={`Player ${index + 1}: `}
+                />
+                <Box marginRight="3px" />
+                <Dice
+                  eyes={health}
+                  color={colors.blueAccent[100]}
+                  sideLength={20}
+                />
+              </Box>
+            )
+        )}
+      </Box>
     </Box>
   );
 };

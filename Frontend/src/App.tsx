@@ -38,7 +38,12 @@ const App = () => {
               setIsVisible={setIsVisible}
               isDanish={isDanish}
             />
-            {isVisible && <div className="sidebarMobileOverlay"></div>}
+            {isVisible && (
+              <div
+                className="sidebarMobileOverlay"
+                onClick={() => setIsVisible(false)}
+              />
+            )}
           </div>
           <div className="rest">
             <Topbar

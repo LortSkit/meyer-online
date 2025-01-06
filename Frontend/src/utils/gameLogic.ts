@@ -16,12 +16,37 @@ export type Action =
   | "Truth"
   | "Bluff";
 
-export class Meyer {
-  private readonly allPossibleRollsOrdered: Int32[] = [
-    41, 42, 43, 51, 52, 53, 54, 61, 62, 63, 64, 65, 11, 22, 33, 44, 55, 66, 31,
-    21, 32,
-  ];
+//For the static functions below
+const allPossibleRollsOrdered: Int32[] = [
+  41, 42, 43, 51, 52, 53, 54, 61, 62, 63, 64, 65, 11, 22, 33, 44, 55, 66, 31,
+  21, 32,
+];
 
+//Static logic functions for meyer game
+function getRollsGreaterThanEqualTo(rol: Int32): Int32[] {
+  let index = allPossibleRollsOrdered.indexOf(rol);
+  return allPossibleRollsOrdered.slice(index, allPossibleRollsOrdered.length);
+}
+
+function isGreaterThanEqualTo(roll1: Int32, roll2: Int32): boolean {
+  return getRollsGreaterThanEqualTo(roll2).includes(roll1) || roll2 <= 0;
+}
+
+function isLessThan(roll1: Int32, roll2: Int32): boolean {
+  return !isGreaterThanEqualTo(roll1, roll2);
+}
+
+function isEqualTo(roll1: Int32, roll2: Int32): boolean {
+  return (
+    getRollsGreaterThanEqualTo(roll2).includes(roll1) &&
+    getRollsGreaterThanEqualTo(roll1).includes(roll2)
+  );
+}
+
+function isLessThanEqualTo(roll1: Int32, roll2: Int32): boolean {
+  return isEqualTo(roll1, roll2) || isLessThan(roll1, roll2);
+}
+export class Meyer {
   private readonly numberOfPlayers: Int32 = -1;
 
   private previousRoll: Int32 = -1;
@@ -153,36 +178,6 @@ export class Meyer {
   //////////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////PUBLIC FUNCTIONS//////////////////////////////////
-
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%NUMERICAL LOGIC%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
-  public getRollsGreaterThanEqualTo(rol: Int32): Int32[] {
-    let index = this.allPossibleRollsOrdered.indexOf(rol);
-    return this.allPossibleRollsOrdered.slice(
-      index,
-      this.allPossibleRollsOrdered.length
-    );
-  }
-
-  public isGreaterThanEqualTo(roll1: Int32, roll2: Int32): boolean {
-    return this.getRollsGreaterThanEqualTo(roll2).includes(roll1) || roll2 <= 0;
-  }
-
-  public isLessThan(roll1: Int32, roll2: Int32): boolean {
-    return !this.isGreaterThanEqualTo(roll1, roll2);
-  }
-
-  public isEqualTo(roll1: Int32, roll2: Int32): boolean {
-    return (
-      this.getRollsGreaterThanEqualTo(roll2).includes(roll1) &&
-      this.getRollsGreaterThanEqualTo(roll1).includes(roll2)
-    );
-  }
-
-  public isLessThanEqualTo(roll1: Int32, roll2: Int32): boolean {
-    return this.isEqualTo(roll1, roll2) || this.isLessThan(roll1, roll2);
-  }
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
-
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%FRONTEND GETTERS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
   public getCurrentPlayer(): Int32 {
     //TODO: Does this cause information leakage?
@@ -241,7 +236,7 @@ export class Meyer {
       //Edge case: Cannote bluff if the previous declared roll was a meyer and the player rolled a meyer
       return ["Truth", "SameRollOrHigher"];
     } else if (
-      this.isGreaterThanEqualTo(this.getRoll(), this.previousDeclaredRoll)
+      isGreaterThanEqualTo(this.getRoll(), this.previousDeclaredRoll)
     ) {
       return ["Truth", "Bluff", "SameRollOrHigher"];
     }
@@ -253,12 +248,12 @@ export class Meyer {
     if (this.getRoll() == -1) {
       return [];
     }
-    let bluffchoices = this.allPossibleRollsOrdered.slice(
+    let bluffchoices = allPossibleRollsOrdered.slice(
       0,
-      this.allPossibleRollsOrdered.length
+      allPossibleRollsOrdered.length
     );
     bluffchoices = bluffchoices.filter((value): value is number =>
-      this.isGreaterThanEqualTo(value, this.previousDeclaredRoll)
+      isGreaterThanEqualTo(value, this.previousDeclaredRoll)
     );
     bluffchoices.pop(); //remove 32 (roll of cheers)
     let index = bluffchoices.indexOf(this.getRoll());
@@ -268,7 +263,7 @@ export class Meyer {
       return bluffchoices;
     } else if (
       this.getTurn() > 1 &&
-      this.isLessThanEqualTo(this.getRoll(), this.previousDeclaredRoll)
+      isLessThanEqualTo(this.getRoll(), this.previousDeclaredRoll)
     ) {
       bluffchoices = bluffchoices.slice(index + 1, bluffchoices.length);
     } else {
@@ -300,10 +295,7 @@ export class Meyer {
       if (
         this.previousDeclaredRoll == this.previousRoll ||
         (this.lastAction == "SameRollOrHigher" &&
-          this.isGreaterThanEqualTo(
-            this.previousRoll,
-            this.previousDeclaredRoll
-          ))
+          isGreaterThanEqualTo(this.previousRoll, this.previousDeclaredRoll))
       ) {
         if (this.lastAction == "SameRollOrHigher") {
           textToChange = `Player ${this.previousPlayer} had declared "Same roll or higher" and had to roll at least ${this.previousDeclaredRoll} their roll was ${this.previousRoll}`;
@@ -446,7 +438,7 @@ export class Meyer {
         }
         if (
           this.getTurn() > 1 &&
-          this.isLessThan(this.getRoll(), this.previousDeclaredRoll)
+          isLessThan(this.getRoll(), this.previousDeclaredRoll)
         ) {
           throw new Error(
             "Cannot be truthful if your roll is lower than the previous!"
