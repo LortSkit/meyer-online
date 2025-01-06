@@ -4,7 +4,7 @@ A web-based multiplayer version of the dice game 'Meyer' with the Danish ruleset
 
 ## Deployment
 
-Currently, there is only a [Vite](https://github.com/vitejs/vite)-made React frontend using typescript. To deploy the frontend, simply run the following:
+Currently, there is only a [Vite](https://github.com/vitejs/vite)-made React frontend using typescript, and it requires npm to be installed (see [npm docs](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)). To deploy the frontend, simply run the following:
 
 ```
 cd Frontend
