@@ -1,11 +1,6 @@
 import { Int32 } from "react-native/Libraries/Types/CodegenTypes";
 import { getDiceRoll, getMeyerRoll } from "./diceUtils";
 
-type TurnState = {
-  canAdvanceTurn: boolean;
-  turn: Int32;
-};
-
 export type Action =
   | "Error"
   | "Check"
@@ -47,27 +42,34 @@ function isLessThanEqualTo(roll1: Int32, roll2: Int32): boolean {
   return isEqualTo(roll1, roll2) || isLessThan(roll1, roll2);
 }
 export class Meyer {
-  private readonly numberOfPlayers: Int32 = -1;
-
-  private previousRoll: Int32 = -1;
-  private previousDeclaredRoll: Int32 = -1;
+  //###############################CURRENT+PREVIOUS###############################//
   private roll: Int32 = -1;
-  private declaredRoll: Int32 = -1;
-  private previousPlayer: Int32 = -1;
-  private currentPlayer: Int32 = 1;
+  private previousRoll: Int32 = -1;
 
-  private healths: Int32[] = [];
-  private hasHealthRolled: boolean[] = [];
-  private turnState: TurnState = {
-    canAdvanceTurn: false,
-    turn: 1,
-  };
-  private round: Int32 = 1;
+  private declaredRoll: Int32 = -1;
+  private previousDeclaredRoll: Int32 = -1;
+
+  private currentPlayer: Int32 = 1;
+  private previousPlayer: Int32 = -1;
 
   private currentAction: Action = "Error";
   private lastAction: Action = "Error";
+  //##############################################################################//
+
+  //####################################GLOBAL####################################//
+  private readonly numberOfPlayers: Int32 = -1;
+
+  private winner: Int32 = -1;
+
+  private healths: Int32[] = [];
+  private hasHealthRolled: boolean[] = [];
+
+  private canAdvanceTurn: boolean = false;
+  private turn: Int32 = 1;
+  private round: Int32 = 1;
 
   private turnTable: string[] = []; //Used for frontend to show information about the current turn
+  //##############################################################################//
 
   constructor(numberOfPlayers: Int32) {
     if (numberOfPlayers < 2 || numberOfPlayers > 10) {
@@ -97,6 +99,13 @@ export class Meyer {
     return nextplayer;
   }
 
+  private isCurrentPlayerWinner(): boolean {
+    if (this.getNextPlayer(this.currentPlayer)) {
+      return true;
+    }
+    return false;
+  }
+
   private decreaseHealth(player: Int32, lostHealth: Int32): void {
     this.healths[player - 1] -= lostHealth;
   }
@@ -120,10 +129,8 @@ export class Meyer {
     this.updateRolls();
     this.previousPlayer = this.currentPlayer;
     this.currentPlayer = this.getNextPlayer(this.currentPlayer);
-    this.turnState = {
-      canAdvanceTurn: false,
-      turn: this.turnState.turn + 1,
-    };
+    this.canAdvanceTurn = false;
+    this.turn++;
     this.turnTable = [this.turnTable[this.turnTable.length - 1]];
   }
 
@@ -135,29 +142,21 @@ export class Meyer {
     let checkingPlayer = this.currentPlayer;
     this.currentPlayer = this.previousPlayer;
     this.previousPlayer = checkingPlayer;
-    this.turnState = {
-      canAdvanceTurn: false,
-      turn: this.turnState.turn,
-    };
+    this.canAdvanceTurn = false;
   }
 
   private endTurnToHealthRoll(player: Int32): void {
     this.resetRoll();
     this.previousPlayer = this.currentPlayer;
     this.currentPlayer = player;
-    this.turnState = {
-      canAdvanceTurn: false,
-      turn: this.turnState.turn,
-    };
+    this.canAdvanceTurn = false;
   }
 
   private endRoundBase(): void {
     this.resetRoll();
     this.round++;
-    this.turnState = {
-      canAdvanceTurn: false,
-      turn: 1,
-    };
+    this.canAdvanceTurn = false;
+    this.turn = 1;
     let length = this.turnTable.length;
     this.turnTable = this.turnTable.slice(length - 3, length);
   }
@@ -200,16 +199,12 @@ export class Meyer {
     return this.roll;
   }
 
-  public getState(): TurnState {
-    return this.turnState;
-  }
-
   public getRound(): Int32 {
     return this.round;
   }
 
   public getTurn(): Int32 {
-    return this.turnState.turn;
+    return this.turn;
   }
 
   public getTurnTable(): string[] {
@@ -277,84 +272,110 @@ export class Meyer {
 
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%GAME STATE%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
   public advanceTurn(): void {
-    if (!this.turnState.canAdvanceTurn) {
-      throw new Error(`Cannot advance in state ${this.turnState}!`);
+    if (!this.canAdvanceTurn) {
+      throw new Error(`Cannot advance right now!`);
     } else if (this.currentAction == "Error") {
       throw new Error("Cannot advance state when no action has been taken!");
-    } else if (this.currentAction == "Check") {
-      let textToChange = this.turnTable[this.turnTable.length - 1];
-      if (this.previousRoll == 32) {
-        textToChange += `, but Player ${this.previousPlayer} rolled a 32!`;
-        this.turnTable[this.turnTable.length - 1] = textToChange;
-        this.endTurnCheersOnCheck(); //Previous player rolled a 32 in a "Same roll or higher"
-        return;
-      }
-      let healthToLose = 0;
-      this.previousRoll == 21 ? (healthToLose = 2) : (healthToLose = 1);
+    }
 
-      if (
-        this.previousDeclaredRoll == this.previousRoll ||
-        (this.lastAction == "SameRollOrHigher" &&
-          isGreaterThanEqualTo(this.previousRoll, this.previousDeclaredRoll))
-      ) {
-        if (this.lastAction == "SameRollOrHigher") {
-          textToChange = `Player ${this.previousPlayer} had declared "Same roll or higher" and had to roll at least ${this.previousDeclaredRoll} their roll was ${this.previousRoll}`;
-        } else {
-          textToChange = `Player ${this.previousPlayer} had declared ${this.previousDeclaredRoll} and their roll was indeed ${this.previousRoll}`;
-        }
-        this.turnTable[this.turnTable.length - 1] += "...";
-        this.turnTable.push(textToChange);
-        this.decreaseHealth(this.currentPlayer, healthToLose);
-        this.turnTable.push(
-          `Player ${this.currentPlayer} lost ${
-            healthToLose == 2 ? "2 lives" : "1 life"
-          }`
-        );
-        if (
-          this.healths[this.currentPlayer - 1] == 3 &&
-          !this.hasHealthRolled[this.currentPlayer - 1]
-        ) {
-          this.endTurnToHealthRoll(this.currentPlayer);
+    switch (this.currentAction as Action) {
+      case "Check":
+        let textToChange = this.turnTable[this.turnTable.length - 1]; //For turnTable
+
+        //Edge case: The checked roll is the roll of cheers (no one loses)
+        if (this.previousRoll == 32) {
+          textToChange += `, but Player ${this.previousPlayer} rolled a 32!`;
+          this.turnTable[this.turnTable.length - 1] = textToChange;
+          this.endTurnCheersOnCheck(); //Previous player rolled a 32 in a "Same roll or higher"
           return;
         }
-        this.endRoundCurrentPlayerLost();
-      } else {
-        if (this.lastAction == "SameRollOrHigher") {
-          textToChange = `Player ${this.previousPlayer} had declared "Same roll or higher" and had to roll at least ${this.previousDeclaredRoll} but their roll was only ${this.previousRoll}...`;
-        } else {
-          textToChange = `Player ${this.previousPlayer} had declared ${this.previousDeclaredRoll} and their roll was actually ${this.previousRoll}`;
-        }
-        this.turnTable[this.turnTable.length - 1] += "...";
-        this.turnTable.push(textToChange);
-        this.decreaseHealth(this.previousPlayer, healthToLose);
-        this.turnTable.push(
-          `Player ${this.previousPlayer} lost ${
-            healthToLose == 2 ? "2 lives" : "1 life"
-          }`
-        );
+
+        //Edge cases, if checked roll is 21, losing player loses 2 health instead of 1
+        let healthToLose = 0;
+        this.previousRoll == 21 ? (healthToLose = 2) : (healthToLose = 1);
+
+        //Current player lost
         if (
-          this.healths[this.previousPlayer - 1] == 3 &&
-          !this.hasHealthRolled[this.previousPlayer - 1]
+          this.previousDeclaredRoll == this.previousRoll ||
+          (this.lastAction == "SameRollOrHigher" &&
+            isGreaterThanEqualTo(this.previousRoll, this.previousDeclaredRoll))
         ) {
-          this.endTurnToHealthRoll(this.previousPlayer);
-          return;
+          //Update turnTable text
+          if (this.lastAction == "SameRollOrHigher") {
+            textToChange = `Player ${this.previousPlayer} had declared "Same roll or higher" and had to roll at least ${this.previousDeclaredRoll} their roll was ${this.previousRoll}`;
+          } else {
+            textToChange = `Player ${this.previousPlayer} had declared ${this.previousDeclaredRoll} and their roll was indeed ${this.previousRoll}`;
+          }
+          this.turnTable[this.turnTable.length - 1] += "...";
+          this.turnTable.push(textToChange);
+          this.turnTable.push(
+            `Player ${this.currentPlayer} lost ${
+              healthToLose == 2 ? "2 lives" : "1 life"
+            }`
+          );
+
+          this.decreaseHealth(this.currentPlayer, healthToLose);
+
+          //Edge case: Losing player has to healthroll before new round can begin
+          if (
+            this.healths[this.currentPlayer - 1] == 3 &&
+            !this.hasHealthRolled[this.currentPlayer - 1]
+          ) {
+            this.endTurnToHealthRoll(this.currentPlayer);
+            return;
+          }
+
+          this.endRoundCurrentPlayerLost();
+          break;
+
+          //Previous player lost
+        } else {
+          //Update turnTable text
+          if (this.lastAction == "SameRollOrHigher") {
+            textToChange = `Player ${this.previousPlayer} had declared "Same roll or higher" and had to roll at least ${this.previousDeclaredRoll} but their roll was only ${this.previousRoll}...`;
+          } else {
+            textToChange = `Player ${this.previousPlayer} had declared ${this.previousDeclaredRoll} and their roll was actually ${this.previousRoll}`;
+          }
+          this.turnTable[this.turnTable.length - 1] += "...";
+          this.turnTable.push(textToChange);
+          this.turnTable.push(
+            `Player ${this.previousPlayer} lost ${
+              healthToLose == 2 ? "2 lives" : "1 life"
+            }`
+          );
+
+          this.decreaseHealth(this.previousPlayer, healthToLose);
+
+          //Edge case: Losing player has to healthroll before new round can begin
+          if (
+            this.healths[this.previousPlayer - 1] == 3 &&
+            !this.hasHealthRolled[this.previousPlayer - 1]
+          ) {
+            this.endTurnToHealthRoll(this.previousPlayer);
+            return;
+          }
+
+          this.endRoundPreviousPlayerLost();
+          break;
         }
-        this.endRoundPreviousPlayerLost();
-      }
-    } else if (this.currentAction == "HealthRoll") {
-      this.endRoundBase();
-    } else if (this.currentAction == "Roll") {
-      if (this.getRoll() != 32) {
-        this.turnState.canAdvanceTurn = false;
-      }
-    } else if (this.currentAction == "Cheers") {
-      this.endRoundBase(); //Current player rolled a 32
-    } else if (this.currentAction == "SameRollOrHigher") {
-      this.endTurn();
-    } else if (this.currentAction == "Truth" || this.currentAction == "Bluff") {
-      this.endTurn();
-    } else {
-      throw new Error("This is unreachable");
+
+      case "HealthRoll":
+        this.endRoundBase();
+        break;
+
+      case "Roll":
+        if (this.getRoll() != 32) {
+          this.canAdvanceTurn = false;
+        }
+        break;
+
+      case "Cheers":
+        this.endRoundBase(); //Current player rolled a 32
+        break;
+
+      default: //SameRollOrHigher, Truth, or Bluff
+        this.endTurn();
+        break;
     }
     this.lastAction = this.currentAction;
     this.currentAction = "Error";
@@ -366,7 +387,7 @@ export class Meyer {
       this.currentAction = action;
     }
     if (action != "Bluff") {
-      this.turnState.canAdvanceTurn = true;
+      this.canAdvanceTurn = true;
     }
     switch (
       action //Error checking and roll setting
@@ -465,7 +486,7 @@ export class Meyer {
       throw new Error("Your bluff cannot be the Roll of Cheers!");
     }
     this.declaredRoll = choice;
-    this.turnState.canAdvanceTurn = true;
+    this.canAdvanceTurn = true;
     this.turnTable.push(
       `Player ${this.currentPlayer} declared ${this.declaredRoll}`
     );
