@@ -2,38 +2,39 @@ import { Box, Button, Typography, useTheme } from "@mui/material";
 import { Action, Meyer } from "../../utils/gameLogic";
 import { tokens } from "../../theme";
 import { Dice, RollWithName } from "../../utils/diceUtils";
-import { useEffect, useState } from "react";
+import { act, useEffect, useState } from "react";
 
 interface ActionProps {
   isDanish: boolean;
   meyer: Meyer;
+  actionChoices: Action[];
+  setActionChoices: React.Dispatch<React.SetStateAction<Action[]>>;
+  setBluffs: React.Dispatch<React.SetStateAction<number[]>>;
   setChosenAction: React.Dispatch<React.SetStateAction<Action>>;
   setCurrentHealths: React.Dispatch<React.SetStateAction<number[]>>;
   setCurrentPlayer: React.Dispatch<React.SetStateAction<number>>;
-  setBluffs: React.Dispatch<React.SetStateAction<number[]>>;
-  roll: number;
-  setTurn: React.Dispatch<React.SetStateAction<number>>;
   setRoll: React.Dispatch<React.SetStateAction<number>>;
   setRound: React.Dispatch<React.SetStateAction<number>>;
   setShowBluffs: React.Dispatch<React.SetStateAction<boolean>>;
+  setTurn: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const ActionChoices = ({
   isDanish,
   meyer,
+  actionChoices,
+  setActionChoices,
+  setBluffs,
   setChosenAction,
   setCurrentHealths,
   setCurrentPlayer,
-  setBluffs,
-  roll,
-  setTurn,
   setRoll,
   setRound,
   setShowBluffs,
+  setTurn,
 }: ActionProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [actionChoices, setActionChoices] = useState(["Roll" as Action]); //Temporary value
   const translateActions: { [action: string]: string } = {
     ["Error"]: isDanish ? "FEJL!" : "ERROR!",
     ["Check"]: isDanish ? "Tjek" : "Check",
@@ -47,100 +48,91 @@ export const ActionChoices = ({
     ["Bluff"]: isDanish ? "Bluf" : "Bluff",
   };
 
-  const onClick = (action: Action) => () => {
-    let trueRoll = roll;
-    if (action == "Roll") {
-      trueRoll = meyer.getRoll();
-      setRoll(trueRoll);
-    }
-    //Handles in-game actions
-    setActionChoices(meyer.getActionChoices());
-    if (action != "Error") {
-      setChosenAction(action);
-      meyer.takeAction(action);
-    }
-    if (action != "Bluff" && action != "Error") {
-      meyer.advanceTurn();
-
-      if (action == "Roll") {
-        setRoll(meyer.getRoll());
-      }
-    } else if (action == "Bluff") {
-      setBluffs(meyer.getBluffChoices());
-      setShowBluffs(true);
-    }
-    setActionChoices(meyer.getActionChoices());
-    if (
-      action == "Check" ||
-      action == "HealthRoll" ||
-      action == "Cheers" ||
-      action == "SameRollOrHigher" ||
-      action == "Truth"
-    ) {
-      setTurn(meyer.getTurn());
-      setChosenAction("Error");
-      setRoll(-1);
-    }
-    if (action == "Check" || action == "Cheers" || action == "HealthRoll") {
-      setRound(meyer.getRound());
-      setCurrentHealths(meyer.getCurrentHealths());
-    }
+  function endTurn(): void {
+    setChosenAction("Error");
+    setRoll(-1);
+    setTurn(meyer.getTurn());
     setCurrentPlayer(meyer.getCurrentPlayer());
+  }
+
+  function endRound(): void {
+    endTurn();
+    setRound(meyer.getRound());
+    setCurrentHealths(meyer.getCurrentHealths());
+  }
+
+  const onClick = (action: Action) => () => {
+    if (action != "Error") {
+      meyer.takeAction(action);
+      setChosenAction(action);
+
+      if (action != "Bluff") {
+        meyer.advanceTurn();
+      }
+    }
+
+    switch (action) {
+      case "Error":
+        break;
+
+      case "Check":
+        endRound();
+        break;
+
+      case "HealthRoll":
+        endRound();
+        break;
+
+      case "Roll":
+        setRoll(meyer.getRoll());
+        break;
+
+      case "Cheers":
+        endRound();
+        break;
+
+      case "SameRollOrHigher":
+        endTurn();
+        break;
+
+      case "Truth":
+        endTurn();
+        break;
+
+      case "Bluff":
+        setBluffs(meyer.getBluffChoices());
+        setShowBluffs(true);
+        break;
+    }
+
+    setActionChoices(meyer.getActionChoices());
   };
 
-  const choices = () => {
-    useEffect(() => {
-      setCurrentPlayer(() => meyer.getCurrentPlayer());
-    }, []);
-    useEffect(() => {
-      setRoll(() => meyer.getRoll());
-    }, []);
-    useEffect(() => {
-      setRound(() => meyer.getRound());
-    }, []);
-    useEffect(() => {
-      setTurn(() => meyer.getTurn());
-    }, []);
-    useEffect(() => {
-      setBluffs(meyer.getBluffChoices());
-    }, []);
-    useEffect(() => {
-      setActionChoices(meyer.getActionChoices());
-    }, []);
-    useEffect(() => {
-      setCurrentHealths(meyer.getCurrentHealths());
-    }, []);
-
-    return actionChoices.map((action) => (
-      <Box display="flex" justifyContent="center" key={action} flexWrap="wrap">
-        <Box
-          display="flex"
-          justifyContent="center"
-          bgcolor={colors.primary[700]}
-          borderRadius="3px"
-        >
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={onClick(action)}
-          >
-            <Typography
-              fontSize="20px"
-              fontStyle="normal"
-              textTransform="none"
-              children={translateActions[action as string]}
-            />
-          </Button>
-        </Box>
-        <Box marginLeft="3px" />
-        <Box display="flex" justifyContent="center" />
+  const choices = actionChoices.map((action) => (
+    <Box display="flex" justifyContent="center" key={action} flexWrap="wrap">
+      <Box
+        display="flex"
+        justifyContent="center"
+        bgcolor={colors.primary[700]}
+        borderRadius="3px"
+      >
+        <Button variant="contained" color="secondary" onClick={onClick(action)}>
+          <Typography
+            fontSize="20px"
+            fontStyle="normal"
+            textTransform="none"
+            children={translateActions[action as string]}
+          />
+        </Button>
       </Box>
-    ));
-  };
+      <Box marginLeft="3px" />
+      <Box display="flex" justifyContent="center" />
+    </Box>
+  ));
 
   return (
     <Box display="flex" justifyContent="center" flexWrap="wrap">
-      {choices()}
+      {choices}
     </Box>
   );
 };
@@ -148,18 +140,42 @@ export const ActionChoices = ({
 interface BluffProps {
   bluffs: number[];
   meyer: Meyer;
+  setActionChoices: React.Dispatch<React.SetStateAction<Action[]>>;
   setChosenAction: React.Dispatch<React.SetStateAction<Action>>;
+  setCurrentPlayer: React.Dispatch<React.SetStateAction<number>>;
+  setRoll: React.Dispatch<React.SetStateAction<number>>;
   setShowBluffs: React.Dispatch<React.SetStateAction<boolean>>;
+  setTurn: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const BluffChoices = ({
   bluffs,
   meyer,
+  setActionChoices,
   setChosenAction,
+  setCurrentPlayer,
+  setRoll,
   setShowBluffs,
+  setTurn,
 }: BluffProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  function endTurn(): void {
+    setChosenAction("Error");
+    setRoll(-1);
+    setTurn(meyer.getTurn());
+    setCurrentPlayer(meyer.getCurrentPlayer());
+  }
+
+  const onClick = (bluff: number) => () => {
+    meyer.chooseBluff(bluff);
+    meyer.advanceTurn();
+    setShowBluffs(false);
+    setActionChoices(meyer.getActionChoices());
+    endTurn();
+  };
+
   const bluffChoices = bluffs.map((bluff) => (
     <Box
       display="flex"
@@ -168,17 +184,13 @@ export const BluffChoices = ({
       flexWrap="wrap"
       borderRadius="3px"
     >
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={() => {
-          setShowBluffs(false);
-          meyer.chooseBluff(bluff);
-          meyer.advanceTurn();
-          setChosenAction("Error");
-        }}
-      >
-        <Typography fontSize="20px" fontStyle="normal" textTransform="none">
+      <Button variant="contained" color="secondary" onClick={onClick(bluff)}>
+        <Typography
+          fontSize="20px"
+          fontStyle="normal"
+          textTransform="none"
+          component="span"
+        >
           <RollWithName
             roll={bluff}
             color={colors.blueAccent[100]}

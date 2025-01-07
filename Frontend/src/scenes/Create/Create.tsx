@@ -13,18 +13,19 @@ interface Props {
 const Create = ({ isDanish }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [numberOfPlayers, setNumberOfPlayers] = useState(-1);
-  const [meyer, setMeyer] = useState(null as unknown as Meyer); //Temporary instance
-  const [canStartNewGame, setCanStartNewGame] = useState(true);
-  const [inGame, setInGame] = useState(false);
-  const [chosenAction, setChosenAction] = useState("Error" as Action);
-  const [showBluffs, setShowBluffs] = useState(false);
+  const [actionChoices, setActionChoices] = useState(["Roll"] as Action[]);
   const [bluffs, setBluffs] = useState([] as number[]);
+  const [canStartNewGame, setCanStartNewGame] = useState(true);
+  const [chosenAction, setChosenAction] = useState("Error" as Action);
+  const [currentHealths, setCurrentHealths] = useState([] as number[]);
+  const [currentPlayer, setCurrentPlayer] = useState(1);
+  const [inGame, setInGame] = useState(false);
+  const [meyer, setMeyer] = useState(null as unknown as Meyer);
+  const [numberOfPlayers, setNumberOfPlayers] = useState(-1);
   const [roll, setRoll] = useState(-1);
   const [round, setRound] = useState(1);
+  const [showBluffs, setShowBluffs] = useState(false);
   const [turn, setTurn] = useState(1);
-  const [currentHealths, setCurrentHealths] = useState([-1]); //Temporary value //TODO: Use this, but needs round loser
-  const [currentPlayer, setCurrentPlayer] = useState(1);
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
     setNumberOfPlayers(Number(event.target.value));
@@ -158,22 +159,27 @@ const Create = ({ isDanish }: Props) => {
                   <ActionChoices
                     isDanish={isDanish}
                     meyer={meyer}
-                    setCurrentPlayer={setCurrentPlayer}
-                    setCurrentHealths={setCurrentHealths}
-                    setChosenAction={setChosenAction}
+                    actionChoices={actionChoices}
+                    setActionChoices={setActionChoices}
                     setBluffs={setBluffs}
-                    roll={roll}
-                    setTurn={setTurn}
+                    setChosenAction={setChosenAction}
+                    setCurrentHealths={setCurrentHealths}
+                    setCurrentPlayer={setCurrentPlayer}
                     setRoll={setRoll}
                     setRound={setRound}
                     setShowBluffs={setShowBluffs}
+                    setTurn={setTurn}
                   />
                 )}
                 {showBluffs && (
                   <BluffChoices
                     bluffs={bluffs}
                     meyer={meyer}
+                    setActionChoices={setActionChoices}
                     setChosenAction={setChosenAction}
+                    setCurrentPlayer={setCurrentPlayer}
+                    setRoll={setRoll}
+                    setTurn={setTurn}
                     setShowBluffs={setShowBluffs}
                   />
                 )}
