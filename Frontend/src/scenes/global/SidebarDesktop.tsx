@@ -30,7 +30,7 @@ const SidebarDesktop = ({ isCollapsed, setIsCollapsed, isDanish }: Props) => {
       height="100%"
       top="0"
       bgcolor={colors.primary[700]}
-      zIndex={1}
+      zIndex={2}
     >
       <Sidebar
         collapsed={isCollapsed}

@@ -34,7 +34,7 @@ const Topbar = ({ isVisible, setIsVisible, isDanish, setIsDanish }: Props) => {
       flexDirection="row"
       justifyContent="space-between"
       padding="10px 16px 10px 16px"
-      zIndex={0}
+      zIndex={1}
       sx={{ outline: "1px solid", outlineColor: colors.primary[600] }}
     >
       {/* MOBILE MENU + SEARCH BAR */}
