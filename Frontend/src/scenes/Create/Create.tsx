@@ -35,45 +35,49 @@ const Create = ({ isDanish }: Props) => {
   const [turn, setTurn] = useState(1);
   const [turnsTotal, setTurnsTotal] = useState(1);
 
-  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+  function onChange(event: ChangeEvent<HTMLInputElement>): void {
     setNumberOfPlayers(Number(event.target.value));
-  };
+  }
 
-  const onInput = (event: ChangeEvent<HTMLInputElement>) => {
-    Number(event.target.value) == 10;
+  function onInput(event: ChangeEvent<HTMLInputElement>): void {
     Number(event.target.value) >= 10 && event.target.value.slice(0, 2) == "10"
       ? (event.target.value = "10")
       : (event.target.value = event.target.value.slice(
           event.target.value.length - 1,
           event.target.value.length
         ));
-  };
+  }
 
-  const onClickCreateGame = () => {
+  function createGame(): void {
     setCanStartNewGame(false);
     let meyerInstance = new Meyer(numberOfPlayers);
     setMeyer(meyerInstance);
     setInGame(true);
     setCurrentHealths(meyerInstance.getCurrentHealths());
-  };
+  }
 
-  const onClickEndGame = () => {
+  function resetGame(): void {
+    meyer.resetGame();
     setActionChoices(["Roll"] as Action[]);
     setBluffs([] as number[]);
-    setCanStartNewGame(true);
     setCurrentAction("Error" as Action);
-    setCurrentHealths([] as number[]);
+    setCurrentHealths(meyer.getCurrentHealths());
     setCurrentPlayer(1);
-    setInGame(false);
     setIsGameOver(false);
-    setMeyer(null as unknown as Meyer);
-    setNumberOfPlayers(-1);
     setRoll(-1);
     setRound(1);
     setShowBluffs(false);
     setTurn(1);
     setTurnsTotal(1);
-  };
+  }
+
+  function endGame(): void {
+    resetGame();
+    setCanStartNewGame(true);
+    setInGame(false);
+    setMeyer(null as unknown as Meyer);
+    setNumberOfPlayers(-1);
+  }
 
   return (
     <Box display="flex" flexBasis="100%" flexDirection="column">
@@ -128,7 +132,7 @@ const Create = ({ isDanish }: Props) => {
             <Button
               variant="contained"
               color="secondary"
-              onClick={onClickCreateGame}
+              onClick={createGame}
               disabled={numberOfPlayers < 2 || numberOfPlayers > 10}
             >
               <Typography
@@ -201,16 +205,12 @@ const Create = ({ isDanish }: Props) => {
                     justifyContent="center"
                     children={
                       isDanish
-                        ? `Der blev spillet ${round} ${
-                            round == 1 ? "runde" : "runder"
-                          }, og ${turnsTotal} ${
-                            turnsTotal == 1 ? "tur" : "ture"
-                          }`
-                        : `A total of ${round} ${
-                            round == 1 ? "round" : "rounds"
-                          } and ${turnsTotal} ${
-                            turnsTotal == 1 ? "turn" : "turns"
-                          } were played`
+                        ? `Der blev spillet ${round - 1} runder, og ${
+                            turnsTotal - 1
+                          } ture`
+                        : `A total of ${round} rounds and ${
+                            turnsTotal - 1
+                          } turns were played`
                     }
                   />
                 </Box>
@@ -258,20 +258,34 @@ const Create = ({ isDanish }: Props) => {
                   )}
                 </Box>
               )}
-              {/* GAME OVER - END GAME BUTTON */}
+              {/* GAME OVER - PLAY AGAIN AND END GAME BUTTON */}
               {isGameOver && (
                 <Box display="flex" flexDirection="column">
                   <Box display="flex" justifyContent="center">
+                    {/* PLAY AGAIN */}
                     <Button
                       variant="contained"
                       color="secondary"
-                      onClick={onClickEndGame}
+                      onClick={resetGame}
                     >
                       <Typography
                         fontSize="20px"
                         fontStyle="normal"
                         textTransform="none"
-                        children={"End game"}
+                        children={isDanish ? "Spil igen" : "Play again"}
+                      />
+                    </Button>
+                    {/* END GAME */}
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={endGame}
+                    >
+                      <Typography
+                        fontSize="20px"
+                        fontStyle="normal"
+                        textTransform="none"
+                        children={isDanish ? "Afslut spil" : "End game"}
                       />
                     </Button>
                   </Box>
@@ -289,7 +303,11 @@ const Create = ({ isDanish }: Props) => {
               </Box>
               {/* HEALTH */}
             </Box>
-            <Healths currentHealths={currentHealths} />
+            <Healths
+              currentHealths={currentHealths}
+              currentPlayer={currentPlayer}
+              isGameOver={isGameOver}
+            />
           </Box>
         )}
       </Box>

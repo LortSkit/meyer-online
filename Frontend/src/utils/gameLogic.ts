@@ -78,13 +78,18 @@ export class Meyer {
       );
     }
     this.numberOfPlayers = numberOfPlayers;
+    this.setHealths();
+  }
+
+  ////////////////////////////////PRIVATE FUNCTIONS/////////////////////////////////
+  private setHealths(): void {
+    this.healths = [];
     for (let i = 0; i < this.numberOfPlayers; i++) {
       this.healths.push(6);
       this.hasHealthRolled.push(false);
     }
   }
 
-  ////////////////////////////////PRIVATE FUNCTIONS/////////////////////////////////
   private getNextPlayer(player: Int32): Int32 {
     let nextplayer = player + 1;
     if (nextplayer > this.numberOfPlayers) {
@@ -101,7 +106,6 @@ export class Meyer {
 
   private isCurrentPlayerWinner(): boolean {
     if (this.getNextPlayer(this.currentPlayer) == this.currentPlayer) {
-      console.log("Winner found!");
       return true;
     }
     return false;
@@ -163,32 +167,25 @@ export class Meyer {
   }
 
   private endRoundCurrentPlayerLost(): void {
-    console.log("Current player lost!");
     this.endRoundBase();
     this.healths[this.currentPlayer - 1] != 0
       ? undefined //current player = current player
       : (this.currentPlayer = this.getNextPlayer(this.currentPlayer));
     if (this.isCurrentPlayerWinner()) {
-      console.log(
-        `Check if Player ${this.currentPlayer} is a winner... (previous player was Player ${this.previousPlayer})`
-      );
       this.winner = this.currentPlayer;
     }
   }
 
   private endRoundPreviousPlayerLost(): void {
-    console.log("Previous player lost!");
     this.endRoundBase();
     this.healths[this.previousPlayer - 1] != 0
       ? (this.currentPlayer = this.previousPlayer)
       : undefined; //current player = current player
     if (this.isCurrentPlayerWinner()) {
-      console.log(
-        `Check if Player ${this.currentPlayer} is a winner... (previous player was Player ${this.previousPlayer})`
-      );
       this.winner = this.currentPlayer;
     }
   }
+
   //////////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////PUBLIC FUNCTIONS//////////////////////////////////
@@ -470,6 +467,25 @@ export class Meyer {
     this.turnTable.push(
       `Player ${this.currentPlayer} declared ${this.declaredRoll}`
     );
+  }
+
+  public resetGame(): void {
+    this.resetRoll();
+    this.currentPlayer = 1;
+    this.previousPlayer = -1;
+
+    this.currentAction = "Error";
+    this.previousAction = "Error";
+
+    this.winner = -1;
+
+    this.setHealths();
+
+    this.canAdvanceTurn = false;
+    this.turn = 1;
+    this.round = 1;
+
+    this.turnTable = [];
   }
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
   /////////////////////////////////////////////////////////////////////////////////

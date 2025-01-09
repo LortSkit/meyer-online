@@ -1,8 +1,8 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
+import { ArrowForwardOutlined } from "@mui/icons-material";
 import { Action, Meyer } from "../../utils/gameLogic";
 import { tokens } from "../../theme";
 import { Dice, RollWithName } from "../../utils/diceUtils";
-import { act, useEffect, useState } from "react";
 
 interface ActionProps {
   isDanish: boolean;
@@ -221,9 +221,15 @@ export const BluffChoices = ({
 
 interface HealthsProps {
   currentHealths: number[];
+  currentPlayer: number;
+  isGameOver: boolean;
 }
 
-export const Healths = ({ currentHealths }: HealthsProps) => {
+export const Healths = ({
+  currentHealths,
+  currentPlayer,
+  isGameOver,
+}: HealthsProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -234,6 +240,9 @@ export const Healths = ({ currentHealths }: HealthsProps) => {
           (health, index) =>
             health > 0 && (
               <Box display="flex" key={index}>
+                {currentPlayer == index + 1 && !isGameOver && (
+                  <ArrowForwardOutlined />
+                )}
                 <Typography
                   display="flex"
                   fontSize="14px"
