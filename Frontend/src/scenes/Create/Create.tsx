@@ -3,36 +3,40 @@ import { tokens } from "../../theme";
 import { Meyer, Action } from "../../utils/gameLogic";
 import { ChangeEvent, useState } from "react";
 import { RollWithName } from "../../utils/diceUtils";
-import { Dice } from "../../utils/diceUtils";
-import { ActionChoices, BluffChoices, Healths } from "./GameElements";
+import {
+  ActionChoices,
+  BluffChoices,
+  Healths,
+  TurnInfo,
+  TurnInformation,
+  TurnInfoToMessage,
+} from "./GameElements";
 
 interface Props {
   isDanish: boolean;
 }
 
 const Create = ({ isDanish }: Props) => {
-  // TODO: Add the following states and use them to move Meyer's turnTable into frontend:
-  // previousAction
-  // declaredRoll
-  // previousPlayer
-  // previousRoll
-  // previousDeclaredRoll
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [actionChoices, setActionChoices] = useState(["Roll"] as Action[]);
   const [bluffs, setBluffs] = useState([] as number[]);
   const [canStartNewGame, setCanStartNewGame] = useState(true);
-  const [currentAction, setCurrentAction] = useState("Error" as Action); //TODO: Use to update previousAction
   const [currentHealths, setCurrentHealths] = useState([] as number[]);
-  const [currentPlayer, setCurrentPlayer] = useState(1); //TODO: Use to update previousPlayer
+  const [currentPlayer, setCurrentPlayer] = useState(1);
   const [inGame, setInGame] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [meyer, setMeyer] = useState(null as unknown as Meyer);
   const [numberOfPlayers, setNumberOfPlayers] = useState(-1);
-  const [roll, setRoll] = useState(-1); //TODO: Use to update previousRoll
+  const [previousAction, setPreviousAction] = useState("Error" as Action); //TODO: MAKE TURNINFORMATION
+  const [previousDeclaredRoll, setPreviousDeclaredRoll] = useState(-1); //TODO: MAKE TURNINFORMATION
+  const [previousPlayer, setPreviousPlayer] = useState(-1); //TODO: MAKE TURNINFORMATION
+  const [previousRoll, setPreviousRoll] = useState(-1); //TODO: MAKE TURNINFORMATION
+  const [roll, setRoll] = useState(-1);
   const [round, setRound] = useState(1);
   const [showBluffs, setShowBluffs] = useState(false);
   const [turn, setTurn] = useState(1);
+  const [turnInformation, setTurnInformation] = useState([] as TurnInfo[]); //TODO: MAKE TURNINFORMATION
   const [turnsTotal, setTurnsTotal] = useState(1);
 
   function onChange(event: ChangeEvent<HTMLInputElement>): void {
@@ -60,14 +64,18 @@ const Create = ({ isDanish }: Props) => {
     meyer.resetGame();
     setActionChoices(["Roll"] as Action[]);
     setBluffs([] as number[]);
-    setCurrentAction("Error" as Action);
     setCurrentHealths(meyer.getCurrentHealths());
-    setCurrentPlayer(1);
+    //setCurrentPlayer(currentPlayer); //winner gets to start next game
     setIsGameOver(false);
+    setPreviousAction("Error");
+    setPreviousDeclaredRoll(-1);
+    setPreviousPlayer(-1);
+    setPreviousRoll(-1);
     setRoll(-1);
     setRound(1);
     setShowBluffs(false);
     setTurn(1);
+    setTurnInformation([] as TurnInfo[]);
     setTurnsTotal(1);
   }
 
@@ -151,8 +159,13 @@ const Create = ({ isDanish }: Props) => {
             alignItems="flex-start"
             flexBasis="100%"
           >
-            <Box display="flex" minWidth="17%" />
-            <Box display="flex" justifyContent="center" flexDirection="column">
+            <Box display="flex" minWidth="21%" />
+            <Box
+              display="flex"
+              justifyContent="center"
+              flexDirection="column"
+              maxWidth="48%"
+            >
               {/* GAME HEADING */}
               {!isGameOver && (
                 <Box
@@ -207,7 +220,7 @@ const Create = ({ isDanish }: Props) => {
                       isDanish
                         ? `Der blev spillet ${round - 1} runder, og ${
                             turnsTotal - 1
-                          } ture`
+                          } ture i alt`
                         : `A total of ${round} rounds and ${
                             turnsTotal - 1
                           } turns were played`
@@ -228,31 +241,46 @@ const Create = ({ isDanish }: Props) => {
                   {!showBluffs && (
                     <ActionChoices
                       isDanish={isDanish}
-                      meyer={meyer}
                       actionChoices={actionChoices}
+                      currentHealths={currentHealths}
+                      currentPlayer={currentPlayer}
+                      meyer={meyer}
+                      previousAction={previousAction}
+                      previousPlayer={previousPlayer}
+                      previousDeclaredRoll={previousDeclaredRoll}
+                      previousRoll={previousRoll}
+                      roll={roll}
                       setActionChoices={setActionChoices}
                       setBluffs={setBluffs}
-                      setCurrentAction={setCurrentAction}
                       setCurrentHealths={setCurrentHealths}
                       setCurrentPlayer={setCurrentPlayer}
                       setIsGameOver={setIsGameOver}
+                      setPreviousAction={setPreviousAction}
+                      setPreviousDeclaredRoll={setPreviousDeclaredRoll}
+                      setPreviousPlayer={setPreviousPlayer}
+                      setPreviousRoll={setPreviousRoll}
                       setRoll={setRoll}
                       setRound={setRound}
                       setShowBluffs={setShowBluffs}
                       setTurn={setTurn}
+                      setTurnInformation={setTurnInformation}
                       setTurnsTotal={setTurnsTotal}
                     />
                   )}
                   {showBluffs && (
                     <BluffChoices
                       bluffs={bluffs}
+                      currentPlayer={currentPlayer}
                       meyer={meyer}
                       setActionChoices={setActionChoices}
-                      setCurrentAction={setCurrentAction}
                       setCurrentPlayer={setCurrentPlayer}
+                      setPreviousAction={setPreviousAction}
+                      setPreviousDeclaredRoll={setPreviousDeclaredRoll}
+                      setPreviousPlayer={setPreviousPlayer}
                       setRoll={setRoll}
-                      setTurn={setTurn}
                       setShowBluffs={setShowBluffs}
+                      setTurn={setTurn}
+                      setTurnInformation={setTurnInformation}
                       setTurnsTotal={setTurnsTotal}
                     />
                   )}
@@ -275,6 +303,7 @@ const Create = ({ isDanish }: Props) => {
                         children={isDanish ? "Spil igen" : "Play again"}
                       />
                     </Button>
+                    <Box marginLeft="3px" />
                     {/* END GAME */}
                     <Button
                       variant="contained"
@@ -292,17 +321,13 @@ const Create = ({ isDanish }: Props) => {
                 </Box>
               )}
               <Box p={1} />
-              <Box display="flex" justifyContent="center">
-                <Box display="flex" flexDirection="column">
-                  {meyer.getTurnTable().map((value: string, index: number) => (
-                    <Box key={index} display="flex" justifyContent="center">
-                      {value}
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
-              {/* HEALTH */}
+              {/* TURN INFORMATION */}
+              <TurnInformation
+                isDanish={isDanish}
+                turnInformation={turnInformation}
+              />
             </Box>
+            {/* HEALTH */}
             <Healths
               currentHealths={currentHealths}
               currentPlayer={currentPlayer}
