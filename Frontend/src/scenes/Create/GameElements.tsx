@@ -10,13 +10,15 @@ interface ActionProps {
   actionChoices: Action[];
   setActionChoices: React.Dispatch<React.SetStateAction<Action[]>>;
   setBluffs: React.Dispatch<React.SetStateAction<number[]>>;
-  setChosenAction: React.Dispatch<React.SetStateAction<Action>>;
+  setCurrentAction: React.Dispatch<React.SetStateAction<Action>>;
   setCurrentHealths: React.Dispatch<React.SetStateAction<number[]>>;
   setCurrentPlayer: React.Dispatch<React.SetStateAction<number>>;
+  setIsGameOver: React.Dispatch<React.SetStateAction<boolean>>;
   setRoll: React.Dispatch<React.SetStateAction<number>>;
   setRound: React.Dispatch<React.SetStateAction<number>>;
   setShowBluffs: React.Dispatch<React.SetStateAction<boolean>>;
   setTurn: React.Dispatch<React.SetStateAction<number>>;
+  setTurnsTotal: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const ActionChoices = ({
@@ -25,13 +27,15 @@ export const ActionChoices = ({
   actionChoices,
   setActionChoices,
   setBluffs,
-  setChosenAction,
+  setCurrentAction,
   setCurrentHealths,
   setCurrentPlayer,
+  setIsGameOver,
   setRoll,
   setRound,
   setShowBluffs,
   setTurn,
+  setTurnsTotal,
 }: ActionProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -49,9 +53,10 @@ export const ActionChoices = ({
   };
 
   function endTurn(): void {
-    setChosenAction("Error");
+    setCurrentAction("Error");
     setRoll(-1);
     setTurn(meyer.getTurn());
+    setTurnsTotal((t) => t + 1);
     setCurrentPlayer(meyer.getCurrentPlayer());
   }
 
@@ -59,12 +64,15 @@ export const ActionChoices = ({
     endTurn();
     setRound(meyer.getRound());
     setCurrentHealths(meyer.getCurrentHealths());
+    if (meyer.isGameOver()) {
+      setIsGameOver(true);
+    }
   }
 
   const onClick = (action: Action) => () => {
     if (action != "Error") {
       meyer.takeAction(action);
-      setChosenAction(action);
+      setCurrentAction(action);
 
       if (action != "Bluff") {
         meyer.advanceTurn();
@@ -109,7 +117,7 @@ export const ActionChoices = ({
   };
 
   const choices = actionChoices.map((action) => (
-    <Box display="flex" justifyContent="center" key={action} flexWrap="wrap">
+    <Box display="flex" justifyContent="center" key={action}>
       <Box
         display="flex"
         justifyContent="center"
@@ -141,30 +149,33 @@ interface BluffProps {
   bluffs: number[];
   meyer: Meyer;
   setActionChoices: React.Dispatch<React.SetStateAction<Action[]>>;
-  setChosenAction: React.Dispatch<React.SetStateAction<Action>>;
+  setCurrentAction: React.Dispatch<React.SetStateAction<Action>>;
   setCurrentPlayer: React.Dispatch<React.SetStateAction<number>>;
   setRoll: React.Dispatch<React.SetStateAction<number>>;
   setShowBluffs: React.Dispatch<React.SetStateAction<boolean>>;
   setTurn: React.Dispatch<React.SetStateAction<number>>;
+  setTurnsTotal: React.Dispatch<React.SetStateAction<number>>;
 }
 
 export const BluffChoices = ({
   bluffs,
   meyer,
   setActionChoices,
-  setChosenAction,
+  setCurrentAction,
   setCurrentPlayer,
   setRoll,
   setShowBluffs,
   setTurn,
+  setTurnsTotal,
 }: BluffProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   function endTurn(): void {
-    setChosenAction("Error");
+    setCurrentAction("Error");
     setRoll(-1);
     setTurn(meyer.getTurn());
+    setTurnsTotal((t) => t + 1);
     setCurrentPlayer(meyer.getCurrentPlayer());
   }
 
@@ -209,17 +220,17 @@ export const BluffChoices = ({
 };
 
 interface HealthsProps {
-  meyer: Meyer;
+  currentHealths: number[];
 }
 
-export const Healths = ({ meyer }: HealthsProps) => {
+export const Healths = ({ currentHealths }: HealthsProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   return (
     <Box display="flex" justifyContent="flex-start" minWidth="17%">
       <Box display="flex" flexDirection="column">
-        {meyer.getCurrentHealths().map(
+        {currentHealths.map(
           (health, index) =>
             health > 0 && (
               <Box display="flex" key={index}>
