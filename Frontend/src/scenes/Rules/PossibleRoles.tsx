@@ -24,7 +24,12 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
           ? "Fællesskålsslaget (alle skal drikke), som kan redde dig, da der starter en ny runde, hvis du ruller den her"
           : "The Roll of Cheers (everyone must drink), which can also save you as rolling this will start a new round"}
       </Box>
-      <RollWithName roll={32} color={colors.blueAccent[100]} sideLength={12} />
+      <RollWithName
+        isDanish={isDanish}
+        roll={32}
+        color={colors.blueAccent[100]}
+        sideLength={12}
+      />
       <Box p={1} />
 
       <Box display="flex" justifyContent="center">
@@ -32,7 +37,12 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
           ? 'Det højeste slag er "meyer"'
           : 'The highest roll is "meyer"'}
       </Box>
-      <RollWithName roll={21} color={colors.blueAccent[100]} sideLength={12} />
+      <RollWithName
+        isDanish={isDanish}
+        roll={21}
+        color={colors.blueAccent[100]}
+        sideLength={12}
+      />
       <Box p={1} />
 
       <Box display="flex" justifyContent="center">
@@ -40,7 +50,12 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
           ? 'Det næsthøjeste slag er "lille-meyer"'
           : 'The second highest roll is "meyer"'}
       </Box>
-      <RollWithName roll={31} color={colors.blueAccent[100]} sideLength={12} />
+      <RollWithName
+        isDanish={isDanish}
+        roll={31}
+        color={colors.blueAccent[100]}
+        sideLength={12}
+      />
       <Box p={1} />
       {/* PAIRS */}
       <Box display="flex" justifyContent="center">
@@ -50,6 +65,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
       </Box>
       <Box display="flex" justifyContent="center">
         <RollWithName
+          isDanish={isDanish}
           roll={66}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -57,6 +73,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={55}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -64,6 +81,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={44}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -71,6 +89,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={33}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -78,6 +97,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={22}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -85,6 +105,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={11}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -101,6 +122,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
       <Box display="flex" justifyContent="center">
         {/* 60s */}
         <RollWithName
+          isDanish={isDanish}
           roll={65}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -108,6 +130,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={64}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -115,6 +138,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={63}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -122,6 +146,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={62}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -129,6 +154,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={61}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -137,6 +163,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
         {/* 50s */}
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={54}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -144,6 +171,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={53}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -151,6 +179,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={52}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -158,6 +187,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={51}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -166,6 +196,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
         {/* 40s */}
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={43}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -173,6 +204,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={42}
           color={colors.blueAccent[100]}
           sideLength={12}
@@ -180,6 +212,7 @@ export const POSSIBLEROLLS = ({ isDanish }: LangProps) => {
 
         <Box marginLeft={space} />
         <RollWithName
+          isDanish={isDanish}
           roll={41}
           color={colors.blueAccent[100]}
           sideLength={12}

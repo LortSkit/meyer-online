@@ -5,6 +5,7 @@ import { tokens } from "../../../../theme";
 import { RollWithName } from "../../../../utils/diceUtils";
 
 interface Props {
+  isDanish: boolean;
   bluffs: number[];
   currentPlayer: number;
   meyer: Meyer;
@@ -21,6 +22,7 @@ interface Props {
 }
 
 const BluffChoices = ({
+  isDanish,
   bluffs,
   currentPlayer,
   meyer,
@@ -69,15 +71,16 @@ const BluffChoices = ({
     >
       <Button variant="contained" color="secondary" onClick={onClick(bluff)}>
         <Typography
-          fontSize="20px"
+          fontSize="18px"
           fontStyle="normal"
           textTransform="none"
           component="span"
         >
           <RollWithName
+            isDanish={isDanish}
             roll={bluff}
             color={colors.blueAccent[100]}
-            sideLength={12}
+            sideLength={18}
           />
         </Typography>
       </Button>

@@ -42,7 +42,7 @@ const PlayerHealths = ({
                 <Dice
                   eyes={health}
                   color={colors.blueAccent[100]}
-                  sideLength={20}
+                  sideLength={25}
                 />
                 <Box paddingLeft="5px" />
               </Box>

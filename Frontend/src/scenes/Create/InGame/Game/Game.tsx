@@ -1,4 +1,4 @@
-import { Box, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import GameHeading from "./GameHeading";
 import ActionChoices from "./ActionChoices";
 import BluffChoices from "./BluffChoices";
@@ -81,11 +81,19 @@ const Game = ({
         turn={turn}
       />
       {roll != -1 && (
-        <RollWithName
-          roll={roll}
-          color={colors.blueAccent[100]}
-          sideLength={12}
-        />
+        <Typography
+          fontSize="25px"
+          fontStyle="normal"
+          textTransform="none"
+          component="span"
+        >
+          <RollWithName
+            isDanish={isDanish}
+            roll={roll}
+            color={colors.blueAccent[100]}
+            sideLength={30}
+          />
+        </Typography>
       )}
       {!showBluffs && (
         <ActionChoices
@@ -118,6 +126,7 @@ const Game = ({
       )}
       {showBluffs && (
         <BluffChoices
+          isDanish={isDanish}
           bluffs={bluffs}
           currentPlayer={currentPlayer}
           meyer={meyer}

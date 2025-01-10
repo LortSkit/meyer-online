@@ -9,6 +9,7 @@ import {
   Dice6,
 } from "../components/icons/DiceIcons";
 import { Box, SxProps, Theme } from "@mui/material";
+import { rollToName } from "./lang/langDiceUtils";
 
 //From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 
@@ -84,13 +85,27 @@ export const Roll = ({ roll, color, sideLength, sx }: RollProps) => {
   );
 };
 
-export const RollWithName = ({ roll, color, sideLength, sx }: RollProps) => (
+interface RollWithNameProps {
+  isDanish: boolean;
+  roll: Int32;
+  color: string;
+  sideLength: Int32;
+  sx?: SxProps<Theme> | undefined;
+}
+
+export const RollWithName = ({
+  isDanish,
+  roll,
+  color,
+  sideLength,
+  sx,
+}: RollWithNameProps) => (
   <Box display="flex" flexDirection="column" sx={sx}>
     <Box display="flex" justifyContent="center">
       <Roll roll={roll} color={color} sideLength={sideLength} />
     </Box>
     <Box display="flex" justifyContent="center">
-      {roll}
+      {rollToName(isDanish, roll)}
     </Box>
   </Box>
 );
