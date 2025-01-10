@@ -5,21 +5,6 @@ interface LangProps {
   isDanish: boolean;
 }
 
-export const HEADING = ({ isDanish }: LangProps) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-  return (
-    <Box display="flex" justifyContent="center">
-      <Typography
-        variant="h1"
-        color={colors.blueAccent[100]}
-        fontWeight="bold"
-        children={isDanish ? "Regler" : "Rules"}
-      />
-    </Box>
-  );
-};
-
 export const HOOK = ({ isDanish }: LangProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);

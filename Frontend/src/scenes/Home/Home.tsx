@@ -1,5 +1,6 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
+import HomeHeading from "./HomeHeading";
 
 interface Props {
   isDanish: boolean;
@@ -12,14 +13,7 @@ const Home = ({ isDanish }: Props) => {
   return (
     <Box display="flex" flexBasis="100%" flexDirection="column">
       {/* HEADING */}
-      <Box display="flex" justifyContent="center">
-        <Typography
-          variant="h1"
-          color={colors.blueAccent[100]}
-          fontWeight="bold"
-          children={"Meyer"}
-        />
-      </Box>
+      <HomeHeading isDanish={isDanish} />
     </Box>
   );
 };

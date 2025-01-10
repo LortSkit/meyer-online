@@ -1,22 +1,6 @@
 import { Int32 } from "react-native/Libraries/Types/CodegenTypes";
 import { getDiceRoll, getMeyerRoll } from "./diceUtils";
-
-const possibleActions = [
-  "Error",
-  "Check",
-  "HealthRoll",
-  "Roll",
-  "Cheers",
-  "SameRollOrHigher",
-  "Truth",
-  "Bluff",
-] as const;
-
-export function isAction(x: any): x is Action {
-  return possibleActions.includes(x);
-}
-
-export type Action = (typeof possibleActions)[number];
+import { Action } from "./gameTypes";
 
 //For the static functions below
 const allPossibleRollsOrdered: Int32[] = [
