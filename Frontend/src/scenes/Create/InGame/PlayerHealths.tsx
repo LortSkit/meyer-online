@@ -23,28 +23,37 @@ const PlayerHealths = ({
   return (
     <Box display="flex" justifyContent="flex-start" minWidth="21%">
       <Box display="flex" flexDirection="column">
+        <Box paddingTop="13.5px" />
         {currentHealths.map(
           (health, index) =>
             health > 0 && (
-              <Box display="flex" key={index}>
-                {currentPlayer == index + 1 && !isGameOver && (
-                  <ArrowForwardOutlined />
-                )}
-                {!(currentPlayer == index + 1 && !isGameOver) && (
-                  <Box paddingLeft="calc(20.5px + 5px)" />
-                )}
-                <Typography
-                  display="flex"
-                  fontSize="14px"
-                  children={translatePlayerIndex(isDanish, index)}
-                />
-                <Box marginRight="3px" />
-                <Dice
-                  eyes={health}
-                  color={colors.blueAccent[100]}
-                  sideLength={25}
-                />
-                <Box paddingLeft="5px" />
+              <Box display="flex" flexDirection="column" key={index}>
+                <Box display="flex">
+                  {currentPlayer == index + 1 && !isGameOver && (
+                    <ArrowForwardOutlined />
+                  )}
+                  {!(currentPlayer == index + 1 && !isGameOver) && (
+                    <Box paddingLeft="calc(20.5px + 5px)" />
+                  )}
+                  <Dice
+                    eyes={health}
+                    color={colors.blueAccent[100]}
+                    sideLength={25}
+                  />
+                  <Box marginRight="3px" />
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="center"
+                  >
+                    <Typography
+                      display="flex"
+                      fontSize="14px"
+                      children={translatePlayerIndex(isDanish, index)}
+                    />
+                  </Box>
+                </Box>
+                <Box paddingTop="5px" />
               </Box>
             )
         )}

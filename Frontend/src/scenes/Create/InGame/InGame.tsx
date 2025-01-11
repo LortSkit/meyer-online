@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import Game from "./Game/Game";
 import GameOver from "./GameOver/GameOver";
-import TurnInformation from "./TurnInformation";
+import TurnInformation from "./TurnInformation/TurnInformation";
 import PlayerHealths from "./PlayerHealths";
 import { Meyer } from "../../../utils/gameLogic";
 import { Action, TurnInfo } from "../../../utils/gameTypes";

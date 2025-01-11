@@ -8,7 +8,6 @@ export function rollToName(isDanish: boolean, roll: number): string {
           return "Meyer";
 
         case 31:
-          console.log("Lang isDanish=", isDanish);
           return isDanish ? "Lille Meyer" : "Little Meyer";
 
         case 32:

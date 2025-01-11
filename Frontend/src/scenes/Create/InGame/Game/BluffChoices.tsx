@@ -71,7 +71,7 @@ const BluffChoices = ({
     >
       <Button variant="contained" color="secondary" onClick={onClick(bluff)}>
         <Typography
-          fontSize="18px"
+          fontSize="16px"
           fontStyle="normal"
           textTransform="none"
           component="span"
@@ -80,7 +80,7 @@ const BluffChoices = ({
             isDanish={isDanish}
             roll={bluff}
             color={colors.blueAccent[100]}
-            sideLength={18}
+            sideLength={16}
           />
         </Typography>
       </Button>
