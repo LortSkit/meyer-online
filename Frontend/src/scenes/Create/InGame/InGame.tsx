@@ -124,6 +124,7 @@ const InGame = ({
           {/* TURN INFORMATION */}
           <TurnInformation
             isDanish={isDanish}
+            round={round}
             turnInformation={turnInformation}
           />
         </Box>

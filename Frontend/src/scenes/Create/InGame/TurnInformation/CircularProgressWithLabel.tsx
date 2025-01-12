@@ -17,6 +17,7 @@ function CircularProgressWithLabel(
     <Box sx={{ position: "relative", display: "inline-flex" }}>
       <CircularProgress
         variant="determinate"
+        size="30px"
         sx={{ color: props.overridecolor }}
         {...props}
       />
@@ -24,18 +25,19 @@ function CircularProgressWithLabel(
         sx={{
           top: 0,
           left: 0,
-          bottom: "2px",
+          bottom: 0,
           right: 0,
           position: "absolute",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          flexDirection: "column",
         }}
       >
         <Typography
           variant="caption"
           component="div"
-          fontSize="20px"
+          fontSize="16px"
           sx={{ color: "text.secondary" }}
         >{`${
           props.maxvalue + 1 - Math.round((props.value * props.maxvalue) / 100)
