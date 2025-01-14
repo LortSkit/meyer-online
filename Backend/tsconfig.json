@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2022", "ESNext"], // ES2020 in earlier versions
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "target": "ES2022", // ES2020 in earlier versions
+    "esModuleInterop": true,
+    "skipLibCheck": true, // Skip type checking all .d.ts files
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src"],
+  "ts-node": { "esm": true }
+}
