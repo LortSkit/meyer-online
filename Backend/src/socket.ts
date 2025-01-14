@@ -25,16 +25,20 @@ export class ServerSocket {
     });
 
     this.io.on("connect", this.StartListeners);
+
+    console.info("Socket IO started.");
   }
 
   StartListeners = (socket: Socket) => {
     console.info("Message received from " + socket.id);
 
+    /* HANDSHAKE */
     socket.on(
       "handshake",
       (callback: (uid: string, users: string[]) => void) => {
         console.info("Handshake received from: " + socket.id);
 
+        /* Check if this is a reconnection */
         const reconnected = Object.values(this.users).includes(socket.id);
 
         if (reconnected) {
@@ -50,13 +54,15 @@ export class ServerSocket {
           }
         }
 
+        /* Generate a new user */
         const uid = v4();
         this.users[uid] = socket.id;
 
         const users = Object.values(this.users);
-        console.info("Sending callback ...");
+        console.info("Sending callback for handshake ...");
         callback(uid, users);
 
+        /* Send new user to all connected users */
         this.SendMessage(
           "user_connected",
           users.filter((id) => id !== socket.id),
@@ -65,6 +71,7 @@ export class ServerSocket {
       }
     );
 
+    /* DISCONNECT */
     socket.on("disconnect", () => {
       console.info("Disconnect received from: " + socket.id);
 
@@ -80,10 +87,17 @@ export class ServerSocket {
     });
   };
 
+  // StartListeners = (socket: Socket) => {
   GetUidFromSocketID = (id: string) => {
     return Object.keys(this.users).find((uid) => this.users[uid] === id);
   };
 
+  /**
+   * Sender a message through the socket
+   * @param name The name of the event, ex: handshake
+   * @param users List of socket id's
+   * @param payload any information needed by the user for state updates
+   */
   SendMessage = (name: string, users: string[], payload?: Object) => {
     console.info("Emitting event: " + name + " to", users);
     users.forEach((id) =>

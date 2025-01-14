@@ -10,6 +10,7 @@ import Home from "./scenes/Home/Home";
 import Create from "./scenes/Create/Create";
 import Find from "./scenes/Find/Find";
 import Rules from "./scenes/Rules/Rules";
+import SocketContextComponent from "./contexts/Socket/Components";
 
 const App = () => {
   const initIsCollapsed = localStorage.getItem("isCollapsed") === "true";
@@ -60,7 +61,14 @@ const App = () => {
                     path="/create"
                     element={<Create isDanish={isDanish} />}
                   />
-                  <Route path="/find" element={<Find isDanish={isDanish} />} />
+                  <Route
+                    path="/find"
+                    element={
+                      <SocketContextComponent>
+                        <Find isDanish={isDanish} />
+                      </SocketContextComponent>
+                    }
+                  />
                   <Route
                     path="/rules"
                     element={<Rules isDanish={isDanish} />}
