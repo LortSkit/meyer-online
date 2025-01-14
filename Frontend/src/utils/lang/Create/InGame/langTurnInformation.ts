@@ -122,7 +122,10 @@ export function translateTurnInfo(
     case "Bluff":
       bluff = turnInfo[1][1];
       return isDanish
-        ? `Spiller ${currentPlayer} sagde, de slog ${bluff}`
-        : `Player ${currentPlayer} declared ${bluff}`;
+        ? `Spiller ${currentPlayer} sagde, de slog ${rollToName(
+            isDanish,
+            bluff
+          )}`
+        : `Player ${currentPlayer} declared ${rollToName(isDanish, bluff)}`;
   }
 }
