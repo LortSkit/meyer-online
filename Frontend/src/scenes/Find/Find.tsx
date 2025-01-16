@@ -20,7 +20,9 @@ const Find = ({ isDanish }: Props) => {
 
   useEffect(() => {
     /* Connect to the Web Socket */
-    SocketState.socket?.emit("join_lobby", SocketState.uid);
+    if (SocketState.uid) {
+      SocketState.socket?.emit("join_lobby", SocketState.uid);
+    }
   }, [SocketState.uid]);
 
   const StartListeners = () => {
@@ -28,10 +30,17 @@ const Find = ({ isDanish }: Props) => {
       SocketDispatch({ type: "update_games", payload: games });
     });
 
-    SocketState.socket?.on("add_game", (games: Game[]) => {
+    SocketState.socket?.on("add_game", (game: Game) => {
       SocketDispatch({
-        type: "update_games",
-        payload: games,
+        type: "update_game",
+        payload: game,
+      });
+    });
+
+    SocketState.socket?.on("remove_game", (gameId: string) => {
+      SocketDispatch({
+        type: "remove_game",
+        payload: gameId,
       });
     });
   };

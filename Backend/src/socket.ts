@@ -45,7 +45,14 @@ export class ServerSocket {
     /* HANDSHAKE */
     socket.on(
       "handshake",
-      (callback: (uid: string, users: string[]) => void) => {
+      (
+        callback: (
+          reconnect: boolean,
+          uid: string,
+          users: string[],
+          gameId: string
+        ) => void
+      ) => {
         console.info("Handshake received from: " + socket.id);
 
         /* Check if this is a reconnection */
@@ -59,9 +66,14 @@ export class ServerSocket {
 
           if (uid) {
             console.info("Sending callback for reconnect ...");
-            callback(uid, users);
-            return;
+            const game = this.games[uid];
+            let gameId = "";
+            if (game) {
+              gameId = game.id;
+            }
+            callback(reconnected, "", [], gameId);
           }
+          return;
         }
 
         /* Generate a new user */
@@ -70,13 +82,13 @@ export class ServerSocket {
 
         const users = Object.values(this.users);
         console.info("Sending callback for handshake ...");
-        callback(uid, users);
+        callback(reconnected, uid, users, "");
 
         /* Send new user to all connected users */
         this.SendMessage(
           "user_connected",
           users.filter((id) => id !== socket.id),
-          users
+          socket.id
         );
       }
     );
@@ -89,10 +101,17 @@ export class ServerSocket {
 
       if (uid) {
         delete this.users[uid];
+        const game = this.games[uid];
+        delete this.games[uid];
 
         const users = Object.values(this.users);
 
-        this.SendMessage("user_disconnected", users, socket.id);
+        let gameId = "";
+        if (game) {
+          gameId = game.id;
+        }
+
+        this.SendMessage("user_disconnected", users, [socket.id, gameId]);
       }
     });
 
@@ -108,11 +127,14 @@ export class ServerSocket {
     /* NEW GAME */
     socket.on("create_game", (uid: string, game: Game) => {
       game.id = v4();
+      const existingGame = this.games[uid];
       this.games[uid] = game;
 
-      const games = Object.values(this.games);
+      if (existingGame) {
+        this.SendMessage("remove_game", ["Lobby"], existingGame.id);
+      }
 
-      this.SendMessage("add_game", ["Lobby"], games);
+      this.SendMessage("add_game", ["Lobby"], game);
     });
   };
 

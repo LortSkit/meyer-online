@@ -30,8 +30,9 @@ const SocketContextComponent: React.FunctionComponent<
 
   useEffect(() => {
     /* Connect to the Web Socket */
-    socket.connect();
-
+    if (loading) {
+      socket.connect();
+    }
     /* Save the socket in context */
     SocketDispatch({ type: "update_socket", payload: socket });
 
@@ -39,20 +40,25 @@ const SocketContextComponent: React.FunctionComponent<
     StartListeners();
 
     /* Send the handshake */
-    SendHandshake();
+    if (loading) {
+      SendHandshake();
+    }
   }, []);
 
   const StartListeners = () => {
     /** Messages */
-    socket.on("user_connected", (users: string[]) => {
+    socket.on("user_connected", (user: string) => {
       console.info("User connected message received");
-      SocketDispatch({ type: "update_users", payload: users });
+      SocketDispatch({ type: "update_user", payload: user });
     });
 
     /** Messages */
-    socket.on("user_disconnected", (uid: string) => {
+    socket.on("user_disconnected", (payload: string[]) => {
       console.info("User disconnected message received");
-      SocketDispatch({ type: "remove_user", payload: uid });
+      SocketDispatch({ type: "remove_user", payload: payload[0] });
+      if (payload[1] !== "") {
+        SocketDispatch({ type: "remove_game", payload: payload[1] });
+      }
     });
 
     /* Reconnect event */
@@ -80,11 +86,19 @@ const SocketContextComponent: React.FunctionComponent<
   const SendHandshake = () => {
     console.info("Sending handshake");
 
-    socket.emit("handshake", (uid: string, users: string[]) => {
-      console.log("User handshake callback message received");
-      SocketDispatch({ type: "update_uid", payload: uid });
-      SocketDispatch({ type: "update_users", payload: users });
-    });
+    socket.emit(
+      "handshake",
+      (reconnect: boolean, uid: string, users: string[], gameId: string) => {
+        console.log("User handshake callback message received");
+        if (!reconnect) {
+          SocketDispatch({ type: "update_uid", payload: uid });
+          SocketDispatch({ type: "update_users", payload: users });
+        }
+        if (gameId !== "") {
+          SocketDispatch({ type: "remove_game", payload: gameId });
+        }
+      }
+    );
 
     setLoading(false);
   };

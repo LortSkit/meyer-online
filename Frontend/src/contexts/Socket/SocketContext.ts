@@ -1,3 +1,4 @@
+import { Games } from "@mui/icons-material";
 import { createContext, useContext } from "react";
 import { Socket } from "socket.io-client";
 
@@ -25,11 +26,14 @@ export const defaultSocketContextState: ISocketContextState = {
 export type TSocketContextActions =
   | "update_socket"
   | "update_uid"
+  | "update_user"
   | "update_users"
   | "remove_user"
-  | "update_games";
+  | "update_game"
+  | "update_games"
+  | "remove_game";
 
-export type TSocketContextPayload = string | string[] | Socket | Game[];
+export type TSocketContextPayload = string | string[] | Socket | Game | Game[];
 
 export interface ISocketContextActions {
   type: TSocketContextActions;
@@ -52,6 +56,15 @@ export const SocketReducer = (
     case "update_uid":
       return { ...state, uid: action.payload as string };
 
+    case "update_user":
+      if (!state.users.includes(action.payload as string)) {
+        return {
+          ...state,
+          users: state.users.concat([action.payload as string]),
+        };
+      }
+      return state;
+
     case "update_users":
       return { ...state, users: action.payload as string[] };
 
@@ -63,8 +76,26 @@ export const SocketReducer = (
         ),
       };
 
+    case "update_game":
+      if (!state.games.includes(action.payload as Game)) {
+        return {
+          ...state,
+          games: state.games.concat([action.payload as Game]),
+        };
+      }
+
+      return state;
+
     case "update_games":
       return { ...state, games: action.payload as Game[] };
+
+    case "remove_game":
+      return {
+        ...state,
+        games: state.games.filter(
+          (game: Game) => game.id !== (action.payload as string)
+        ),
+      };
   }
 };
 
