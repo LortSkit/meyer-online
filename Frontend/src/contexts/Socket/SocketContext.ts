@@ -1,25 +1,35 @@
 import { createContext, useContext } from "react";
 import { Socket } from "socket.io-client";
 
+export type Game = {
+  id: string;
+  name: string;
+  numberOfPlayers: number;
+  maxNumberOfPlayers: number;
+};
+
 export interface ISocketContextState {
   socket: Socket | undefined;
   uid: string;
   users: string[];
+  games: Game[];
 }
 
 export const defaultSocketContextState: ISocketContextState = {
   socket: undefined,
   uid: "",
   users: [],
+  games: [],
 };
 
 export type TSocketContextActions =
   | "update_socket"
   | "update_uid"
   | "update_users"
-  | "remove_user";
+  | "remove_user"
+  | "update_games";
 
-export type TSocketContextPayload = string | string[] | Socket;
+export type TSocketContextPayload = string | string[] | Socket | Game[];
 
 export interface ISocketContextActions {
   type: TSocketContextActions;
@@ -52,6 +62,9 @@ export const SocketReducer = (
           (uid: string) => uid !== (action.payload as string)
         ),
       };
+
+    case "update_games":
+      return { ...state, games: action.payload as Game[] };
   }
 };
 

@@ -1,12 +1,8 @@
 import { Box, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 import FindHeading from "./FindHeading";
-import { useContext } from "react";
-import SocketContext, {
-  SocketContextProvider,
-  useGlobalContext,
-} from "../../contexts/Socket/SocketContext";
-import SocketContextComponent from "../../contexts/Socket/Components";
+import { Game, useGlobalContext } from "../../contexts/Socket/SocketContext";
+import { useEffect } from "react";
 
 interface Props {
   isDanish: boolean;
@@ -16,16 +12,53 @@ const Find = ({ isDanish }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const value = useGlobalContext();
+  const { SocketState, SocketDispatch } = useGlobalContext();
+
+  useEffect(() => {
+    StartListeners();
+  }, []);
+
+  useEffect(() => {
+    /* Connect to the Web Socket */
+    SocketState.socket?.emit("join_lobby", SocketState.uid);
+  }, [SocketState.uid]);
+
+  const StartListeners = () => {
+    SocketState.socket?.on("joined_lobby", (games: Game[]) => {
+      SocketDispatch({ type: "update_games", payload: games });
+    });
+
+    SocketState.socket?.on("add_game", (games: Game[]) => {
+      SocketDispatch({
+        type: "update_games",
+        payload: games,
+      });
+    });
+  };
 
   return (
     <Box display="flex" flexBasis="100%" flexDirection="column">
       {/* HEADING */}
       <FindHeading isDanish={isDanish} />
       <Box>
-        Your userId: <strong>{value.SocketState.uid}</strong> <br />
-        Users online: <strong>{value.SocketState.users.length}</strong> <br />
-        SocketID: <strong>{value.SocketState.socket?.id}</strong> <br />
+        Your userId: <strong>{SocketState.uid}</strong> <br />
+        Users online: <strong>{SocketState.users.length}</strong> <br />
+        SocketID: <strong>{SocketState.socket?.id}</strong> <br />
+      </Box>
+      <br />
+      <br />
+      <Box>
+        {SocketState.games.map((game) => (
+          <Box key={game.id}>
+            Game Id: <strong>{game.id}</strong> <br />
+            Game name: <strong>{game.name}</strong> <br />
+            Players:
+            <strong>
+              {game.numberOfPlayers}/{game.maxNumberOfPlayers}
+            </strong>
+            <br />
+          </Box>
+        ))}
       </Box>
     </Box>
   );

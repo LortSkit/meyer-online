@@ -56,7 +56,14 @@ const App = () => {
             <main className="content">
               <Box display="flex" flexBasis="100%">
                 <Routes>
-                  <Route path="/" element={<Home isDanish={isDanish} />} />
+                  <Route
+                    path="/"
+                    element={
+                      <SocketContextComponent>
+                        <Home isDanish={isDanish} />
+                      </SocketContextComponent>
+                    }
+                  />
                   <Route
                     path="/create"
                     element={<Create isDanish={isDanish} />}
