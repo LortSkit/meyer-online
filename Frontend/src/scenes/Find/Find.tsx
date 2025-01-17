@@ -15,35 +15,11 @@ const Find = ({ isDanish }: Props) => {
   const { SocketState, SocketDispatch } = useGlobalContext();
 
   useEffect(() => {
-    StartListeners();
-  }, []);
-
-  useEffect(() => {
     /* Connect to the Web Socket */
     if (SocketState.uid) {
       SocketState.socket?.emit("join_lobby", SocketState.uid);
     }
   }, [SocketState.uid]);
-
-  const StartListeners = () => {
-    SocketState.socket?.on("joined_lobby", (games: Game[]) => {
-      SocketDispatch({ type: "update_games", payload: games });
-    });
-
-    SocketState.socket?.on("add_game", (game: Game) => {
-      SocketDispatch({
-        type: "update_game",
-        payload: game,
-      });
-    });
-
-    SocketState.socket?.on("remove_game", (gameId: string) => {
-      SocketDispatch({
-        type: "remove_game",
-        payload: gameId,
-      });
-    });
-  };
 
   return (
     <Box display="flex" flexBasis="100%" flexDirection="column">
@@ -51,7 +27,7 @@ const Find = ({ isDanish }: Props) => {
       <FindHeading isDanish={isDanish} />
       <Box>
         Your userId: <strong>{SocketState.uid}</strong> <br />
-        Users online: <strong>{SocketState.users.length}</strong> <br />
+        Users online: <strong>{SocketState.usersTotal}</strong> <br />
         SocketID: <strong>{SocketState.socket?.id}</strong> <br />
       </Box>
       <br />

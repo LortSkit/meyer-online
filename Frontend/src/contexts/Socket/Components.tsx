@@ -1,6 +1,7 @@
 import { PropsWithChildren, useEffect, useReducer, useState } from "react";
 import {
   defaultSocketContextState,
+  Game,
   SocketContextProvider,
   SocketReducer,
 } from "./SocketContext";
@@ -47,15 +48,15 @@ const SocketContextComponent: React.FunctionComponent<
 
   const StartListeners = () => {
     /** Messages */
-    socket.on("user_connected", (user: string) => {
+    socket.on("user_connected", (usersTotal: string) => {
       console.info("User connected message received");
-      SocketDispatch({ type: "update_user", payload: user });
+      SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
     });
 
     /** Messages */
     socket.on("user_disconnected", (payload: string[]) => {
       console.info("User disconnected message received");
-      SocketDispatch({ type: "remove_user", payload: payload[0] });
+      SocketDispatch({ type: "update_usersTotal", payload: payload[0] });
       if (payload[1] !== "") {
         SocketDispatch({ type: "remove_game", payload: payload[1] });
       }
@@ -82,25 +83,45 @@ const SocketContextComponent: React.FunctionComponent<
       console.info("Reconnection failure");
       alert("We are unable to connect you to the web socket.");
     });
+
+    /* Join Lobby */
+    socket.on("joined_lobby", (games: Game[]) => {
+      SocketDispatch({ type: "update_games", payload: games });
+    });
+
+    /* Join Lobby */
+    socket.on("add_game", (game: Game) => {
+      SocketDispatch({
+        type: "update_game",
+        payload: game,
+      });
+    });
+
+    /* Update Games */
+    socket.on("remove_game", (gameId: string) => {
+      SocketDispatch({
+        type: "remove_game",
+        payload: gameId,
+      });
+    });
   };
   const SendHandshake = () => {
     console.info("Sending handshake");
 
     socket.emit(
       "handshake",
-      (reconnect: boolean, uid: string, users: string[], gameId: string) => {
+      (reconnect: boolean, uid: string, usersTotal: number, gameId: string) => {
         console.log("User handshake callback message received");
         if (!reconnect) {
           SocketDispatch({ type: "update_uid", payload: uid });
-          SocketDispatch({ type: "update_users", payload: users });
+          SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
         }
         if (gameId !== "") {
           SocketDispatch({ type: "remove_game", payload: gameId });
         }
+        setLoading(false);
       }
     );
-
-    setLoading(false);
   };
 
   if (loading) return <p>Loading Socket IO ...</p>;

@@ -10,15 +10,16 @@ import {
   Search,
 } from "@mui/icons-material";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
+import { isInLobby } from "../../utils/appUtils";
 
 interface Props {
-  isVisible: boolean;
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
   isDanish: boolean;
   setIsDanish: React.Dispatch<React.SetStateAction<boolean>>;
+  pathname: string;
 }
 
-const Topbar = ({ isVisible, setIsVisible, isDanish, setIsDanish }: Props) => {
+const Topbar = ({ setIsVisible, isDanish, setIsDanish, pathname }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
@@ -45,27 +46,31 @@ const Topbar = ({ isVisible, setIsVisible, isDanish, setIsDanish }: Props) => {
         justifyContent="space-between"
       >
         {/* MENU BUTTON - Only visible if screen is small enough */}
-        <div
-          className="menuButtonMobile"
-          style={{ backgroundColor: colors.primary[500] }}
-        >
-          <IconButton onClick={() => setIsVisible(true)}>
-            <MenuOutlined />
-          </IconButton>
-          <Box p={1} />
-        </div>
+        {!isInLobby(pathname) && (
+          <div
+            className="menuButtonMobile"
+            style={{ backgroundColor: colors.primary[500] }}
+          >
+            <IconButton onClick={() => setIsVisible(true)}>
+              <MenuOutlined />
+            </IconButton>
+            <Box p={1} />
+          </div>
+        )}
 
         {/* SEARCH BAR */}
-        <Box display="flex">
-          <InputBase
-            id="search-bar"
-            sx={{ ml: 2, flex: 1, color: colors.grey[400] }}
-            placeholder={isDanish ? "DEN HER GØR INTET" : "THIS DOES NOTHING"}
-          />
-          <IconButton type="button" sx={{ p: 1 }}>
-            <Search />
-          </IconButton>
-        </Box>
+        {!isInLobby(pathname) && (
+          <Box display="flex">
+            <InputBase
+              id="search-bar"
+              sx={{ ml: 2, flex: 1, color: colors.grey[400] }}
+              placeholder={isDanish ? "DEN HER GØR INTET" : "THIS DOES NOTHING"}
+            />
+            <IconButton type="button" sx={{ p: 1 }}>
+              <Search />
+            </IconButton>
+          </Box>
+        )}
       </Box>
       {/* ICONS */}
       <Box display="flex" borderRadius="3px">
@@ -104,7 +109,7 @@ const Topbar = ({ isVisible, setIsVisible, isDanish, setIsDanish }: Props) => {
         </IconButton>
       </Box>
     </Box>
-  ); //css properties directly
+  );
 };
 
 export default Topbar;

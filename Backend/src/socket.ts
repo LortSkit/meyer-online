@@ -10,20 +10,37 @@ type Game = {
   numberOfPlayers: number;
   maxNumberOfPlayers: number;
 };
+
+export type GameRequest = {
+  name: string;
+  maxNumberOfPlayers: number;
+};
+
+function gameRequestToGame(gameRequest: GameRequest): Game {
+  return {
+    id: v4(),
+    name: gameRequest.name,
+    numberOfPlayers: 0,
+    maxNumberOfPlayers: gameRequest.maxNumberOfPlayers,
+  };
+}
+
 export class ServerSocket {
   public static instance: ServerSocket;
   public io: Server;
 
-  /** Master list of all connected users */
   public users: { [uid: string]: string };
 
-  /** Master list of all public games */
   public games: { [uid: string]: Game };
+  public gamesIdIndex: { [gameId: string]: string };
+  public publicGames: { [uid: string]: string };
 
   constructor(server: HttpServer) {
     ServerSocket.instance = this;
     this.users = {};
     this.games = {};
+    this.gamesIdIndex = {};
+    this.publicGames = {};
     this.io = new Server(server, {
       serveClient: false,
       pingInterval: 10000,
@@ -49,7 +66,7 @@ export class ServerSocket {
         callback: (
           reconnect: boolean,
           uid: string,
-          users: string[],
+          userstotal: number,
           gameId: string
         ) => void
       ) => {
@@ -62,7 +79,6 @@ export class ServerSocket {
           console.info("This user has reconnected.");
 
           const uid = this.GetUidFromSocketID(socket.id);
-          const users = Object.values(this.users);
 
           if (uid) {
             console.info("Sending callback for reconnect ...");
@@ -71,7 +87,7 @@ export class ServerSocket {
             if (game) {
               gameId = game.id;
             }
-            callback(reconnected, "", [], gameId);
+            callback(reconnected, "", -1, gameId);
           }
           return;
         }
@@ -82,13 +98,13 @@ export class ServerSocket {
 
         const users = Object.values(this.users);
         console.info("Sending callback for handshake ...");
-        callback(reconnected, uid, users, "");
+        callback(reconnected, uid, users.length, "");
 
         /* Send new user to all connected users */
         this.SendMessage(
           "user_connected",
           users.filter((id) => id !== socket.id),
-          socket.id
+          users.length
         );
       }
     );
@@ -101,17 +117,25 @@ export class ServerSocket {
 
       if (uid) {
         delete this.users[uid];
+
         const game = this.games[uid];
+        const publicGame = this.publicGames[uid];
+
         delete this.games[uid];
+        delete this.publicGames[uid];
+
+        if (game) {
+          delete this.gamesIdIndex[game.id];
+        }
 
         const users = Object.values(this.users);
 
         let gameId = "";
-        if (game) {
+        if (publicGame) {
           gameId = game.id;
         }
 
-        this.SendMessage("user_disconnected", users, [socket.id, gameId]);
+        this.SendMessage("user_disconnected", users, [users.length, gameId]);
       }
     });
 
@@ -119,23 +143,61 @@ export class ServerSocket {
     socket.on("join_lobby", (uid: string) => {
       socket.join("Lobby");
 
-      const games = Object.values(this.games);
+      const publicGamesFiltered: [string, Game][] = Object.entries(
+        this.games
+      ).filter(([uid, game]) => {
+        return this.publicGames[uid] === game.id;
+      });
 
-      this.SendMessage("joined_lobby", [this.users[uid]], games);
+      const publicGamesDict: { [uid: string]: Game } =
+        Object.fromEntries(publicGamesFiltered);
+
+      const publicGames: Game[] = Object.values(publicGamesDict);
+
+      this.SendMessage("joined_lobby", [this.users[uid]], publicGames);
     });
 
     /* NEW GAME */
-    socket.on("create_game", (uid: string, game: Game) => {
-      game.id = v4();
-      const existingGame = this.games[uid];
-      this.games[uid] = game;
+    socket.on(
+      "create_game",
+      (
+        uid: string,
+        gameRequest: GameRequest,
+        isPublic: boolean,
+        callback: (gameId: string) => void
+      ) => {
+        const game = gameRequestToGame(gameRequest);
+        const existingGame = this.games[uid];
+        this.games[uid] = game;
+        this.gamesIdIndex[game.id] = uid;
 
-      if (existingGame) {
-        this.SendMessage("remove_game", ["Lobby"], existingGame.id);
+        if (existingGame) {
+          this.SendMessage("remove_game", ["Lobby"], existingGame.id);
+        }
+
+        if (isPublic) {
+          this.publicGames[uid] = game.id;
+          this.SendMessage("add_game", ["Lobby"], game);
+        }
+        callback(game.id);
       }
+    );
 
-      this.SendMessage("add_game", ["Lobby"], game);
-    });
+    /* JOIN GAME */
+    socket.on(
+      "join_game",
+      (gameId: string, callback: (exists: boolean) => void) => {
+        const uid = this.gamesIdIndex[gameId];
+        let exists = false;
+        if (uid) {
+          exists = true;
+          socket.join(gameId);
+          callback(exists);
+          return;
+        }
+        callback(false);
+      }
+    );
   };
 
   // StartListeners = (socket: Socket) => {

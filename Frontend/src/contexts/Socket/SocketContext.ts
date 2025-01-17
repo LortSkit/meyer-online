@@ -9,35 +9,44 @@ export type Game = {
   maxNumberOfPlayers: number;
 };
 
+export type GameRequest = {
+  name: string;
+  maxNumberOfPlayers: number;
+};
+
 export interface ISocketContextState {
   socket: Socket | undefined;
   uid: string;
-  users: string[];
+  usersTotal: number;
   games: Game[];
 }
 
 export const defaultSocketContextState: ISocketContextState = {
   socket: undefined,
   uid: "",
-  users: [],
+  usersTotal: 0,
   games: [],
 };
 
 export type TSocketContextActions =
   | "update_socket"
   | "update_uid"
-  | "update_user"
-  | "update_users"
-  | "remove_user"
+  | "update_usersTotal"
   | "update_game"
   | "update_games"
   | "remove_game";
 
-export type TSocketContextPayload = string | string[] | Socket | Game | Game[];
+export type TSocketContextPayload =
+  | string
+  | string[]
+  | Socket
+  | Game
+  | Game[]
+  | number;
 
 export interface ISocketContextActions {
   type: TSocketContextActions;
-  payload: TSocketContextPayload;
+  payload?: TSocketContextPayload;
 }
 
 export const SocketReducer = (
@@ -56,25 +65,8 @@ export const SocketReducer = (
     case "update_uid":
       return { ...state, uid: action.payload as string };
 
-    case "update_user":
-      if (!state.users.includes(action.payload as string)) {
-        return {
-          ...state,
-          users: state.users.concat([action.payload as string]),
-        };
-      }
-      return state;
-
-    case "update_users":
-      return { ...state, users: action.payload as string[] };
-
-    case "remove_user":
-      return {
-        ...state,
-        users: state.users.filter(
-          (uid: string) => uid !== (action.payload as string)
-        ),
-      };
+    case "update_usersTotal":
+      return { ...state, usersTotal: action.payload as number };
 
     case "update_game":
       if (!state.games.includes(action.payload as Game)) {
