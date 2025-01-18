@@ -7,21 +7,53 @@ import { v4 } from "uuid";
 type Game = {
   id: string;
   name: string;
-  numberOfPlayers: number;
+  players: string[];
   maxNumberOfPlayers: number;
 };
 
-export type GameRequest = {
+type GameBase = {
+  id: string;
   name: string;
   maxNumberOfPlayers: number;
 };
 
-function gameRequestToGame(gameRequest: GameRequest): Game {
+type GameDisplay = {
+  id: string;
+  name: string;
+  numberOfPlayers: number;
+  maxNumberOfPlayers: number;
+};
+
+type GameRequest = {
+  name: string;
+  maxNumberOfPlayers: number;
+};
+
+type Room = "Lobby" | "Create" | "Game";
+
+function gameRequestToGameBase(gameRequest: GameRequest): GameBase {
   return {
     id: v4(),
     name: gameRequest.name,
-    numberOfPlayers: 0,
     maxNumberOfPlayers: gameRequest.maxNumberOfPlayers,
+  };
+}
+
+function gameBaseToGame(gameBase: GameBase): Game {
+  return {
+    id: gameBase.id,
+    name: gameBase.name,
+    players: [],
+    maxNumberOfPlayers: gameBase.maxNumberOfPlayers,
+  };
+}
+
+function gameBaseToGameDisplay(gameBase: GameBase): GameDisplay {
+  return {
+    id: gameBase.id,
+    name: gameBase.name,
+    numberOfPlayers: 0,
+    maxNumberOfPlayers: gameBase.maxNumberOfPlayers,
   };
 }
 
@@ -31,16 +63,25 @@ export class ServerSocket {
 
   public users: { [uid: string]: string };
 
-  public games: { [uid: string]: Game };
-  public gamesIdIndex: { [gameId: string]: string };
-  public publicGames: { [uid: string]: string };
+  public gameBases: { [uid: string]: GameBase };
+  public gamesIdIndex: { [gameId: string]: string }; //gameId -> uid
+  public gamePlayers: { [gameId: string]: string[] }; //gameId -> uid[]
+  public playerInGame: { [uid: string]: string }; // uid -> gameId
+  public publicGames: { [uid: string]: string }; // uid -> gameId
+
+  public inRoom: { [uid: string]: Room };
 
   constructor(server: HttpServer) {
     ServerSocket.instance = this;
     this.users = {};
-    this.games = {};
+    this.gameBases = {};
     this.gamesIdIndex = {};
+    this.gamePlayers = {};
+    this.playerInGame = {};
     this.publicGames = {};
+
+    this.inRoom = {};
+
     this.io = new Server(server, {
       serveClient: false,
       pingInterval: 10000,
@@ -54,6 +95,96 @@ export class ServerSocket {
     this.io.on("connect", this.StartListeners);
 
     console.info("Socket IO started.");
+  }
+
+  public removeUserFromGamesAndRoom(uid: string): void {
+    const game = this.gameBases[uid];
+    const inGameId = this.playerInGame[uid];
+    const inGameOwnerUid = this.gamesIdIndex[inGameId];
+
+    delete this.gameBases[uid];
+    delete this.gamesIdIndex[game?.id];
+    delete this.publicGames[uid];
+    delete this.playerInGame[uid];
+    delete this.inRoom[uid];
+
+    if (inGameId) {
+      this.gamePlayers[inGameId] = this.gamePlayers[inGameId].filter(
+        (value: string) => value !== uid
+      );
+
+      if (inGameOwnerUid === uid) {
+        this.SendMessage("game_owner_left", [inGameId]);
+      }
+
+      if (this.gameIsPublic(inGameId)) {
+        this.SendMessage(
+          "update_game_num_players",
+          ["Lobby"],
+          [inGameId, this.gamePlayers[inGameId].length]
+        );
+      }
+    }
+  }
+
+  public getPublicGameDisplays(): GameDisplay[] {
+    const publicGamesFiltered: [string, GameBase][] = Object.entries(
+      this.gameBases
+    ).filter(([uid, game]) => {
+      return this.publicGames[uid] === game.id;
+    });
+
+    const publicGamesDict: { [uid: string]: GameBase } =
+      Object.fromEntries(publicGamesFiltered);
+
+    const publicGamesBases: GameBase[] = Object.values(publicGamesDict);
+
+    const publicGames = publicGamesBases.map((value: GameBase) => {
+      let gameDisplay = gameBaseToGameDisplay(value);
+      gameDisplay.numberOfPlayers = this.gamePlayers[gameDisplay.id].length;
+      return gameDisplay;
+    });
+
+    return publicGames;
+  }
+
+  public gameExists(gameId: string): boolean {
+    if (this.gamesIdIndex[gameId]) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public gameIsPublic(gameId: string): boolean {
+    if (!this.gameExists(gameId)) {
+      return false;
+    }
+
+    if (this.publicGames[this.gamesIdIndex[gameId]]) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public leavePreviousRoom(socket: Socket, uid: string): void {
+    const previousRoom = this.inRoom[uid];
+
+    if (previousRoom) {
+      if (previousRoom == "Game") {
+        const gameToLeave = this.playerInGame[uid];
+        socket.leave(gameToLeave);
+        this.removeUserFromGamesAndRoom(uid);
+        if (this.gamesIdIndex[gameToLeave] === uid) {
+          this.SendMessage("game_owner_left", [gameToLeave]);
+        } else {
+          //TODO: tell other party member you've left
+        }
+      } else {
+        socket.leave(previousRoom);
+      }
+    }
   }
 
   StartListeners = (socket: Socket) => {
@@ -82,10 +213,10 @@ export class ServerSocket {
 
           if (uid) {
             console.info("Sending callback for reconnect ...");
-            const game = this.games[uid];
+            const gameBase = this.gameBases[uid];
             let gameId = "";
-            if (game) {
-              gameId = game.id;
+            if (gameBase) {
+              gameId = gameBase.id;
             }
             callback(reconnected, "", -1, gameId);
           }
@@ -118,20 +249,14 @@ export class ServerSocket {
       if (uid) {
         delete this.users[uid];
 
-        const game = this.games[uid];
-        const publicGame = this.publicGames[uid];
-
-        delete this.games[uid];
-        delete this.publicGames[uid];
-
-        if (game) {
-          delete this.gamesIdIndex[game.id];
-        }
+        const game = this.gameBases[uid];
+        const gameIsPublic = this.gameIsPublic(game?.id);
+        this.removeUserFromGamesAndRoom(uid);
 
         const users = Object.values(this.users);
 
         let gameId = "";
-        if (publicGame) {
+        if (gameIsPublic) {
           gameId = game.id;
         }
 
@@ -141,20 +266,24 @@ export class ServerSocket {
 
     /* LOBBY */
     socket.on("join_lobby", (uid: string) => {
+      this.leavePreviousRoom(socket, uid); //Make sure we are always only in one new room
+
       socket.join("Lobby");
+      this.inRoom[uid] = "Lobby";
 
-      const publicGamesFiltered: [string, Game][] = Object.entries(
-        this.games
-      ).filter(([uid, game]) => {
-        return this.publicGames[uid] === game.id;
-      });
+      this.SendMessage(
+        "joined_lobby",
+        [this.users[uid]],
+        this.getPublicGameDisplays()
+      );
+    });
 
-      const publicGamesDict: { [uid: string]: Game } =
-        Object.fromEntries(publicGamesFiltered);
+    /* CREATE */
+    socket.on("join_create", (uid: string) => {
+      this.leavePreviousRoom(socket, uid); //Make sure we are always only in one new room
 
-      const publicGames: Game[] = Object.values(publicGamesDict);
-
-      this.SendMessage("joined_lobby", [this.users[uid]], publicGames);
+      socket.join("Create");
+      this.inRoom[uid] = "Create";
     });
 
     /* NEW GAME */
@@ -166,36 +295,84 @@ export class ServerSocket {
         isPublic: boolean,
         callback: (gameId: string) => void
       ) => {
-        const game = gameRequestToGame(gameRequest);
-        const existingGame = this.games[uid];
-        this.games[uid] = game;
-        this.gamesIdIndex[game.id] = uid;
+        const gameBase = gameRequestToGameBase(gameRequest);
+        const game = gameBaseToGame(gameBase);
+        const existingGame = this.gameBases[uid];
+        const existingGameIsPublic = this.gameIsPublic(existingGame?.id);
 
-        if (existingGame) {
-          this.SendMessage("remove_game", ["Lobby"], existingGame.id);
+        const currentRoom = this.inRoom[uid];
+
+        if (currentRoom === "Create") {
+          this.gameBases[uid] = game;
+          this.gamesIdIndex[game.id] = uid;
+          this.gamePlayers[game.id] = [];
+        }
+
+        if (existingGameIsPublic) {
+          this.SendMessage("remove_game", ["Lobby"], existingGame?.id);
+          delete this.publicGames[uid];
         }
 
         if (isPublic) {
+          const gameDisplay = gameBaseToGameDisplay(gameBase);
           this.publicGames[uid] = game.id;
-          this.SendMessage("add_game", ["Lobby"], game);
+
+          if (currentRoom === "Create") {
+            this.SendMessage("add_game", ["Lobby"], gameDisplay);
+          }
         }
-        callback(game.id);
+
+        if (currentRoom === "Create") {
+          callback(game.id);
+        } else {
+          callback("");
+        }
       }
     );
 
     /* JOIN GAME */
     socket.on(
       "join_game",
-      (gameId: string, callback: (exists: boolean) => void) => {
+      (
+        joiningUid: string,
+        gameId: string,
+        callback: (exists: boolean, enoughSpace: boolean) => void
+      ) => {
         const uid = this.gamesIdIndex[gameId];
         let exists = false;
         if (uid) {
           exists = true;
-          socket.join(gameId);
-          callback(exists);
+
+          if (!this.gamePlayers[gameId].includes(joiningUid)) {
+            const hasEnoughSpace =
+              this.gamePlayers[gameId].length <
+              this.gameBases[uid].maxNumberOfPlayers;
+
+            if (!hasEnoughSpace) {
+              callback(exists, hasEnoughSpace);
+              return;
+            }
+            this.leavePreviousRoom(socket, joiningUid);
+            socket.join(gameId);
+            this.inRoom[joiningUid] = "Game";
+
+            callback(exists, hasEnoughSpace);
+
+            this.playerInGame[joiningUid] = gameId;
+            this.gamePlayers[gameId].push(joiningUid);
+
+            if (this.gameIsPublic(gameId)) {
+              this.SendMessage(
+                "update_game_num_players",
+                ["Lobby"],
+                [gameId, this.gamePlayers[gameId].length]
+              );
+            }
+          }
+
           return;
         }
-        callback(false);
+        callback(false, false);
       }
     );
   };

@@ -49,7 +49,7 @@ const BluffChoices = ({
   }
 
   function onClick(bluff: number): () => void {
-    return function onClickInner(): void {
+    return () => {
       meyer.chooseBluff(bluff);
       meyer.advanceTurn();
       setActionChoices(meyer.getActionChoices());

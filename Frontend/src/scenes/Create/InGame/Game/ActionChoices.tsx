@@ -80,7 +80,7 @@ const ActionChoices = ({
   }
 
   function onClick(action: Action): () => void {
-    return function onClickInner(): void {
+    return () => {
       let numbersList: number[] = [currentPlayer];
       let toBeTurnInfo: TurnInfo[] = [[action, numbersList]];
 

@@ -6,6 +6,7 @@ import {
   SocketReducer,
 } from "./SocketContext";
 import { useSocket } from "../../hooks/useSocket";
+import { useNavigate } from "react-router-dom";
 
 export interface ISocketContextComponentProps extends PropsWithChildren {}
 
@@ -19,6 +20,8 @@ const SocketContextComponent: React.FunctionComponent<
     defaultSocketContextState
   );
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   const socket = useSocket({
     uri: "ws://localhost:1337/",
@@ -81,7 +84,7 @@ const SocketContextComponent: React.FunctionComponent<
     /* Reconnect failed */
     socket.io.on("reconnect_failed", () => {
       console.info("Reconnection failure");
-      alert("We are unable to connect you to the web socket.");
+      alert("We are unable to connect you to the web socket."); //TODO: isDanish is needed here! Use lang!
     });
 
     /* Join Lobby */
@@ -89,20 +92,33 @@ const SocketContextComponent: React.FunctionComponent<
       SocketDispatch({ type: "update_games", payload: games });
     });
 
-    /* Join Lobby */
+    /* Add game */
     socket.on("add_game", (game: Game) => {
       SocketDispatch({
-        type: "update_game",
+        type: "add_game",
         payload: game,
       });
     });
 
-    /* Update Games */
+    /* Remove game */
     socket.on("remove_game", (gameId: string) => {
       SocketDispatch({
         type: "remove_game",
         payload: gameId,
       });
+    });
+
+    /* Update game number of players*/
+    socket.on("update_game_num_players", (payload: [string, number]) => {
+      SocketDispatch({ type: "update_game_num_players", payload: payload });
+    });
+
+    /* Owner left */
+    socket.on("game_owner_left", () => {
+      focus();
+      confirm("Game owner has left, redirecting you");
+      navigate("/find");
+      //TODO: isDanish is needed here! Use lang!
     });
   };
   const SendHandshake = () => {

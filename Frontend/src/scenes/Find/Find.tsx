@@ -1,8 +1,9 @@
-import { Box, useTheme } from "@mui/material";
+import { Box, Button, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 import FindHeading from "./FindHeading";
 import { Game, useGlobalContext } from "../../contexts/Socket/SocketContext";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   isDanish: boolean;
@@ -11,6 +12,7 @@ interface Props {
 const Find = ({ isDanish }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate();
 
   const { SocketState, SocketDispatch } = useGlobalContext();
 
@@ -20,6 +22,10 @@ const Find = ({ isDanish }: Props) => {
       SocketState.socket?.emit("join_lobby", SocketState.uid);
     }
   }, [SocketState.uid]);
+
+  function onClick(gameId: string): () => void {
+    return () => navigate(`/game/${gameId}`);
+  }
 
   return (
     <Box display="flex" flexBasis="100%" flexDirection="column">
@@ -34,15 +40,23 @@ const Find = ({ isDanish }: Props) => {
       <br />
       <Box>
         {SocketState.games.map((game) => (
-          <Box key={game.id}>
-            Game Id: <strong>{game.id}</strong> <br />
-            Game name: <strong>{game.name}</strong> <br />
-            Players:
-            <strong>
-              {game.numberOfPlayers}/{game.maxNumberOfPlayers}
-            </strong>
-            <br />
-          </Box>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={onClick(game.id)}
+            disabled={game.numberOfPlayers >= game.maxNumberOfPlayers}
+            key={game.id}
+          >
+            <Box>
+              Game Id: <strong>{game.id}</strong> <br />
+              Game name: <strong>{game.name}</strong> <br />
+              Players:
+              <strong>
+                {game.numberOfPlayers}/{game.maxNumberOfPlayers}
+              </strong>
+              <br />
+            </Box>
+          </Button>
         ))}
       </Box>
     </Box>

@@ -6,6 +6,7 @@ import {
   useGlobalContext,
 } from "../../contexts/Socket/SocketContext";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 interface Props {
   isDanish: boolean;
@@ -17,6 +18,13 @@ const Home = ({ isDanish }: Props) => {
   const navigate = useNavigate();
 
   const { SocketState, SocketDispatch } = useGlobalContext();
+
+  useEffect(() => {
+    /* Connect to the Web Socket */
+    if (SocketState.uid) {
+      SocketState.socket?.emit("join_create", SocketState.uid);
+    }
+  }, [SocketState.uid]);
 
   function onClickPublic() {
     let game: GameRequest = {

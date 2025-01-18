@@ -32,7 +32,8 @@ export type TSocketContextActions =
   | "update_socket"
   | "update_uid"
   | "update_usersTotal"
-  | "update_game"
+  | "add_game"
+  | "update_game_num_players"
   | "update_games"
   | "remove_game";
 
@@ -42,7 +43,8 @@ export type TSocketContextPayload =
   | Socket
   | Game
   | Game[]
-  | number;
+  | number
+  | [string, number];
 
 export interface ISocketContextActions {
   type: TSocketContextActions;
@@ -68,7 +70,7 @@ export const SocketReducer = (
     case "update_usersTotal":
       return { ...state, usersTotal: action.payload as number };
 
-    case "update_game":
+    case "add_game":
       if (!state.games.includes(action.payload as Game)) {
         return {
           ...state,
@@ -77,6 +79,15 @@ export const SocketReducer = (
       }
 
       return state;
+
+    case "update_game_num_players":
+      let index = state.games.findIndex(
+        (value: Game) => value.id === (action.payload as [string, number])[0]
+      );
+      state.games[index].numberOfPlayers = (
+        action.payload as [string, number]
+      )[1];
+      return { ...state, games: state.games };
 
     case "update_games":
       return { ...state, games: action.payload as Game[] };
