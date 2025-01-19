@@ -3,6 +3,7 @@
 import { Server as HttpServer } from "http";
 import { Socket, Server } from "socket.io";
 import { v4 } from "uuid";
+import { frontendURL } from "./environmentUtils";
 
 type Game = {
   id: string;
@@ -88,7 +89,7 @@ export class ServerSocket {
       pingTimeout: 5000,
       cookie: false,
       cors: {
-        origin: "*", //TODO: Insecure, should be changed before production!!
+        origin: frontendURL,
       },
     });
 
@@ -102,22 +103,25 @@ export class ServerSocket {
     const inGameId = this.playerInGame[uid];
     const inGameOwnerUid = this.gamesIdIndex[inGameId];
 
-    delete this.gameBases[uid];
-    delete this.gamesIdIndex[game?.id];
-    delete this.publicGames[uid];
-    delete this.playerInGame[uid];
-    delete this.inRoom[uid];
-
     if (inGameId) {
+      console.info(
+        "WTF? gameid is",
+        inGameId,
+        "ownergameuid is",
+        inGameOwnerUid,
+        "this player's uid"
+      );
+
       this.gamePlayers[inGameId] = this.gamePlayers[inGameId].filter(
         (value: string) => value !== uid
       );
 
       if (inGameOwnerUid === uid) {
         this.SendMessage("game_owner_left", [inGameId]);
-      }
-
-      if (this.gameIsPublic(inGameId)) {
+        if (this.gameIsPublic(inGameId)) {
+          this.SendMessage("remove_game", ["Lobby"], inGameId);
+        }
+      } else if (this.gameIsPublic(inGameId)) {
         this.SendMessage(
           "update_game_num_players",
           ["Lobby"],
@@ -125,6 +129,12 @@ export class ServerSocket {
         );
       }
     }
+
+    delete this.gameBases[uid];
+    delete this.gamesIdIndex[game?.id];
+    delete this.publicGames[uid];
+    delete this.playerInGame[uid];
+    delete this.inRoom[uid];
   }
 
   public getPublicGameDisplays(): GameDisplay[] {
@@ -172,7 +182,7 @@ export class ServerSocket {
     const previousRoom = this.inRoom[uid];
 
     if (previousRoom) {
-      if (previousRoom == "Game") {
+      if (previousRoom === "Game") {
         const gameToLeave = this.playerInGame[uid];
         socket.leave(gameToLeave);
         this.removeUserFromGamesAndRoom(uid);
@@ -247,25 +257,19 @@ export class ServerSocket {
       const uid = this.GetUidFromSocketID(socket.id);
 
       if (uid) {
-        delete this.users[uid];
-
-        const game = this.gameBases[uid];
-        const gameIsPublic = this.gameIsPublic(game?.id);
         this.removeUserFromGamesAndRoom(uid);
+        delete this.users[uid];
 
         const users = Object.values(this.users);
 
-        let gameId = "";
-        if (gameIsPublic) {
-          gameId = game.id;
-        }
-
-        this.SendMessage("user_disconnected", users, [users.length, gameId]);
+        this.SendMessage("user_disconnected", users, [users.length]);
       }
     });
 
     /* LOBBY */
     socket.on("join_lobby", (uid: string) => {
+      console.info("Received event: join_lobby from " + socket.id);
+
       this.leavePreviousRoom(socket, uid); //Make sure we are always only in one new room
 
       socket.join("Lobby");
@@ -280,6 +284,7 @@ export class ServerSocket {
 
     /* CREATE */
     socket.on("join_create", (uid: string) => {
+      console.info("Received event: join_create from " + socket.id);
       this.leavePreviousRoom(socket, uid); //Make sure we are always only in one new room
 
       socket.join("Create");
@@ -295,6 +300,8 @@ export class ServerSocket {
         isPublic: boolean,
         callback: (gameId: string) => void
       ) => {
+        console.info("Received event: create_game from " + socket.id);
+
         const gameBase = gameRequestToGameBase(gameRequest);
         const game = gameBaseToGame(gameBase);
         const existingGame = this.gameBases[uid];
@@ -338,6 +345,8 @@ export class ServerSocket {
         gameId: string,
         callback: (exists: boolean, enoughSpace: boolean) => void
       ) => {
+        console.info("Received event: join_game from " + socket.id);
+
         const uid = this.gamesIdIndex[gameId];
         let exists = false;
         if (uid) {

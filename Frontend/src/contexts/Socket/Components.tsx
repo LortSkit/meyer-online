@@ -24,7 +24,9 @@ const SocketContextComponent: React.FunctionComponent<
   const navigate = useNavigate();
 
   const socket = useSocket({
-    uri: "ws://localhost:1337/",
+    uri: `ws://${import.meta.env.VITE_HOSTNAME}:${
+      import.meta.env.VITE_SOCKETPORT
+    }/`,
     opts: {
       reconnectionAttempts: 5,
       reconnectionDelay: 5000,
@@ -57,12 +59,9 @@ const SocketContextComponent: React.FunctionComponent<
     });
 
     /** Messages */
-    socket.on("user_disconnected", (payload: string[]) => {
+    socket.on("user_disconnected", (usersTotal: string) => {
       console.info("User disconnected message received");
-      SocketDispatch({ type: "update_usersTotal", payload: payload[0] });
-      if (payload[1] !== "") {
-        SocketDispatch({ type: "remove_game", payload: payload[1] });
-      }
+      SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
     });
 
     /* Reconnect event */
