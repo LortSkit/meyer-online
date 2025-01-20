@@ -4,6 +4,8 @@ import FindHeading from "./FindHeading";
 import { Game, useGlobalContext } from "../../contexts/Socket/SocketContext";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { MiddleChild } from "../../components/CenteredPage/PageChildren";
+import CenteredPage from "../../components/CenteredPage/CenteredPage";
 
 interface Props {
   isDanish: boolean;
@@ -27,8 +29,8 @@ const Find = ({ isDanish }: Props) => {
     return () => navigate(`/game/${gameId}`);
   }
 
-  return (
-    <Box display="flex" flexBasis="100%" flexDirection="column">
+  const middleChild = (
+    <MiddleChild>
       {/* HEADING */}
       <FindHeading isDanish={isDanish} />
       <Box>
@@ -59,8 +61,10 @@ const Find = ({ isDanish }: Props) => {
           </Button>
         ))}
       </Box>
-    </Box>
+    </MiddleChild>
   );
+
+  return <CenteredPage middleChild={middleChild} />;
 };
 
 export default Find;

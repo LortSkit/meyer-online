@@ -1,7 +1,8 @@
 import { Box } from "@mui/material";
 import SetNumberOfPlayers from "./SetNumberOfPlayers";
-import CreateNewGameButton from "./CreateNewGameButton";
+import CreateNewGameButtons from "./CreateNewGameButtons";
 import { Meyer } from "../../../utils/gameLogic";
+import SocketContextComponent from "../../../contexts/Socket/SocketComponents";
 
 interface Props {
   isDanish: boolean;
@@ -32,7 +33,8 @@ const CreateNewGame = ({
       <Box p={1} />
       <Box display="flex" justifyContent="center" flexBasis="100%">
         {/* BUTTON */}
-        <CreateNewGameButton
+
+        <CreateNewGameButtons
           isDanish={isDanish}
           numberOfPlayers={numberOfPlayers}
           setCanCreateNewGame={setCanCreateNewGame}

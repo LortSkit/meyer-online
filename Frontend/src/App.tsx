@@ -10,7 +10,7 @@ import Home from "./scenes/Home/Home";
 import Create from "./scenes/Create/Create";
 import Find from "./scenes/Find/Find";
 import Rules from "./scenes/Rules/Rules";
-import SocketContextComponent from "./contexts/Socket/Components";
+import SocketContextComponent from "./contexts/Socket/SocketComponents";
 import GameLobby from "./scenes/GameLobby/GameLobby";
 import { isInLobby } from "./utils/appUtils";
 
@@ -66,22 +66,19 @@ const App = () => {
             <main className="content">
               <Box display="flex" flexBasis="100%">
                 <Routes>
+                  <Route path="/" element={<Home isDanish={isDanish} />} />
                   <Route
-                    path="/"
+                    path="/create"
                     element={
-                      <SocketContextComponent>
-                        <Home isDanish={isDanish} />
+                      <SocketContextComponent isDanish={isDanish}>
+                        <Create isDanish={isDanish} />
                       </SocketContextComponent>
                     }
                   />
                   <Route
-                    path="/create"
-                    element={<Create isDanish={isDanish} />}
-                  />
-                  <Route
                     path="/find"
                     element={
-                      <SocketContextComponent>
+                      <SocketContextComponent isDanish={isDanish}>
                         <Find isDanish={isDanish} />
                       </SocketContextComponent>
                     }
@@ -93,7 +90,7 @@ const App = () => {
                   <Route
                     path="/game/:gameId"
                     element={
-                      <SocketContextComponent>
+                      <SocketContextComponent isDanish={isDanish}>
                         <GameLobby />
                       </SocketContextComponent>
                     }

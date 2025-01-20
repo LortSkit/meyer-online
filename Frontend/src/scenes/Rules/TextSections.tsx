@@ -5,7 +5,7 @@ interface LangProps {
   isDanish: boolean;
 }
 
-export const HOOK = ({ isDanish }: LangProps) => {
+export const RulesHook = ({ isDanish }: LangProps) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   return (
@@ -24,7 +24,8 @@ export const HOOK = ({ isDanish }: LangProps) => {
   );
 };
 
-export const INTRODUCTION = ({ isDanish }: LangProps) => {
+export const RulesIntroduction = ({ isDanish }: LangProps) => {
+  //TODO: MOVE TEXT TO LANG
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const sentence1 = isDanish

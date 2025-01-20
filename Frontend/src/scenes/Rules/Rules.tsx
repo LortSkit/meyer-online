@@ -1,8 +1,10 @@
 import { Box, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { HOOK, INTRODUCTION } from "./TextSections";
-import { POSSIBLEROLLS } from "./PossibleRoles";
+import { RulesHook, RulesIntroduction } from "./TextSections";
+import { RulesPossibleRolls } from "./PossibleRoles";
 import RulesHeading from "./RulesHeading";
+import { MiddleChild } from "../../components/CenteredPage/PageChildren";
+import CenteredPage from "../../components/CenteredPage/CenteredPage";
 
 interface Props {
   isDanish: boolean;
@@ -12,20 +14,22 @@ const Rules = ({ isDanish }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  return (
-    <Box display="flex" flexBasis="100%" flexDirection="column" overflow="auto">
-      {/* HEADING */}
+  const middleChild = (
+    <MiddleChild>
       <RulesHeading isDanish={isDanish} />
-      <Box p={2}>
-        {/* HOOK */}
-        <HOOK isDanish={isDanish} />
-        {/* INTRODUCTION */}
-        <INTRODUCTION isDanish={isDanish} />
-        {/* POSSIBLE ROLLS */}
-        <POSSIBLEROLLS isDanish={isDanish} />
-      </Box>
-    </Box>
+
+      {/* HOOK */}
+      <RulesHook isDanish={isDanish} />
+
+      {/* INTRODUCTION */}
+      <RulesIntroduction isDanish={isDanish} />
+
+      {/* POSSIBLE ROLLS */}
+      <RulesPossibleRolls isDanish={isDanish} />
+    </MiddleChild>
   );
+
+  return <CenteredPage middleChild={middleChild} />;
 };
 
 export default Rules;

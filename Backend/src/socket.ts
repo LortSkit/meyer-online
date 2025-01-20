@@ -104,14 +104,6 @@ export class ServerSocket {
     const inGameOwnerUid = this.gamesIdIndex[inGameId];
 
     if (inGameId) {
-      console.info(
-        "WTF? gameid is",
-        inGameId,
-        "ownergameuid is",
-        inGameOwnerUid,
-        "this player's uid"
-      );
-
       this.gamePlayers[inGameId] = this.gamePlayers[inGameId].filter(
         (value: string) => value !== uid
       );

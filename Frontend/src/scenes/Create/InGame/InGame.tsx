@@ -6,6 +6,11 @@ import PlayerHealths from "./PlayerHealths";
 import { Meyer } from "../../../utils/gameLogic";
 import { Action, TurnInfo } from "../../../utils/gameTypes";
 import { useState } from "react";
+import {
+  MiddleChild,
+  RightChild,
+} from "../../../components/CenteredPage/PageChildren";
+import CenteredPage from "../../../components/CenteredPage/CenteredPage";
 
 interface Props {
   isDanish: boolean;
@@ -43,101 +48,93 @@ const InGame = ({
   const [turnInformation, setTurnInformation] = useState([] as TurnInfo[]);
   const [turnsTotal, setTurnsTotal] = useState(1);
 
-  return (
-    <Box display="flex" justifyContent="center" flexBasis="100%">
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        flexBasis="100%"
-      >
-        <Box display="flex" minWidth="21%" />
-        <Box
-          display="flex"
-          justifyContent="center"
-          flexDirection="column"
-          maxWidth="48%"
-        >
-          {/* GAME */}
-          {!isGameOver && (
-            <Game
-              isDanish={isDanish}
-              actionChoices={actionChoices}
-              bluffs={bluffs}
-              currentHealths={currentHealths}
-              currentPlayer={currentPlayer}
-              meyer={meyer}
-              previousAction={previousAction}
-              previousPlayer={previousPlayer}
-              previousDeclaredRoll={previousDeclaredRoll}
-              previousRoll={previousRoll}
-              roll={roll}
-              round={round}
-              showBluffs={showBluffs}
-              turn={turn}
-              setActionChoices={setActionChoices}
-              setBluffs={setBluffs}
-              setCurrentHealths={setCurrentHealths}
-              setCurrentPlayer={setCurrentPlayer}
-              setIsGameOver={setIsGameOver}
-              setPreviousAction={setPreviousAction}
-              setPreviousDeclaredRoll={setPreviousDeclaredRoll}
-              setPreviousPlayer={setPreviousPlayer}
-              setPreviousRoll={setPreviousRoll}
-              setRoll={setRoll}
-              setRound={setRound}
-              setShowBluffs={setShowBluffs}
-              setTurn={setTurn}
-              setTurnInformation={setTurnInformation}
-              setTurnsTotal={setTurnsTotal}
-            />
-          )}
-          {/* GAME OVER */}
-          {isGameOver && (
-            <GameOver
-              isDanish={isDanish}
-              currentPlayer={currentPlayer}
-              meyer={meyer}
-              round={round}
-              turnsTotal={turnsTotal}
-              setActionChoices={setActionChoices}
-              setBluffs={setBluffs}
-              setCanCreateNewGame={setCanCreateNewGame}
-              setCurrentHealths={setCurrentHealths}
-              setInGame={setInGame}
-              setIsGameOver={setIsGameOver}
-              setMeyer={setMeyer}
-              setNumberOfPlayers={setNumberOfPlayers}
-              setPreviousAction={setPreviousAction}
-              setPreviousDeclaredRoll={setPreviousDeclaredRoll}
-              setPreviousPlayer={setPreviousPlayer}
-              setPreviousRoll={setPreviousRoll}
-              setRoll={setRoll}
-              setRound={setRound}
-              setShowBluffs={setShowBluffs}
-              setTurn={setTurn}
-              setTurnInformation={setTurnInformation}
-              setTurnsTotal={setTurnsTotal}
-            />
-          )}
-          <Box p={1} />
-          {/* TURN INFORMATION */}
-          <TurnInformation
-            isDanish={isDanish}
-            round={round}
-            turnInformation={turnInformation}
-          />
-        </Box>
-        {/* HEALTH */}
-        <PlayerHealths
+  const middleChild = (
+    <MiddleChild>
+      {/* GAME */}
+      {!isGameOver && (
+        <Game
           isDanish={isDanish}
+          actionChoices={actionChoices}
+          bluffs={bluffs}
           currentHealths={currentHealths}
           currentPlayer={currentPlayer}
-          isGameOver={isGameOver}
+          meyer={meyer}
+          previousAction={previousAction}
+          previousPlayer={previousPlayer}
+          previousDeclaredRoll={previousDeclaredRoll}
+          previousRoll={previousRoll}
+          roll={roll}
+          round={round}
+          showBluffs={showBluffs}
+          turn={turn}
+          setActionChoices={setActionChoices}
+          setBluffs={setBluffs}
+          setCurrentHealths={setCurrentHealths}
+          setCurrentPlayer={setCurrentPlayer}
+          setIsGameOver={setIsGameOver}
+          setPreviousAction={setPreviousAction}
+          setPreviousDeclaredRoll={setPreviousDeclaredRoll}
+          setPreviousPlayer={setPreviousPlayer}
+          setPreviousRoll={setPreviousRoll}
+          setRoll={setRoll}
+          setRound={setRound}
+          setShowBluffs={setShowBluffs}
+          setTurn={setTurn}
+          setTurnInformation={setTurnInformation}
+          setTurnsTotal={setTurnsTotal}
         />
-      </Box>
-    </Box>
+      )}
+      {/* GAME OVER */}
+      {isGameOver && (
+        <GameOver
+          isDanish={isDanish}
+          currentPlayer={currentPlayer}
+          meyer={meyer}
+          round={round}
+          turnsTotal={turnsTotal}
+          setActionChoices={setActionChoices}
+          setBluffs={setBluffs}
+          setCanCreateNewGame={setCanCreateNewGame}
+          setCurrentHealths={setCurrentHealths}
+          setInGame={setInGame}
+          setIsGameOver={setIsGameOver}
+          setMeyer={setMeyer}
+          setNumberOfPlayers={setNumberOfPlayers}
+          setPreviousAction={setPreviousAction}
+          setPreviousDeclaredRoll={setPreviousDeclaredRoll}
+          setPreviousPlayer={setPreviousPlayer}
+          setPreviousRoll={setPreviousRoll}
+          setRoll={setRoll}
+          setRound={setRound}
+          setShowBluffs={setShowBluffs}
+          setTurn={setTurn}
+          setTurnInformation={setTurnInformation}
+          setTurnsTotal={setTurnsTotal}
+        />
+      )}
+      <Box p={1} />
+      {/* TURN INFORMATION */}
+      <TurnInformation
+        isDanish={isDanish}
+        round={round}
+        turnInformation={turnInformation}
+      />
+    </MiddleChild>
   );
+
+  const rightChild = (
+    <RightChild>
+      {/* HEALTH */}
+      <PlayerHealths
+        isDanish={isDanish}
+        currentHealths={currentHealths}
+        currentPlayer={currentPlayer}
+        isGameOver={isGameOver}
+      />
+    </RightChild>
+  );
+
+  return <CenteredPage middleChild={middleChild} rightChild={rightChild} />;
 };
 
 export default InGame;

@@ -7,13 +7,16 @@ import {
 } from "./SocketContext";
 import { useSocket } from "../../hooks/useSocket";
 import { useNavigate } from "react-router-dom";
+import { translateRedirecting } from "../../utils/lang/langSocketComponents";
 
-export interface ISocketContextComponentProps extends PropsWithChildren {}
+export interface ISocketContextComponentProps extends PropsWithChildren {
+  isDanish: boolean;
+}
 
 const SocketContextComponent: React.FunctionComponent<
   ISocketContextComponentProps
 > = (props) => {
-  const { children } = props;
+  const { children, isDanish } = props;
 
   const [SocketState, SocketDispatch] = useReducer(
     SocketReducer,
@@ -115,9 +118,8 @@ const SocketContextComponent: React.FunctionComponent<
     /* Owner left */
     socket.on("game_owner_left", () => {
       focus();
-      confirm("Game owner has left, redirecting you");
+      confirm(translateRedirecting(isDanish));
       navigate("/find");
-      //TODO: isDanish is needed here! Use lang!
     });
   };
   const SendHandshake = () => {
