@@ -1,5 +1,5 @@
 import { isAction, TurnInfo } from "../../../gameTypes";
-import { rollToName } from "../../langDiceUtils";
+import { translateRollName } from "../../langDiceUtils";
 
 export function translateTurnInfo(
   isDanish: boolean,
@@ -34,51 +34,69 @@ export function translateTurnInfo(
 
     case "CheckTT":
       return isDanish
-        ? `Spiller ${previousPlayer} sagde "Dét eller derover" og skulle derfor rulle mindst ${rollToName(
+        ? `Spiller ${previousPlayer} sagde "Dét eller derover" og skulle derfor rulle mindst ${translateRollName(
             isDanish,
             previousDeclaredRoll
-          )}, og deres rul var ${rollToName(isDanish, previousRoll)}${
+          )}, og deres rul var ${translateRollName(isDanish, previousRoll)}${
             previousRoll == 32 ? "!" : ""
           }`
-        : `Player ${previousPlayer} had declared "Same roll or higher" and had to roll at least ${rollToName(
+        : `Player ${previousPlayer} had declared "Same roll or higher" and had to roll at least ${translateRollName(
             isDanish,
             previousDeclaredRoll
-          )} and their roll was ${rollToName(isDanish, previousRoll)}${
+          )} and their roll was ${translateRollName(isDanish, previousRoll)}${
             previousRoll == 32 ? "!" : ""
           }`;
 
     case "CheckFT":
       return isDanish
-        ? `Spiller ${previousPlayer} sagde, de slog ${rollToName(
+        ? `Spiller ${previousPlayer} sagde, de slog ${translateRollName(
             isDanish,
             previousDeclaredRoll
-          )}, og deres slag var virkelig ${rollToName(isDanish, previousRoll)}`
-        : `Player ${previousPlayer} had declared ${rollToName(
+          )}, og deres slag var virkelig ${translateRollName(
+            isDanish,
+            previousRoll
+          )}`
+        : `Player ${previousPlayer} had declared ${translateRollName(
             isDanish,
             previousDeclaredRoll
-          )} and their roll was indeed ${rollToName(isDanish, previousRoll)}`;
+          )} and their roll was indeed ${translateRollName(
+            isDanish,
+            previousRoll
+          )}`;
 
     case "CheckTF":
       return isDanish
-        ? `Spiller ${previousPlayer} sagde "Dét eller derover" og skulle derfor rulle mindst ${rollToName(
+        ? `Spiller ${previousPlayer} sagde "Dét eller derover" og skulle derfor rulle mindst ${translateRollName(
             isDanish,
             previousDeclaredRoll
-          )}, men deres rul var kun ${rollToName(isDanish, previousRoll)}...`
-        : `Player ${previousPlayer} had declared "Same roll or higher" and had to roll at least ${rollToName(
+          )}, men deres rul var kun ${translateRollName(
+            isDanish,
+            previousRoll
+          )}...`
+        : `Player ${previousPlayer} had declared "Same roll or higher" and had to roll at least ${translateRollName(
             isDanish,
             previousDeclaredRoll
-          )} but their roll was only ${rollToName(isDanish, previousRoll)}...`;
+          )} but their roll was only ${translateRollName(
+            isDanish,
+            previousRoll
+          )}...`;
 
     case "CheckFF":
       return isDanish
-        ? `Spiller ${previousPlayer} sagde, de slog ${rollToName(
+        ? `Spiller ${previousPlayer} sagde, de slog ${translateRollName(
             isDanish,
             previousDeclaredRoll
-          )}, og deres slag var virkelig ${rollToName(isDanish, previousRoll)}`
-        : `Player ${previousPlayer} had declared ${rollToName(
+          )}, og deres slag var virkelig ${translateRollName(
+            isDanish,
+            previousRoll
+          )}`
+        : `Player ${previousPlayer} had declared ${translateRollName(
             isDanish,
             previousDeclaredRoll
-          )} and their roll was actually ${rollToName(isDanish, previousRoll)}`;
+          )} and their roll was actually ${translateRollName(
+            isDanish,
+            previousRoll
+          )}`;
 
     case "CheckLoseHealth":
       let losingPlayer = turnInfo[1][0];
@@ -113,19 +131,25 @@ export function translateTurnInfo(
     case "Truth":
       roll = turnInfo[1][1];
       return isDanish
-        ? `Spiller ${currentPlayer} sagde, de slog ${rollToName(
+        ? `Spiller ${currentPlayer} sagde, de slog ${translateRollName(
             isDanish,
             roll
           )}`
-        : `Player ${currentPlayer} declared ${rollToName(isDanish, roll)}`;
+        : `Player ${currentPlayer} declared ${translateRollName(
+            isDanish,
+            roll
+          )}`;
 
     case "Bluff":
       bluff = turnInfo[1][1];
       return isDanish
-        ? `Spiller ${currentPlayer} sagde, de slog ${rollToName(
+        ? `Spiller ${currentPlayer} sagde, de slog ${translateRollName(
             isDanish,
             bluff
           )}`
-        : `Player ${currentPlayer} declared ${rollToName(isDanish, bluff)}`;
+        : `Player ${currentPlayer} declared ${translateRollName(
+            isDanish,
+            bluff
+          )}`;
   }
 }

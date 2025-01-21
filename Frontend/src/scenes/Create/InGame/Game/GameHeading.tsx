@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import {
-  translateCurrentPlayer_turn,
+  translateCurrentPlayerTurn,
   translateRoundTurn,
 } from "../../../../utils/lang/Create/InGame/Game/langeGameHeading";
 
@@ -24,7 +24,7 @@ const GameHeading = ({ isDanish, currentPlayer, round, turn }: Props) => {
         fontSize="20px"
         display="flex"
         justifyContent="center"
-        children={translateCurrentPlayer_turn(isDanish, currentPlayer)}
+        children={translateCurrentPlayerTurn(isDanish, currentPlayer)}
       />
     </Box>
   );

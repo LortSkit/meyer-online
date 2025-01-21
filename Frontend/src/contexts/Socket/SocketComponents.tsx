@@ -7,7 +7,10 @@ import {
 } from "./SocketContext";
 import { useSocket } from "../../hooks/useSocket";
 import { useNavigate } from "react-router-dom";
-import { translateRedirecting } from "../../utils/lang/langSocketComponents";
+import {
+  translateReconnectFailure,
+  translateRedirecting,
+} from "../../utils/lang/langSocketComponents";
 
 export interface ISocketContextComponentProps extends PropsWithChildren {
   isDanish: boolean;
@@ -86,7 +89,7 @@ const SocketContextComponent: React.FunctionComponent<
     /* Reconnect failed */
     socket.io.on("reconnect_failed", () => {
       console.info("Reconnection failure");
-      alert("We are unable to connect you to the web socket."); //TODO: isDanish is needed here! Use lang!
+      alert(translateReconnectFailure(isDanish));
     });
 
     /* Join Lobby */

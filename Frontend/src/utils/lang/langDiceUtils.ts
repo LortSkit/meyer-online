@@ -1,6 +1,6 @@
 import { isGreaterThanEqualTo } from "../gameLogic";
 
-export function rollToName(isDanish: boolean, roll: number): string {
+export function translateRollName(isDanish: boolean, roll: number): string {
   if (isGreaterThanEqualTo(roll, 11)) {
     if (isGreaterThanEqualTo(roll, 31)) {
       switch (roll) {

@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import {
-  translateCurrentPlayer_won,
+  translateCurrentPlayerWon,
   translateRoundTurnsTotal,
 } from "../../../../utils/lang/Create/InGame/GameOver/langGameOverHeading";
 
@@ -23,7 +23,7 @@ const GameOverHeading = ({
         fontSize="30px"
         display="flex"
         justifyContent="center"
-        children={translateCurrentPlayer_won(isDanish, currentPlayer)}
+        children={translateCurrentPlayerWon(isDanish, currentPlayer)}
       />
       <Typography
         fontSize="20px"

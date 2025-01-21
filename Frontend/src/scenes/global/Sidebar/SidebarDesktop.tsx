@@ -33,6 +33,10 @@ const SidebarDesktop = ({ isCollapsed, setIsCollapsed, isDanish }: Props) => {
         backgroundColor={colors.primary[700]}
         collapsedWidth="75px"
         style={{ minHeight: "100vh" }}
+        rootStyles={{
+          border: "0",
+          borderRight: `1px solid ${colors.blackAccent[300]}`,
+        }}
       >
         <Menu>
           {/* LOGO AND MENU ICON */}

@@ -1,4 +1,4 @@
-export function translateCurrentPlayer_won(
+export function translateCurrentPlayerWon(
   isDanish: boolean,
   currentPlayer: number
 ): string {

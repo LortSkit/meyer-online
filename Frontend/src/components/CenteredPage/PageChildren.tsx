@@ -18,7 +18,7 @@ export const MiddleChild = (props?: Props) => {
       display="flex"
       justifyContent="center"
       flexDirection="column"
-      maxWidth="48%"
+      minWidth="48%"
     >
       {props?.children}
     </Box>

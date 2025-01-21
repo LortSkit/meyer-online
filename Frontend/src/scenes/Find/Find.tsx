@@ -33,34 +33,50 @@ const Find = ({ isDanish }: Props) => {
     <MiddleChild>
       {/* HEADING */}
       <FindHeading isDanish={isDanish} />
-      <Box>
-        Your userId: <strong>{SocketState.uid}</strong> <br />
-        Users online: <strong>{SocketState.usersTotal}</strong> <br />
-        SocketID: <strong>{SocketState.socket?.id}</strong> <br />
+      <Box display="flex" justifyContent="center">
+        <Box display="flex" justifyContent="center" flexDirection="column">
+          <p>
+            Your userId: <strong>{SocketState.uid}</strong>
+          </p>
+          <p>
+            Users online:
+            <strong>{SocketState.usersTotal}</strong>
+          </p>
+          <p>
+            Your socketId:
+            <strong>{SocketState.socket?.id}</strong>
+          </p>
+        </Box>
       </Box>
-      <br />
-      <br />
-      <Box>
-        {SocketState.games.map((game) => (
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={onClick(game.id)}
-            disabled={game.numberOfPlayers >= game.maxNumberOfPlayers}
-            key={game.id}
-          >
-            <Box>
-              Game Id: <strong>{game.id}</strong> <br />
-              Game name: <strong>{game.name}</strong> <br />
-              Players:
-              <strong>
-                {game.numberOfPlayers}/{game.maxNumberOfPlayers}
-              </strong>
-              <br />
-            </Box>
-          </Button>
-        ))}
-      </Box>
+      {SocketState.games.map((game) => (
+        <Box
+          display="flex"
+          justifyContent="center"
+          flexDirection="column"
+          flexBasis="100%"
+        >
+          <Box display="flex" justifyContent="center">
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={onClick(game.id)}
+              disabled={game.numberOfPlayers >= game.maxNumberOfPlayers}
+              key={game.id}
+            >
+              <Box>
+                Game Id: <strong>{game.id}</strong> <br />
+                Game name: <strong>{game.name}</strong> <br />
+                Players:
+                <strong>
+                  {game.numberOfPlayers}/{game.maxNumberOfPlayers}
+                </strong>
+                <br />
+              </Box>
+            </Button>
+          </Box>
+          <Box paddingTop="5px" />
+        </Box>
+      ))}
     </MiddleChild>
   );
 

@@ -29,6 +29,7 @@ const SidebarMobile = ({ isVisible, setIsVisible, isDanish }: Props) => {
         backgroundColor={colors.primary[700]}
         collapsedWidth="0px"
         style={{ height: "100%" }}
+        rootStyles={{ border: "0" }}
       >
         <Menu>
           {/* LOGO */}

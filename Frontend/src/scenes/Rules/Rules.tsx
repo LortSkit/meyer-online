@@ -1,10 +1,10 @@
-import { Box, useTheme } from "@mui/material";
+import { useTheme } from "@mui/material";
 import { tokens } from "../../theme";
-import { RulesHook, RulesIntroduction } from "./TextSections";
-import { RulesPossibleRolls } from "./PossibleRoles";
 import RulesHeading from "./RulesHeading";
 import { MiddleChild } from "../../components/CenteredPage/PageChildren";
 import CenteredPage from "../../components/CenteredPage/CenteredPage";
+import PossibleRoles from "./PossibleRoles/PossibleRoles";
+import RulesIntro from "./RulesIntro";
 
 interface Props {
   isDanish: boolean;
@@ -17,15 +17,8 @@ const Rules = ({ isDanish }: Props) => {
   const middleChild = (
     <MiddleChild>
       <RulesHeading isDanish={isDanish} />
-
-      {/* HOOK */}
-      <RulesHook isDanish={isDanish} />
-
-      {/* INTRODUCTION */}
-      <RulesIntroduction isDanish={isDanish} />
-
-      {/* POSSIBLE ROLLS */}
-      <RulesPossibleRolls isDanish={isDanish} />
+      <RulesIntro isDanish={isDanish} />
+      <PossibleRoles isDanish={isDanish} />
     </MiddleChild>
   );
 

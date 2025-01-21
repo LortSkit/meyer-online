@@ -9,7 +9,7 @@ import {
   Dice6,
 } from "../components/icons/DiceIcons";
 import { Box, SxProps, Theme } from "@mui/material";
-import { rollToName } from "./lang/langDiceUtils";
+import { translateRollName } from "./lang/langDiceUtils";
 
 //From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 
@@ -105,7 +105,7 @@ export const RollWithName = ({
       <Roll roll={roll} color={color} sideLength={sideLength} />
     </Box>
     <Box display="flex" justifyContent="center">
-      {rollToName(isDanish, roll)}
+      {translateRollName(isDanish, roll)}
     </Box>
   </Box>
 );

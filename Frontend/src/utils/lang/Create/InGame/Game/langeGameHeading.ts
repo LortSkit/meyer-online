@@ -8,7 +8,7 @@ export function translateRoundTurn(
     : `Round ${round}, turn ${turn}`;
 }
 
-export function translateCurrentPlayer_turn(
+export function translateCurrentPlayerTurn(
   isDanish: boolean,
   currentPlayer: number
 ): string {
