@@ -30,7 +30,7 @@ type GameRequest = {
   maxNumberOfPlayers: number;
 };
 
-type Room = "Lobby" | "Create" | "Game";
+type Room = "Find" | "Create" | "Game";
 
 function gameRequestToGameBase(gameRequest: GameRequest): GameBase {
   return {
@@ -90,6 +90,10 @@ export class ServerSocket {
       cookie: false,
       cors: {
         origin: frontendURL,
+        allowedHeaders: "*:*",
+        credentials: true,
+        optionsSuccessStatus: 200,
+        preflightContinue: true,
       },
     });
 
@@ -259,13 +263,13 @@ export class ServerSocket {
     });
 
     /* LOBBY */
-    socket.on("join_lobby", (uid: string) => {
-      console.info("Received event: join_lobby from " + socket.id);
+    socket.on("join_find", (uid: string) => {
+      console.info("Received event: join_find from " + socket.id);
 
       this.leavePreviousRoom(socket, uid); //Make sure we are always only in one new room
 
-      socket.join("Lobby");
-      this.inRoom[uid] = "Lobby";
+      socket.join("Find");
+      this.inRoom[uid] = "Find";
 
       this.SendMessage(
         "joined_lobby",

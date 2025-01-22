@@ -49,12 +49,15 @@ const Topbar = ({ setIsVisible, isDanish, setIsDanish, pathname }: Props) => {
         {!isInLobby(pathname) && (
           <div
             className="menuButtonMobile"
-            style={{ backgroundColor: colors.primary[500] }}
+            style={{
+              backgroundColor: colors.primary[500],
+              paddingLeft: "3px",
+            }}
           >
             <IconButton onClick={() => setIsVisible(true)}>
               <MenuOutlined />
             </IconButton>
-            <Box p={1} />
+            <Box paddingLeft="35.4px" />
           </div>
         )}
 
@@ -63,7 +66,7 @@ const Topbar = ({ setIsVisible, isDanish, setIsDanish, pathname }: Props) => {
           <Box display="flex">
             <InputBase
               id="search-bar"
-              sx={{ ml: 2, flex: 1, color: colors.grey[400] }}
+              sx={{ ml: 2, color: colors.grey[400], fontSize: "16px" }}
               placeholder={isDanish ? "DEN HER GØR INTET" : "THIS DOES NOTHING"}
             />
             <IconButton type="button" sx={{ p: 1 }}>

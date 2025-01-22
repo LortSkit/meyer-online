@@ -1,11 +1,10 @@
 //Stolen from https://github.com/ed-roh/react-admin-dashboard
 
 import { useState } from "react";
-import { Menu, Sidebar } from "react-pro-sidebar";
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
-import { CloseOutlined } from "@mui/icons-material";
+import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
+import { Box, IconButton, useTheme } from "@mui/material";
+import { MenuOutlined } from "@mui/icons-material";
 import { tokens } from "../../../theme";
-import { Dice } from "../../../utils/diceUtils";
 import MenuItems from "./MenuItems";
 import MeyerLogo from "./MeyerLogo";
 
@@ -19,6 +18,7 @@ const SidebarMobile = ({ isVisible, setIsVisible, isDanish }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [selected, setSelected] = useState("");
+
   return (
     <div
       className="sidebarMobile"
@@ -32,26 +32,38 @@ const SidebarMobile = ({ isVisible, setIsVisible, isDanish }: Props) => {
         rootStyles={{ border: "0" }}
       >
         <Menu>
-          {/* LOGO */}
-          <Box
-            display="flex"
-            justifyContent="center"
-            minHeight="80px"
-            flexDirection="column"
+          {/* LOGO AND MENU ICON */}
+          <MenuItem
+            onClick={() => {
+              localStorage.setItem("isCollapsed", String(!isVisible));
+              setIsVisible(!isVisible);
+            }}
+            icon={<MenuOutlined />}
+            style={{
+              margin: "3.5px 0 20px 0",
+            }}
           >
-            <Box position="absolute" top={2} right={2}>
-              <IconButton onClick={() => setIsVisible(false)}>
-                <CloseOutlined />
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              //ml="15px"
+            >
+              <IconButton onClick={() => setIsVisible(!isVisible)}>
+                <MeyerLogo />
               </IconButton>
             </Box>
-            <MeyerLogo />
-          </Box>
+          </MenuItem>
           {/* MENU ITEMS */}
           <MenuItems
             isDanish={isDanish}
             paddingLeft="10%"
             selected={selected}
-            setSelected={setSelected}
+            setSelected={(s) => {
+              setSelected(s);
+              setIsVisible(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
           />
         </Menu>
       </Sidebar>

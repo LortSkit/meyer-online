@@ -2,7 +2,7 @@ import { Box, Button, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 import FindHeading from "./FindHeading";
 import { Game, useGlobalContext } from "../../contexts/Socket/SocketContext";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MiddleChild } from "../../components/CenteredPage/PageChildren";
 import CenteredPage from "../../components/CenteredPage/CenteredPage";
@@ -12,8 +12,6 @@ interface Props {
 }
 
 const Find = ({ isDanish }: Props) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const navigate = useNavigate();
 
   const { SocketState, SocketDispatch } = useGlobalContext();
@@ -21,7 +19,7 @@ const Find = ({ isDanish }: Props) => {
   useEffect(() => {
     /* Connect to the Web Socket */
     if (SocketState.uid) {
-      SocketState.socket?.emit("join_lobby", SocketState.uid);
+      SocketState.socket?.emit("join_find", SocketState.uid);
     }
   }, [SocketState.uid]);
 
@@ -80,7 +78,14 @@ const Find = ({ isDanish }: Props) => {
     </MiddleChild>
   );
 
-  return <CenteredPage middleChild={middleChild} />;
+  return (
+    <CenteredPage
+      middleChild={middleChild}
+      leftWidthPercentage={5}
+      middleWidthPercentage={90}
+      rightWidthPercentage={5}
+    />
+  );
 };
 
 export default Find;

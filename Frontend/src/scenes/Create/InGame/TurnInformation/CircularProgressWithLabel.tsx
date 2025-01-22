@@ -3,46 +3,36 @@
 import CircularProgress, {
   CircularProgressProps,
 } from "@mui/material/CircularProgress";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+import { Typography } from "@mui/material";
 
 function CircularProgressWithLabel(
   props: CircularProgressProps & {
     value: number;
     maxvalue: number;
     overridecolor: string;
+    ringSize: number;
   }
 ) {
   return (
-    <Box sx={{ position: "relative", display: "inline-flex" }}>
+    <Box display="flex" justifyContent="flex-end">
       <CircularProgress
         variant="determinate"
-        size="30px"
-        sx={{ color: props.overridecolor }}
+        size={`${props.ringSize * 1.5}px`}
+        sx={{
+          color: props.overridecolor,
+          display: "flex",
+          position: "absolute",
+          paddingTop: `${props.ringSize * 0.1}px`,
+        }}
         {...props}
       />
-      <Box
-        sx={{
-          top: 0,
-          left: 0,
-          bottom: 0,
-          right: 0,
-          position: "absolute",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "column",
-        }}
+      <Typography
+        fontSize={`${props.ringSize}px`}
+        paddingRight={`${props.ringSize * 0.44}px`}
       >
-        <Typography
-          variant="caption"
-          component="div"
-          fontSize="16px"
-          sx={{ color: "text.secondary" }}
-        >{`${
-          props.maxvalue + 1 - Math.round((props.value * props.maxvalue) / 100)
-        }`}</Typography>
-      </Box>
+        {props.maxvalue + 1 - Math.round((props.value * props.maxvalue) / 100)}
+      </Typography>
     </Box>
   );
 }
@@ -51,6 +41,7 @@ export default function CircularWithValueLabel(props: {
   value: number;
   maxvalue: number;
   overridecolor: string;
+  ringSize: number;
 }) {
   return (
     <CircularProgressWithLabel
@@ -60,6 +51,7 @@ export default function CircularWithValueLabel(props: {
       }
       maxvalue={props.maxvalue}
       overridecolor={props.overridecolor}
+      ringSize={props.ringSize}
     />
   );
 }

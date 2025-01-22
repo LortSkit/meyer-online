@@ -1,4 +1,4 @@
-import { useTheme, Box, InputBase } from "@mui/material";
+import { useTheme, Box, InputBase, Typography } from "@mui/material";
 import { tokens } from "../../../theme";
 import { translateNumberOfPlayers } from "../../../utils/lang/Create/CreateNewGame/langSetNumberOfPlayers";
 
@@ -26,13 +26,18 @@ const SetNumberOfPlayers = ({ isDanish, setNumberOfPlayers }: Props) => {
   return (
     <Box display="flex" justifyContent="center" flexDirection="column">
       <Box display="flex" justifyContent="center">
-        <Box display="flex" justifyContent="center">
-          {translateNumberOfPlayers(isDanish)}
+        <Box display="flex" justifyContent="center" flexDirection="column">
+          <Typography
+            fontSize="16px"
+            children={translateNumberOfPlayers(isDanish)}
+          />
         </Box>
         <Box
           display="flex"
           justifyContent="center"
+          alignItems="center"
           bgcolor={colors.primary[600]}
+          width="50px"
         >
           <InputBase
             id="num-players-bar"
@@ -40,6 +45,7 @@ const SetNumberOfPlayers = ({ isDanish, setNumberOfPlayers }: Props) => {
               ml: 1,
               mr: 0,
               color: colors.grey[400],
+              fontSize: "16px",
             }}
             type="number"
             required={true}
@@ -47,6 +53,7 @@ const SetNumberOfPlayers = ({ isDanish, setNumberOfPlayers }: Props) => {
               min: 2,
               max: 10,
               maxLength: 2,
+              pattern: "[0-9]*",
             }}
             inputMode="tel"
             onChange={onChange}

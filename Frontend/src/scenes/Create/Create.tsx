@@ -6,6 +6,7 @@ import { Meyer } from "../../utils/gameLogic";
 import InGame from "./InGame/InGame";
 import { useGlobalContext } from "../../contexts/Socket/SocketContext";
 import SocketContextComponent from "../../contexts/Socket/SocketComponents";
+import CenteredPage from "../../components/CenteredPage/CenteredPage";
 
 interface Props {
   isDanish: boolean;
@@ -28,24 +29,34 @@ const Create = ({ isDanish }: Props) => {
   }, [SocketState.uid]);
 
   return (
-    <Box display="flex" flexBasis="100%" flexDirection="column">
-      {/* HEADING */}
-      <CreateHeading isDanish={isDanish} />
-
-      {/* CREATE NEW LOCAL GAME */}
+    <>
       {canCreateNewGame && (
-        <CreateNewGame
-          isDanish={isDanish}
-          numberOfPlayers={numberOfPlayers}
-          setCanCreateNewGame={setCanCreateNewGame}
-          setCurrentHealths={setCurrentHealths}
-          setInGame={setInGame}
-          setMeyer={setMeyer}
-          setNumberOfPlayers={setNumberOfPlayers}
+        <CenteredPage
+          middleChild={
+            <Box display="flex" flexBasis="100%" flexDirection="column">
+              {/* HEADING */}
+              <CreateHeading isDanish={isDanish} />
+
+              {/* CREATE NEW LOCAL GAME */}
+              <CreateNewGame
+                isDanish={isDanish}
+                numberOfPlayers={numberOfPlayers}
+                setCanCreateNewGame={setCanCreateNewGame}
+                setCurrentHealths={setCurrentHealths}
+                setInGame={setInGame}
+                setMeyer={setMeyer}
+                setNumberOfPlayers={setNumberOfPlayers}
+              />
+            </Box>
+          }
+          leftWidthPercentage={5}
+          middleWidthPercentage={90}
+          rightWidthPercentage={5}
         />
       )}
 
       {/* IN GAME */}
+
       {inGame && (
         <InGame
           isDanish={isDanish}
@@ -58,7 +69,7 @@ const Create = ({ isDanish }: Props) => {
           setNumberOfPlayers={setNumberOfPlayers}
         />
       )}
-    </Box>
+    </>
   );
 };
 

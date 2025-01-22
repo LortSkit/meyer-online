@@ -19,7 +19,9 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^7.1.1",
+    "react-swipeable": "^7.0.2",
     "socket.io-client": "^4.8.1",
+    "usehooks-ts": "^3.1.0",
     "uuid": "^11.0.5",
     "vite-plugin-mkcert": "^1.17.6"
   },

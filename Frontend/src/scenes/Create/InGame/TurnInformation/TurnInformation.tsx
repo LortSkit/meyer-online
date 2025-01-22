@@ -1,6 +1,6 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { TurnInfo } from "../../../../utils/gameTypes";
-import { translateTurnInfo } from "../../../../utils/lang/Create/InGame/langTurnInformation";
+import { translateTurnInfo } from "../../../../utils/lang/Create/InGame/TurnInformation/langTurnInformation";
 import { tokens } from "../../../../theme";
 import { useEffect, useRef, useState } from "react";
 import CircularWithValueLabel from "./CircularProgressWithLabel";
@@ -25,6 +25,7 @@ const TurnInformation = ({ isDanish, round, turnInformation }: Props) => {
   const timerId = useRef(null as unknown);
 
   const timeLength = 5;
+  const ringFontSize = 20;
 
   function initClicked(turnInformation: TurnInfo[]): boolean[] {
     let result = [] as boolean[];
@@ -129,75 +130,76 @@ const TurnInformation = ({ isDanish, round, turnInformation }: Props) => {
           flexDirection="column"
           justifyContent="center"
         >
-          <Box display="flex" justifyContent="center">
+          <Box display="flex" justifyContent="center" width="100%">
             {((isVisible(index) && !hasClicked[index]) || isClicked[index]) && (
-              <Button
-                variant="text"
-                onClick={() => {
-                  setIsClicked((ic) => {
-                    ic[index] = !ic[index];
-                    return ic;
-                  });
-                  setHasClicked((hc) => {
-                    hc[index] = true;
-                    return hc;
-                  });
+              <>
+                <Button
+                  variant="text"
+                  onClick={() => {
+                    setIsClicked((ic) => {
+                      ic[index] = !ic[index];
+                      return ic;
+                    });
+                    setHasClicked((hc) => {
+                      hc[index] = true;
+                      return hc;
+                    });
 
-                  setChosenElementsBuffer(() => {
-                    //works because at most three elements in turnInformation
-                    let newbuffer = chosenElementsBuffer.filter(
-                      (val): val is TurnInfo => val != value
-                    );
-                    let result =
-                      newbuffer.length === chosenElementsBuffer.length
-                        ? chosenElementsBuffer.concat([value])
-                        : newbuffer;
-                    return result;
-                  });
-                }}
-                sx={{
-                  color: colors.blackAccent[100],
-                  //transition: isClickable(value) ? undefined : "none",
-                  backgroundColor: !isClicked[index]
-                    ? colors.primary[700]
-                    : colors.greenAccent[600],
-                  // "&:disabled": {
-                  //   color: isClicked[index]
-                  //     ? colors.blackAccent[100]
-                  //     : undefined,
-                  // },
-                }}
-              >
-                <Typography
-                  fontSize="15px"
-                  fontStyle="normal"
-                  textTransform="none"
-                  children={translateTurnInfo(isDanish, value)}
-                />
-              </Button>
+                    setChosenElementsBuffer(() => {
+                      //works because at most three elements in turnInformation
+                      let newbuffer = chosenElementsBuffer.filter(
+                        (val): val is TurnInfo => val != value
+                      );
+                      let result =
+                        newbuffer.length === chosenElementsBuffer.length
+                          ? chosenElementsBuffer.concat([value])
+                          : newbuffer;
+                      return result;
+                    });
+                  }}
+                  sx={{
+                    color: colors.blackAccent[100],
+                    //transition: isClickable(value) ? undefined : "none",
+                    backgroundColor: !isClicked[index]
+                      ? colors.primary[700]
+                      : colors.greenAccent[600],
+                    // "&:disabled": {
+                    //   color: isClicked[index]
+                    //     ? colors.blackAccent[100]
+                    //     : undefined,
+                    // },
+                  }}
+                >
+                  <Box display="flex" justifyContent="center">
+                    <Typography
+                      fontSize="20px"
+                      fontStyle="normal"
+                      textTransform="none"
+                      children={translateTurnInfo(isDanish, value)}
+                    />
+                  </Box>
+                </Button>
+
+                {isVisible(index) && !hasClicked[index] && (
+                  <>
+                    <Box paddingLeft="10px" />
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      flexDirection="column"
+                    >
+                      <CircularWithValueLabel
+                        value={index + timeLength - counter}
+                        maxvalue={index + timeLength}
+                        overridecolor={colors.primary[100]}
+                        ringSize={ringFontSize}
+                      />
+                    </Box>
+                  </>
+                )}
+              </>
             )}
             <Box paddingLeft="4px" />
-            {isVisible(index) && !hasClicked[index] && (
-              <Box
-                display="flex"
-                flexDirection="column"
-                justifyContent="center"
-              >
-                {/* <Box display="flex" flexDirection="column"></Box> */}
-                <Box
-                  position="absolute"
-                  display="flex"
-                  justifyContent="center"
-                  flexDirection="column"
-                >
-                  <CircularWithValueLabel
-                    value={index + timeLength - counter}
-                    maxvalue={index + timeLength}
-                    overridecolor={colors.primary[100]}
-                  />
-                </Box>
-              </Box>
-            )}
           </Box>
           <Box paddingTop="4px" />
         </Box>

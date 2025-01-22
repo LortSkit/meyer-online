@@ -1,7 +1,8 @@
 import { Box, Typography } from "@mui/material";
 import {
   translateCurrentPlayerTurn,
-  translateRoundTurn,
+  translateRound,
+  translateTurn,
 } from "../../../../utils/lang/Create/InGame/Game/langeGameHeading";
 
 interface Props {
@@ -14,18 +15,26 @@ interface Props {
 const GameHeading = ({ isDanish, currentPlayer, round, turn }: Props) => {
   return (
     <Box display="flex" justifyContent="center" flexDirection="column">
-      <Typography
-        fontSize="30px"
-        display="flex"
-        justifyContent="center"
-        children={translateRoundTurn(isDanish, round, turn)}
-      />
-      <Typography
-        fontSize="20px"
-        display="flex"
-        justifyContent="center"
-        children={translateCurrentPlayerTurn(isDanish, currentPlayer)}
-      />
+      <Typography component="span">
+        <Typography
+          variant="h2"
+          display="flex"
+          justifyContent="center"
+          children={translateRound(isDanish, round)}
+        />
+        <Typography
+          variant="h3"
+          display="flex"
+          justifyContent="center"
+          children={translateTurn(isDanish, turn)}
+        />
+        <Typography
+          fontSize="20px"
+          display="flex"
+          justifyContent="center"
+          children={translateCurrentPlayerTurn(isDanish, currentPlayer)}
+        />
+      </Typography>
     </Box>
   );
 };

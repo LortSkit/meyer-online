@@ -111,7 +111,7 @@ const CreateNewGameButtons = ({
           children={translateCreateOnline(isDanish)}
         />
       </Box>
-      <Box display="flex" justifyContent="center">
+      <Box display="flex" justifyContent="center" flexDirection="column">
         <Box paddingTop="4px" />
 
         {/* PUBLIC */}
@@ -126,7 +126,7 @@ const CreateNewGameButtons = ({
             children={translateCreatePublic(isDanish)}
           />
         </Button>
-        <Box marginLeft="4px" />
+        <Box paddingTop="4px" />
 
         {/* PRIVATE */}
         <Button

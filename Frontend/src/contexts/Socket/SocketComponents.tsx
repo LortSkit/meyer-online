@@ -30,7 +30,7 @@ const SocketContextComponent: React.FunctionComponent<
   const navigate = useNavigate();
 
   const socket = useSocket({
-    uri: `ws://${import.meta.env.VITE_HOSTNAME}:${
+    uri: `${import.meta.env.VITE_PROTOCOL}://${import.meta.env.VITE_HOSTNAME}:${
       import.meta.env.VITE_SOCKETPORT
     }/`,
     opts: {

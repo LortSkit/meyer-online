@@ -32,6 +32,33 @@ function isEqualTo(roll1: Int32, roll2: Int32): boolean {
 function isLessThanEqualTo(roll1: Int32, roll2: Int32): boolean {
   return isEqualTo(roll1, roll2) || isLessThan(roll1, roll2);
 }
+
+export function bluffChoices(
+  currentRoll: Int32,
+  previousDeclaredRoll: Int32,
+  turn: Int32
+) {
+  let bluffchoices = allPossibleRollsOrdered.slice(
+    0,
+    allPossibleRollsOrdered.length
+  );
+  bluffchoices = bluffchoices.filter((value): value is number =>
+    isGreaterThanEqualTo(value, previousDeclaredRoll)
+  );
+  bluffchoices.pop(); //remove 32 (roll of cheers)
+  let index = bluffchoices.indexOf(currentRoll);
+  if (index == bluffchoices.length - 1) {
+    //Bluffing when roll is 21 (what a nice thing to do :) )
+    bluffchoices.pop();
+  } else if (turn > 1 && isLessThanEqualTo(currentRoll, previousDeclaredRoll)) {
+    bluffchoices = bluffchoices.slice(index + 1, bluffchoices.length);
+  } else {
+    bluffchoices = bluffchoices
+      .slice(0, index)
+      .concat(bluffchoices.slice(index + 1, bluffchoices.length));
+  }
+  return bluffchoices;
+}
 export class Meyer {
   //###############################CURRENT+PREVIOUS###############################//
   private roll: Int32 = -1;
@@ -243,30 +270,12 @@ export class Meyer {
     if (this.isGameOver() || this.getRoll() == -1) {
       return [];
     }
-    let bluffchoices = allPossibleRollsOrdered.slice(
-      0,
-      allPossibleRollsOrdered.length
+
+    return bluffChoices(
+      this.getRoll(),
+      this.previousDeclaredRoll,
+      this.getTurn()
     );
-    bluffchoices = bluffchoices.filter((value): value is number =>
-      isGreaterThanEqualTo(value, this.previousDeclaredRoll)
-    );
-    bluffchoices.pop(); //remove 32 (roll of cheers)
-    let index = bluffchoices.indexOf(this.getRoll());
-    if (index == bluffchoices.length - 1) {
-      //Bluffing when roll is 21 (what a nice thing to do :) )
-      bluffchoices.pop();
-      return bluffchoices;
-    } else if (
-      this.getTurn() > 1 &&
-      isLessThanEqualTo(this.getRoll(), this.previousDeclaredRoll)
-    ) {
-      bluffchoices = bluffchoices.slice(index + 1, bluffchoices.length);
-    } else {
-      bluffchoices = bluffchoices
-        .slice(0, index)
-        .concat(bluffchoices.slice(index + 1, bluffchoices.length));
-    }
-    return bluffchoices;
   }
 
   public isGameOver(): boolean {

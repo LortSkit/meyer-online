@@ -30,7 +30,13 @@ const PlayerHealths = ({
               <Box display="flex" flexDirection="column" key={index}>
                 <Box display="flex">
                   {currentPlayer == index + 1 && !isGameOver && (
-                    <ArrowForwardOutlined />
+                    <Box
+                      display="flex"
+                      bgcolor={colors.primary[500]}
+                      zIndex="1"
+                    >
+                      <ArrowForwardOutlined />
+                    </Box>
                   )}
                   {!(currentPlayer == index + 1 && !isGameOver) && (
                     <Box paddingLeft="calc(20.5px + 5px)" />

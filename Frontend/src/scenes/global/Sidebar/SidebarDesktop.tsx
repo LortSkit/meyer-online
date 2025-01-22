@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, IconButton, useTheme } from "@mui/material";
 import { MenuOutlined } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 import creator from "../../../assets/alek.jpg";
@@ -45,9 +45,9 @@ const SidebarDesktop = ({ isCollapsed, setIsCollapsed, isDanish }: Props) => {
               localStorage.setItem("isCollapsed", String(!isCollapsed));
               setIsCollapsed(!isCollapsed);
             }}
-            icon={isCollapsed ? <MenuOutlined /> : undefined}
+            icon={<MenuOutlined />}
             style={{
-              margin: "10px 0 20px 0",
+              margin: "3.5px 0 20px 0",
             }}
           >
             {!isCollapsed && (
@@ -57,9 +57,8 @@ const SidebarDesktop = ({ isCollapsed, setIsCollapsed, isDanish }: Props) => {
                 alignItems="center"
                 //ml="15px"
               >
-                <MeyerLogo />
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
-                  <MenuOutlined />
+                  <MeyerLogo />
                 </IconButton>
               </Box>
             )}
