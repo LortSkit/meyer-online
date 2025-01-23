@@ -1,8 +1,8 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { isGreaterThanEqualTo, Meyer } from "../../../../utils/gameLogic";
 import { tokens } from "../../../../theme";
 import { Action, TurnInfo, TurnInfoType } from "../../../../utils/gameTypes";
-import { translateAction } from "../../../../utils/lang/Create/InGame/Game/langActionChoices";
+import ActionButton from "../../../../components/game/ActionButton";
 
 interface ActionProps {
   isDanish: boolean;
@@ -184,14 +184,11 @@ const ActionChoices = ({
         bgcolor={colors.primary[700]}
         borderRadius="3px"
       >
-        <Button variant="contained" color="secondary" onClick={onClick(action)}>
-          <Typography
-            fontSize="20px"
-            fontStyle="normal"
-            textTransform="none"
-            children={translateAction(isDanish, action)}
-          />
-        </Button>
+        <ActionButton
+          isDanish={isDanish}
+          action={action}
+          onClick={onClick(action)}
+        />
       </Box>
       <Box marginLeft="3px" />
       <Box display="flex" justifyContent="center" />

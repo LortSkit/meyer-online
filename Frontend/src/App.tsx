@@ -66,7 +66,7 @@ const App = () => {
               />
             )}
           </div>
-          <div {...handlers} className="rest">
+          <div className="rest">
             <Topbar
               setIsVisible={setIsVisible}
               isDanish={isDanish}
@@ -74,48 +74,35 @@ const App = () => {
               pathname={pathname}
             />
             <main className="content">
-              <Box
-                display="flex"
-                flexBasis="100%"
-                height="100%"
-                minHeight="80vh"
-              >
-                <Routes>
-                  <Route path="/" element={<Home isDanish={isDanish} />} />
-                  <Route
-                    path="/create"
-                    element={
-                      <SocketContextComponent isDanish={isDanish}>
-                        <Create isDanish={isDanish} />
-                      </SocketContextComponent>
-                    }
-                  />
-                  <Route
-                    path="/find"
-                    element={
-                      <SocketContextComponent isDanish={isDanish}>
-                        <Find isDanish={isDanish} />
-                      </SocketContextComponent>
-                    }
-                  />
-                  <Route
-                    path="/rules"
-                    element={<Rules isDanish={isDanish} />}
-                  />
-                  <Route
-                    path="/game/:gameId"
-                    element={
-                      <SocketContextComponent isDanish={isDanish}>
-                        <GameLobby />
-                      </SocketContextComponent>
-                    }
-                  />
-                  <Route
-                    path="/game"
-                    element={<Navigate to="/game/unknown" />}
-                  />
-                </Routes>
-              </Box>
+              <Routes>
+                <Route path="/" element={<Home isDanish={isDanish} />} />
+                <Route
+                  path="/create"
+                  element={
+                    <SocketContextComponent isDanish={isDanish}>
+                      <Create isDanish={isDanish} />
+                    </SocketContextComponent>
+                  }
+                />
+                <Route
+                  path="/find"
+                  element={
+                    <SocketContextComponent isDanish={isDanish}>
+                      <Find isDanish={isDanish} />
+                    </SocketContextComponent>
+                  }
+                />
+                <Route path="/rules" element={<Rules isDanish={isDanish} />} />
+                <Route
+                  path="/game/:gameId"
+                  element={
+                    <SocketContextComponent isDanish={isDanish}>
+                      <GameLobby />
+                    </SocketContextComponent>
+                  }
+                />
+                <Route path="/game" element={<Navigate to="/game/unknown" />} />
+              </Routes>
             </main>
           </div>
         </div>

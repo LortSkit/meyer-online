@@ -1,38 +1,38 @@
-import { Action } from "../../gameTypes";
-import { translateAction as parentTranslate } from "../Create/InGame/Game/langActionChoices";
-import { translateRollName } from "../langDiceUtils";
+import { Action } from "../../../gameTypes";
+import { translateAction as parentTranslate } from "../../langActionChoices";
+import { translateRollName } from "../../langDiceUtils";
 
 export function translateAction(isDanish: boolean, action: Action): string {
   return parentTranslate(isDanish, action);
 }
 
-export function translateHowToPlay1(isDanish: boolean): string {
+export function translateHowToPlayHeading(isDanish: boolean): string {
   return isDanish ? "Hvordan spiller man Meyer?" : "How to play Meyer";
 }
 
-export function translateHowToPlay2(isDanish: boolean): string {
+export function translateHowToPlayIntro(isDanish: boolean): string {
   return isDanish
     ? "Nu når du ved forholdet mellem slagene, kan vi gå i gang med at forklare, hvordan man spiller."
     : "Now that you know the relationship between the rolls, we can jump right into explaining how to play.";
 }
 
-export function translateHowToPlay3(isDanish: boolean): string {
+export function translateHowToPlayHook(isDanish: boolean): string {
   return isDanish ? "Meyer spiller man på skift" : "Meyer is a turn-based game";
 }
 
-export function translateHowToPlay4(isDanish: boolean): string {
+export function translateHowToPlayCheckRoll1(isDanish: boolean): string {
   return isDanish
     ? "Hver spiller skiftes til at have raflebægerne med terningerne i. Siden du spiller online, skal du ikke bekymre dig om, at skjule, hvad du har slået; det sørger vi for ;)"
     : "Each player takes turns to have the dice boxes with the dice inside. Since you're playing online, don't worry about hiding what you've rolled, we'll make sure no one sees ;)";
 }
 
-export function translateHowToPlay5(isDanish: boolean): string {
+export function translateHowToPlayCheckRoll2(isDanish: boolean): string {
   return isDanish
     ? "Når det er din tur, skal du først vælge mellem de følgende muligheder:"
     : "When it's your turn, you first have to choose between the following options:";
 }
 
-export function translateHowToPlay6(isDanish: boolean): string {
+export function translateHowToPlayCheckRollSmall(isDanish: boolean): string {
   return (
     `"${translateAction(isDanish, "Check")}"` +
     (isDanish
@@ -41,7 +41,7 @@ export function translateHowToPlay6(isDanish: boolean): string {
   );
 }
 
-export function translateHowToPlay7(isDanish: boolean): string {
+export function translateHowToPlayCheckRoll3(isDanish: boolean): string {
   return (
     `"${translateAction(isDanish, "Check")}"` +
     (isDanish
@@ -54,7 +54,7 @@ export function translateHowToPlay7(isDanish: boolean): string {
   );
 }
 
-export function translateHowToPlay8(isDanish: boolean): string {
+export function translateHowToPlayCheckRoll4(isDanish: boolean): string {
   return (
     (isDanish
       ? "Som sagt, så begynder en ny runde, hvis man "
@@ -70,7 +70,9 @@ export function translateHowToPlay8(isDanish: boolean): string {
   );
 }
 
-export function translateHowToPlay9(isDanish: boolean): string {
+export function translateHowToPlayTruthBluffSameSmall1(
+  isDanish: boolean
+): string {
   return (
     `"${translateAction(isDanish, "SameRollOrHigher")}"` +
     (isDanish
@@ -79,7 +81,9 @@ export function translateHowToPlay9(isDanish: boolean): string {
   );
 }
 
-export function translateHowToPlay10(isDanish: boolean): string {
+export function translateHowToPlayTruthBluffSameSmall2(
+  isDanish: boolean
+): string {
   return (
     `"${translateAction(isDanish, "Truth")}"` +
     (isDanish
@@ -88,7 +92,7 @@ export function translateHowToPlay10(isDanish: boolean): string {
   );
 }
 
-export function translateHowToPlay11(isDanish: boolean): string {
+export function translateHowToPlayTruthBluffSame1(isDanish: boolean): string {
   return (
     `"${translateAction(isDanish, "SameRollOrHigher")}"` +
     (isDanish
@@ -105,7 +109,7 @@ export function translateHowToPlay11(isDanish: boolean): string {
   );
 }
 
-export function translateHowToPlay12(isDanish: boolean): string {
+export function translateHowToPlayTruthBluffSame2(isDanish: boolean): string {
   return (
     (isDanish ? "Man kan altid sige " : "You can always tell the ") +
     translateAction(isDanish, "Truth") +
@@ -115,11 +119,11 @@ export function translateHowToPlay12(isDanish: boolean): string {
   );
 }
 
-export function translateHowToPlay13(isDanish: boolean): string {
+export function translateHowToPlayTruthBluffSame3(isDanish: boolean): string {
   return isDanish ? "skal" : "must";
 }
 
-export function translateHowToPlay14(isDanish: boolean): string {
+export function translateHowToPlayTruthBluffSame4(isDanish: boolean): string {
   return (
     (isDanish
       ? " du sige at du slog et slag større end eller lig med det forrige 'erklærede', hvilket betyder, at man nogle gange behøver at "
@@ -130,7 +134,7 @@ export function translateHowToPlay14(isDanish: boolean): string {
   );
 }
 
-export function translateHowToPlay15(
+export function translateHowToPlayTruthBluffSame5(
   isDanish: boolean,
   exampleRoll: number
 ): string {
@@ -150,39 +154,13 @@ export function translateHowToPlay15(
   );
 }
 
-export function translateHowToPlay16(isDanish: boolean): string {
+export function translateHowToPlayTruthBluffSame6(isDanish: boolean): string {
   return isDanish
     ? "Det kan være vanskeligt at forstå, hvilke mulige valg, der er, så forneden ses et interraktivt liste over, hvad der er muligt:"
     : "It can be difficult to understand which possible choices there are, so therefore an interractive list of what's possible can be seen below:";
 }
 
-export function translateHowToPlay17(isDanish: boolean): string {
-  return isDanish ? "Det tidligere" : "The previous";
-}
-
-export function translateHowToPlay18(isDanish: boolean): string {
-  return isDanish ? "'erklærede' slag" : "declared roll";
-}
-
-export function translateHowToPlay19(isDanish: boolean): string {
-  return isDanish ? "Det nuværende slag" : "The current roll";
-}
-
-export function translateButtonNewPrevious(isDanish: boolean): string {
-  return isDanish
-    ? "Slå tidligere 'erklærede' slag om"
-    : "Reroll previous declared roll";
-}
-
-export function translateDeletePrevious(isDanish: boolean): string {
-  return isDanish ? "Slet" : "Delete";
-}
-
-export function translateButtonNewCurrent(isDanish: boolean): string {
-  return isDanish ? "Slå nuværende slag om" : "Reroll current roll";
-}
-
-export function translateHowToPlay20(isDanish: boolean): string {
+export function translateHowToPlayEnd(isDanish: boolean): string {
   return (
     (isDanish
       ? "Om end du vælger at sige "

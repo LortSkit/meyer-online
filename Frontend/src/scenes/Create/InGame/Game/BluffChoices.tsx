@@ -1,8 +1,8 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import { Meyer } from "../../../../utils/gameLogic";
 import { Action, TurnInfo } from "../../../../utils/gameTypes";
 import { tokens } from "../../../../theme";
-import { RollWithName } from "../../../../utils/diceUtils";
+import BluffButton from "../../../../components/game/BluffButton";
 
 interface Props {
   isDanish: boolean;
@@ -69,21 +69,7 @@ const BluffChoices = ({
       flexWrap="wrap"
       borderRadius="3px"
     >
-      <Button variant="contained" color="secondary" onClick={onClick(bluff)}>
-        <Typography
-          fontSize="16px"
-          fontStyle="normal"
-          textTransform="none"
-          component="span"
-        >
-          <RollWithName
-            isDanish={isDanish}
-            roll={bluff}
-            color={colors.blueAccent[100]}
-            sideLength={16}
-          />
-        </Typography>
-      </Button>
+      <BluffButton isDanish={isDanish} bluff={bluff} onClick={onClick(bluff)} />
       <Box marginLeft="3px" />
     </Box>
   ));
