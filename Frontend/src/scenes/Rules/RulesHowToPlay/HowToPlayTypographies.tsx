@@ -65,6 +65,7 @@ export const HowToPlayRoll = ({ children, fontSize }: PropsText) => {
       display="flex"
       flexDirection="column"
       children={children}
+      component="span"
     />
   );
 };

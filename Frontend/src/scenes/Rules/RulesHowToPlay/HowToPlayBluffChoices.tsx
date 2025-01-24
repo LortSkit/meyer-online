@@ -1,8 +1,8 @@
 import { Box, Button, useTheme } from "@mui/material";
-import { HowToPlayRoll } from "./HowToPlayTypographies";
+import { HowToPlayRoll, HowToPlayText } from "./HowToPlayTypographies";
 import { getMeyerRoll, RollWithName } from "../../../utils/diceUtils";
 import { tokens } from "../../../theme";
-import React from "react";
+import React, { useState } from "react";
 import { bluffChoices, isGreaterThanEqualTo } from "../../../utils/gameLogic";
 import ActionButton from "../../../components/game/ActionButton";
 import BluffButton from "../../../components/game/BluffButton";
@@ -14,7 +14,9 @@ import {
   translateHowToPlayPreviousName2,
   translateHowToPlayCurrentName,
   translateHowToPlayPreviousMissing,
+  translateClickMePlease,
 } from "../../../utils/lang/Rules/RulesHowToPlay/langHowToPlayBluffChoices";
+import { ArrowBack, ArrowForward } from "@mui/icons-material";
 
 interface Props {
   isDanish: boolean;
@@ -34,6 +36,8 @@ const HowToPlayBluffChoices = ({
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const [hasClicked, setHasClicked] = useState(false);
+
   function exampleBluffChoices(
     exampleRoll: number,
     previousDeclaredExampleRoll: number
@@ -51,9 +55,31 @@ const HowToPlayBluffChoices = ({
     return roll;
   }
 
+  const clickMePleaseSize = 30;
+  function paddingForClickMePlease(): string {
+    if (isDanish) {
+      if (!hasClicked) {
+        return "0px";
+      } else if (previousDeclaredExampleRoll === -1) {
+        return `${clickMePleaseSize * 2.76}px`;
+      } else {
+        return `${clickMePleaseSize * 1.63}px`;
+      }
+    }
+
+    if (!hasClicked) {
+      return "0px";
+    } else if (previousDeclaredExampleRoll === -1) {
+      return `${clickMePleaseSize * 3.303}px`;
+    } else {
+      return `${clickMePleaseSize * 2.045}px`;
+    }
+  }
+
   return (
     <Box display="flex" justifyContent="center">
       <Box display="flex" justifyContent="center" flexDirection="column">
+        {/* PREVIOUS AND CURRENT ROLL BUTTONS */}
         <Box display="flex" justifyContent="center">
           <Box display="flex" justifyContent="flex-end" flexDirection="column">
             <HowToPlayRoll
@@ -94,11 +120,12 @@ const HowToPlayBluffChoices = ({
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={() =>
+                onClick={() => {
                   setPreviousDeclaredExampleRoll(
                     getMeyerRollNoCheers(previousDeclaredExampleRoll)
-                  )
-                }
+                  );
+                  setHasClicked(true);
+                }}
                 children={translateButtonNewPrevious(isDanish)}
               />
               {previousDeclaredExampleRoll !== -1 && (
@@ -107,14 +134,36 @@ const HowToPlayBluffChoices = ({
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={() => setPreviousDeclaredExampleRoll(-1)}
+                    onClick={() => {
+                      setPreviousDeclaredExampleRoll(-1);
+                      setHasClicked(true);
+                    }}
                     children={translateDeletePrevious(isDanish)}
                   />
                 </>
               )}
             </Box>
           </Box>
-          <Box paddingLeft="20px" />
+          <Box
+            display="flex"
+            justifyContent="flex-end"
+            flexDirection="column"
+            paddingLeft={paddingForClickMePlease()}
+            paddingRight={paddingForClickMePlease()}
+          >
+            {!hasClicked && (
+              <HowToPlayText
+                fontSize={clickMePleaseSize}
+                children={
+                  <>
+                    <ArrowBack />
+                    {translateClickMePlease(isDanish)}
+                    <ArrowForward />
+                  </>
+                }
+              />
+            )}
+          </Box>
           <Box display="flex" justifyContent="flex-end" flexDirection="column">
             <HowToPlayRoll
               fontSize={20}
@@ -142,6 +191,7 @@ const HowToPlayBluffChoices = ({
         </Box>
 
         <br />
+        {/* ACTION AND BLUFF CHOICES */}
         <Box display="flex" justifyContent="center" flexDirection="column">
           {isGreaterThanEqualTo(exampleRoll, previousDeclaredExampleRoll) && (
             <>
@@ -160,10 +210,10 @@ const HowToPlayBluffChoices = ({
             <Box marginLeft="3px" />
             {exampleBluffChoices(exampleRoll, previousDeclaredExampleRoll).map(
               (bluff) => (
-                <>
+                <span key={bluff}>
                   <BluffButton isDanish={isDanish} bluff={bluff} />
                   <Box marginLeft="3px" />
-                </>
+                </span>
               )
             )}
           </Box>

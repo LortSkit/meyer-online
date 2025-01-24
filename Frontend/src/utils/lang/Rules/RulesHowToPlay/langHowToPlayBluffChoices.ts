@@ -10,6 +10,10 @@ export function translateHowToPlayPreviousMissing(isDanish: boolean): string {
   return isDanish ? "Intet" : "None";
 }
 
+export function translateClickMePlease(isDanish: boolean): string {
+  return isDanish ? "KLIK HER!" : "CLICK HERE!";
+}
+
 export function translateHowToPlayCurrentName(isDanish: boolean): string {
   return isDanish ? "Det nuværende slag" : "The current roll";
 }

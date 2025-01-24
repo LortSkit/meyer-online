@@ -16,21 +16,19 @@ const CenteredPage = (props: Props) => {
       <Box display="flex" justifyContent="space-between" flexBasis="100%">
         {props.leftChild ? (
           props.leftChild
-        ) : (props.leftWidthPercentage !== undefined &&
-            !(props.leftWidthPercentage <= 0)) ||
-          props.leftWidthPercentage === undefined ? (
+        ) : props.leftWidthPercentage !== undefined &&
+          props.leftWidthPercentage <= 0 ? undefined : (
           <LeftChild
             widthPercentage={
               props.leftWidthPercentage ? props.leftWidthPercentage : undefined
             }
           />
-        ) : undefined}
+        )}
 
         {props.middleChild ? (
           props.middleChild
-        ) : (props.middleWidthPercentage !== undefined &&
-            !(props.middleWidthPercentage <= 0)) ||
-          !props.middleWidthPercentage ? (
+        ) : props.middleWidthPercentage !== undefined &&
+          props.middleWidthPercentage <= 0 ? undefined : (
           <MiddleChild
             widthPercentage={
               props.middleWidthPercentage
@@ -38,13 +36,12 @@ const CenteredPage = (props: Props) => {
                 : undefined
             }
           />
-        ) : undefined}
+        )}
 
         {props.rightChild ? (
           props.rightChild
-        ) : (props.rightWidthPercentage !== undefined &&
-            !(props.rightWidthPercentage <= 0)) ||
-          props.rightWidthPercentage === undefined ? (
+        ) : props.rightWidthPercentage !== undefined &&
+          props.rightWidthPercentage <= 0 ? undefined : (
           <RightChild
             widthPercentage={
               props.rightWidthPercentage
@@ -52,7 +49,7 @@ const CenteredPage = (props: Props) => {
                 : undefined
             }
           />
-        ) : undefined}
+        )}
       </Box>
     </Box>
   );

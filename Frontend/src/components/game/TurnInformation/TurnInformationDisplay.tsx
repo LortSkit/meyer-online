@@ -3,7 +3,7 @@ import { tokens } from "../../../theme";
 import { TurnInfo } from "../../../utils/gameTypes";
 import { useState } from "react";
 import CircularWithValueLabel from "./CircularProgressWithLabel";
-import { translateTurnInfo } from "../../../utils/lang/game/TurnInformationDisplay/langTurnInformationDisplay";
+import { translateTurnInfo } from "../../../utils/lang/game/TurnInformation/langTurnInformationDisplay";
 
 type OnClickMiddleMan = (value: TurnInfo, index: number) => () => void;
 
@@ -13,7 +13,7 @@ function isOnClickMiddleMan(val: any): val is OnClickMiddleMan {
 
 interface Props {
   isDanish: boolean;
-  counter: number;
+  counter?: number;
   hasClicked: boolean[];
   isClicked: boolean[];
   isTimed?: boolean;
@@ -39,8 +39,16 @@ const TurnInformationDisplay = ({
   const timeLength = 5;
   const ringFontSize = 20;
 
+  if (isTimed && counter === undefined) {
+    throw new Error("Cannot have timed TurnInformation without counter!");
+  }
+
   function isVisible(index: number): boolean {
-    return index + timeLength > counter;
+    if (counter) {
+      return index + timeLength > counter;
+    }
+
+    return true;
   }
 
   return turnInfoList.map((value: TurnInfo, index: number) => (
@@ -87,7 +95,11 @@ const TurnInformationDisplay = ({
                   flexDirection="column"
                 >
                   <CircularWithValueLabel
-                    value={index + timeLength - counter}
+                    value={
+                      counter
+                        ? index + timeLength - counter
+                        : index + timeLength
+                    }
                     maxvalue={index + timeLength}
                     overridecolor={colors.primary[100]}
                     ringSize={ringFontSize}
