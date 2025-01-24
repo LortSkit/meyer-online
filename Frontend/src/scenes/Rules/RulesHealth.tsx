@@ -22,11 +22,29 @@ interface Props {
 }
 
 const RulesHealth = ({ isDanish }: Props) => {
-  let currentHealthsInit = [6, 6, 6, 6, 6, 6, 6, 6, 6, 6];
-  const [currentHealths, setCurrentHealths] = useState(currentHealthsInit);
+  const queryMatches = useMediaQuery("only screen and (min-width: 600px)");
+  const [currentHealths, setCurrentHealths] = useState([] as number[]);
   const [currentPlayer, setCurrentPlayer] = useState(1);
 
-  const leftWidthPercentage = 80;
+  function doCheck(queryMatches: boolean) {
+    if (queryMatches) {
+      if (currentHealths.length !== 10) {
+        setCurrentHealths([6, 6, 6, 6, 6, 6, 6, 6, 6, 6]);
+      }
+
+      return 79;
+    } else {
+      if (currentHealths.length !== 25) {
+        setCurrentHealths([
+          6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+          6, 6,
+        ]);
+      }
+      return 68;
+    }
+  }
+
+  const leftWidthPercentage = doCheck(queryMatches);
 
   const leftChild = (
     <LeftChild widthPercentage={leftWidthPercentage}>
