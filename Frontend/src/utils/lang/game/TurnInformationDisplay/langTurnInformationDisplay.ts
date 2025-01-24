@@ -1,5 +1,5 @@
-import { isAction, TurnInfo } from "../../../../gameTypes";
-import { translateRollName } from "../../../langDiceUtils";
+import { isAction, TurnInfo } from "../../../gameTypes";
+import { translateRollName } from "../../langDiceUtils";
 
 export function translateTurnInfo(
   isDanish: boolean,
@@ -37,14 +37,14 @@ export function translateTurnInfo(
         ? `Spiller ${previousPlayer} sagde "Dét eller derover" og skulle derfor rulle mindst ${translateRollName(
             isDanish,
             previousDeclaredRoll
-          )}, og deres rul var ${translateRollName(isDanish, previousRoll)}${
-            previousRoll == 32 ? "!" : ""
+          )}, og deres slag var ${translateRollName(isDanish, previousRoll)}${
+            previousRoll == 32 ? "! Det skal fejres!" : ""
           }`
         : `Player ${previousPlayer} had declared "Same roll or higher" and had to roll at least ${translateRollName(
             isDanish,
             previousDeclaredRoll
           )} and their roll was ${translateRollName(isDanish, previousRoll)}${
-            previousRoll == 32 ? "!" : ""
+            previousRoll == 32 ? "! That's cause for celebration!" : ""
           }`;
 
     case "CheckFT":
@@ -69,7 +69,7 @@ export function translateTurnInfo(
         ? `Spiller ${previousPlayer} sagde "Dét eller derover" og skulle derfor rulle mindst ${translateRollName(
             isDanish,
             previousDeclaredRoll
-          )}, men deres rul var kun ${translateRollName(
+          )}, men deres slag var kun ${translateRollName(
             isDanish,
             previousRoll
           )}...`

@@ -14,6 +14,9 @@ function CircularProgressWithLabel(
     ringSize: number;
   }
 ) {
+  const passingProps = { ...props, ringSize: undefined };
+  delete passingProps.ringSize;
+
   return (
     <Box display="flex" justifyContent="flex-end">
       <CircularProgress
@@ -25,13 +28,13 @@ function CircularProgressWithLabel(
           position: "absolute",
           paddingTop: `${props.ringSize * 0.1}px`,
         }}
-        {...props}
+        {...passingProps}
       />
       <Typography
         fontSize={`${props.ringSize}px`}
         paddingRight={`${props.ringSize * 0.44}px`}
       >
-        {props.maxvalue + 1 - Math.round((props.value * props.maxvalue) / 100)}
+        {Math.round((props.value * props.maxvalue) / 100) + 1}
       </Typography>
     </Box>
   );
@@ -46,8 +49,9 @@ export default function CircularWithValueLabel(props: {
   return (
     <CircularProgressWithLabel
       value={
-        ((props.maxvalue - props.value) / props.maxvalue) * 100 +
-        100 / props.maxvalue
+        ((props.maxvalue - 1 - (props.maxvalue - props.value)) /
+          props.maxvalue) *
+        100
       }
       maxvalue={props.maxvalue}
       overridecolor={props.overridecolor}

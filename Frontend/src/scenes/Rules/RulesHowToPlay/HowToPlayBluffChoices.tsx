@@ -13,6 +13,7 @@ import {
   translateHowToPlayPreviousName1,
   translateHowToPlayPreviousName2,
   translateHowToPlayCurrentName,
+  translateHowToPlayPreviousMissing,
 } from "../../../utils/lang/Rules/RulesHowToPlay/langHowToPlayBluffChoices";
 
 interface Props {
@@ -55,30 +56,40 @@ const HowToPlayBluffChoices = ({
       <Box display="flex" justifyContent="center" flexDirection="column">
         <Box display="flex" justifyContent="center">
           <Box display="flex" justifyContent="flex-end" flexDirection="column">
-            {previousDeclaredExampleRoll > -1 && (
-              <HowToPlayRoll
-                fontSize={20}
-                children={
-                  <>
-                    <Box display="flex" justifyContent="center">
-                      {
-                        <>
-                          {translateHowToPlayPreviousName1(isDanish)}
-                          <br />
-                          {translateHowToPlayPreviousName2(isDanish)}
-                        </>
-                      }
-                    </Box>
+            <HowToPlayRoll
+              fontSize={20}
+              children={
+                <>
+                  <Box display="flex" justifyContent="center">
+                    {
+                      <>
+                        {translateHowToPlayPreviousName1(isDanish)}
+                        <br />
+                        {translateHowToPlayPreviousName2(isDanish)}
+                      </>
+                    }
+                  </Box>
+                  {previousDeclaredExampleRoll > -1 && (
                     <RollWithName
                       isDanish={isDanish}
                       roll={previousDeclaredExampleRoll}
                       color={colors.blueAccent[100]}
                       sideLength={25}
                     />
-                  </>
-                }
-              />
-            )}
+                  )}
+                  {previousDeclaredExampleRoll === -1 && (
+                    <Box
+                      display="flex"
+                      justifyContent="center"
+                      paddingTop="12.5px"
+                      paddingBottom="12.5px"
+                    >
+                      {translateHowToPlayPreviousMissing(isDanish)}
+                    </Box>
+                  )}
+                </>
+              }
+            />
             <Box display="flex" justifyContent="center">
               <Button
                 variant="contained"

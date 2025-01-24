@@ -61,6 +61,7 @@ const BluffButton = ({ isDanish, bluff, onClick }: Props) => {
         fontSize={`${doCheck(queryMatches)}px`}
         fontStyle="normal"
         textTransform="none"
+        component="span"
         children={
           <RollWithName
             isDanish={isDanish}

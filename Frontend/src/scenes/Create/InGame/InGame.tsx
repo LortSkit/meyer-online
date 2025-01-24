@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import Game from "./Game/Game";
 import GameOver from "./GameOver/GameOver";
-import TurnInformation from "./TurnInformation/TurnInformation";
+import TurnInformation from "./TurnInformation";
 import PlayerHealths from "./PlayerHealths";
 import { Meyer } from "../../../utils/gameLogic";
 import { Action, TurnInfo } from "../../../utils/gameTypes";
@@ -118,6 +118,7 @@ const InGame = ({
         isDanish={isDanish}
         round={round}
         turnInformation={turnInformation}
+        setTurnInformation={setTurnInformation}
       />
     </MiddleChild>
   );
@@ -125,12 +126,15 @@ const InGame = ({
   const rightChild = (
     <RightChild>
       {/* HEALTH */}
-      <PlayerHealths
-        isDanish={isDanish}
-        currentHealths={currentHealths}
-        currentPlayer={currentPlayer}
-        isGameOver={isGameOver}
-      />
+      <>
+        <Box paddingTop="72px" />
+        <PlayerHealths
+          isDanish={isDanish}
+          currentHealths={currentHealths}
+          currentPlayer={currentPlayer}
+          isGameOver={isGameOver}
+        />
+      </>
     </RightChild>
   );
 

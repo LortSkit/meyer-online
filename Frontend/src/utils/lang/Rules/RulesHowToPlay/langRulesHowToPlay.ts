@@ -1,5 +1,5 @@
 import { Action } from "../../../gameTypes";
-import { translateAction as parentTranslate } from "../../langActionChoices";
+import { translateAction as parentTranslate } from "../../game/langActionChoices";
 import { translateRollName } from "../../langDiceUtils";
 
 export function translateAction(isDanish: boolean, action: Action): string {

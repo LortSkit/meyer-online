@@ -6,6 +6,10 @@ export function translateHowToPlayPreviousName2(isDanish: boolean): string {
   return isDanish ? "'erklærede' slag" : "declared roll";
 }
 
+export function translateHowToPlayPreviousMissing(isDanish: boolean): string {
+  return isDanish ? "Intet" : "None";
+}
+
 export function translateHowToPlayCurrentName(isDanish: boolean): string {
   return isDanish ? "Det nuværende slag" : "The current roll";
 }
