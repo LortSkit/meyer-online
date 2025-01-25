@@ -11,6 +11,7 @@ import {
   translateReconnectFailure,
   translateRedirecting,
 } from "../../utils/lang/langSocketComponents";
+import { base } from "../../utils/hostSubDirectory";
 
 export interface ISocketContextComponentProps extends PropsWithChildren {
   isDanish: boolean;
@@ -29,10 +30,18 @@ const SocketContextComponent: React.FunctionComponent<
 
   const navigate = useNavigate();
 
+  const protocol = import.meta.env.VITE_PROTOCOL
+    ? import.meta.env.VITE_PROTOCOL
+    : "http";
+  const hostName = import.meta.env.VITE_HOSTNAME
+    ? import.meta.env.VITE_HOSTNAME
+    : "localhost";
+  const socketPort = import.meta.env.VITE_SOCKETPORT
+    ? Number(import.meta.env.VITE_SOCKETPORT)
+    : 1337;
+
   const socket = useSocket({
-    uri: `${import.meta.env.VITE_PROTOCOL}://${import.meta.env.VITE_HOSTNAME}:${
-      import.meta.env.VITE_SOCKETPORT
-    }/`,
+    uri: `${protocol}://${hostName}:${socketPort}`,
     opts: {
       reconnectionAttempts: 5,
       reconnectionDelay: 5000,
@@ -122,7 +131,7 @@ const SocketContextComponent: React.FunctionComponent<
     socket.on("game_owner_left", () => {
       focus();
       confirm(translateRedirecting(isDanish));
-      navigate("/find");
+      navigate(base + "/find");
     });
   };
   const SendHandshake = () => {

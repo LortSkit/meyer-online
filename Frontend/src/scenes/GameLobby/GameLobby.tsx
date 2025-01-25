@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { validate as isValidUUID } from "uuid";
 import { useGlobalContext } from "../../contexts/Socket/SocketContext";
+import { base } from "../../utils/hostSubDirectory";
 
 const StandardErrorMessage = () => {
   return <div>Game does not exist!</div>;
@@ -21,7 +22,7 @@ const GameLobby = () => {
 
   useEffect(() => {
     if (!isValidUUID(gameId) && gameId !== "unknown") {
-      navigate("/game/unknown");
+      navigate(base + "/game/unknown");
     } else {
       SocketState.socket?.emit(
         "join_game",

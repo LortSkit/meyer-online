@@ -1,6 +1,6 @@
 import { createContext, useState } from "react";
 import { ColorModeContext, tokens, useMode } from "./theme";
-import { Box, colors, CssBaseline, ThemeProvider } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import Topbar from "./scenes/global/Topbar";
 import SidebarDesktop from "./scenes/global/Sidebar/SidebarDesktop";
 import SidebarMobile from "./scenes/global/Sidebar/SidebarMobile";
@@ -14,6 +14,7 @@ import SocketContextComponent from "./contexts/Socket/SocketComponents";
 import GameLobby from "./scenes/GameLobby/GameLobby";
 import { isInLobby } from "./utils/appUtils";
 import { useSwipeable } from "react-swipeable";
+import { base } from "./utils/hostSubDirectory";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -75,9 +76,12 @@ const App = () => {
             />
             <main className="content">
               <Routes>
-                <Route path="/" element={<Home isDanish={isDanish} />} />
                 <Route
-                  path="/create"
+                  path={base + "/"}
+                  element={<Home isDanish={isDanish} />}
+                />
+                <Route
+                  path={base + "/create"}
                   element={
                     <SocketContextComponent isDanish={isDanish}>
                       <Create isDanish={isDanish} />
@@ -85,23 +89,29 @@ const App = () => {
                   }
                 />
                 <Route
-                  path="/find"
+                  path={base + "/find"}
                   element={
                     <SocketContextComponent isDanish={isDanish}>
                       <Find isDanish={isDanish} />
                     </SocketContextComponent>
                   }
                 />
-                <Route path="/rules" element={<Rules isDanish={isDanish} />} />
                 <Route
-                  path="/game/:gameId"
+                  path={base + "/rules"}
+                  element={<Rules isDanish={isDanish} />}
+                />
+                <Route
+                  path={base + "/game/:gameId"}
                   element={
                     <SocketContextComponent isDanish={isDanish}>
                       <GameLobby />
                     </SocketContextComponent>
                   }
                 />
-                <Route path="/game" element={<Navigate to="/game/unknown" />} />
+                <Route
+                  path={base + "/game"}
+                  element={<Navigate to={base + "/game/unknown"} />}
+                />
               </Routes>
             </main>
           </div>

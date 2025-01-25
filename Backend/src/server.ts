@@ -5,19 +5,25 @@ import https from "https";
 import fs from "fs";
 import express from "express";
 import { ServerSocket } from "./socket.ts";
-import { config } from "dotenv";
-import { serverStartupMessage } from "./environmentUtils.ts";
-config();
+import {
+  certFileName,
+  certsLocation,
+  hostName,
+  keyFileName,
+  protocol,
+  serverStartupMessage,
+  socketPort,
+} from "./environmentUtils.ts";
 
 const application = express();
 
 /** Server Handling */
 const server =
-  process.env.PROTOCOL === "https" // stole some code from https://medium.com/@nirbhay0299/enable-https-in-your-typescript-express-app-using-the-pkcs12-file-f86e53535ca
+  protocol === "https" // stole some code from https://medium.com/@nirbhay0299/enable-https-in-your-typescript-express-app-using-the-pkcs12-file-f86e53535ca
     ? https.createServer(
         {
-          cert: fs.readFileSync("../certs/cert.pem"),
-          key: fs.readFileSync("../certs/key.pem"),
+          key: fs.readFileSync(certsLocation + keyFileName),
+          cert: fs.readFileSync(certsLocation + certFileName),
         },
         application
       )
@@ -27,6 +33,6 @@ const server =
 new ServerSocket(server);
 
 /** Listen */
-server.listen(Number(process.env.SOCKETPORT), process.env.HOSTNAME, () => {
+server.listen(socketPort, hostName, () => {
   console.info(serverStartupMessage);
 });

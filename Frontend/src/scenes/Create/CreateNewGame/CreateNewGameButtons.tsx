@@ -1,5 +1,4 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
-import { tokens } from "../../../theme";
+import { Box, Button, Typography } from "@mui/material";
 import { Meyer } from "../../../utils/gameLogic";
 import {
   translateCreateLocal,
@@ -13,6 +12,7 @@ import {
   useGlobalContext,
 } from "../../../contexts/Socket/SocketContext";
 import { useNavigate } from "react-router-dom";
+import { base } from "../../../utils/hostSubDirectory";
 
 interface Props {
   isDanish: boolean;
@@ -31,9 +31,6 @@ const CreateNewGameButtons = ({
   setInGame,
   setMeyer,
 }: Props) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-
   const { SocketState, SocketDispatch } = useGlobalContext();
   const navigate = useNavigate();
 
@@ -56,7 +53,7 @@ const CreateNewGameButtons = ({
       game,
       true,
       (gameId: string) => {
-        navigate(`/game/${gameId}`);
+        navigate(`${base}/game/${gameId}`);
       }
     );
   }
@@ -72,7 +69,7 @@ const CreateNewGameButtons = ({
       game,
       false,
       (gameId: string) => {
-        navigate(`/game/${gameId}`);
+        navigate(`${base}/game/${gameId}`);
       }
     );
   }

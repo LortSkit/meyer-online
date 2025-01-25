@@ -1,11 +1,11 @@
-import { Box, Button, useTheme } from "@mui/material";
-import { tokens } from "../../theme";
+import { Box, Button } from "@mui/material";
 import FindHeading from "./FindHeading";
-import { Game, useGlobalContext } from "../../contexts/Socket/SocketContext";
-import { useContext, useEffect } from "react";
+import { useGlobalContext } from "../../contexts/Socket/SocketContext";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MiddleChild } from "../../components/CenteredPage/PageChildren";
 import CenteredPage from "../../components/CenteredPage/CenteredPage";
+import { base } from "../../utils/hostSubDirectory";
 
 interface Props {
   isDanish: boolean;
@@ -24,7 +24,7 @@ const Find = ({ isDanish }: Props) => {
   }, [SocketState.uid]);
 
   function onClick(gameId: string): () => void {
-    return () => navigate(`/game/${gameId}`);
+    return () => navigate(`${base}/game/${gameId}`);
   }
 
   const middleChild = (

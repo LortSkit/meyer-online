@@ -12,6 +12,7 @@ import {
   translateHome,
   translateRules,
 } from "../../../utils/lang/langMenuItems";
+import { base } from "../../../utils/hostSubDirectory";
 
 interface Props {
   isDanish: boolean;
@@ -26,7 +27,7 @@ const MenuItems = ({ isDanish, paddingLeft, selected, setSelected }: Props) => {
       <Box paddingLeft={paddingLeft}>
         <Item
           title={translateHome(isDanish)}
-          to="/"
+          to={base + "/"}
           icon={<HomeOutlined />}
           selected={selected}
           setSelected={setSelected}
@@ -35,7 +36,7 @@ const MenuItems = ({ isDanish, paddingLeft, selected, setSelected }: Props) => {
       <Box paddingLeft={paddingLeft}>
         <Item
           title={translateCreate(isDanish)}
-          to="/create"
+          to={base + "/create"}
           icon={<CasinoOutlined />}
           selected={selected}
           setSelected={setSelected}
@@ -44,7 +45,7 @@ const MenuItems = ({ isDanish, paddingLeft, selected, setSelected }: Props) => {
       <Box paddingLeft={paddingLeft}>
         <Item
           title={translateFind(isDanish)}
-          to="/find"
+          to={base + "/find"}
           icon={<PeopleOutlined />}
           selected={selected}
           setSelected={setSelected}
@@ -53,7 +54,7 @@ const MenuItems = ({ isDanish, paddingLeft, selected, setSelected }: Props) => {
       <Box paddingLeft={paddingLeft}>
         <Item
           title={translateRules(isDanish)}
-          to="/rules"
+          to={base + "/rules"}
           icon={<HelpOutlined />}
           selected={selected}
           setSelected={setSelected}
