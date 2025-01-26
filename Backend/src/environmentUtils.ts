@@ -6,7 +6,7 @@ export const certsLocation = process.env.CERTS_FOLDER
     process.env.CERTS_FOLDER.endsWith("\\")
     ? process.env.CERTS_FOLDER
     : process.env.CERTS_FOLDER + "/"
-  : "../certs/";
+  : "./certs/";
 
 export const keyFileName = process.env.KEYFILENAME
   ? process.env.KEYFILENAME
