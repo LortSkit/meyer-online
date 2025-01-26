@@ -101,8 +101,8 @@ const SocketContextComponent: React.FunctionComponent<
       alert(translateReconnectFailure(isDanish));
     });
 
-    /* Join Lobby */
-    socket.on("joined_lobby", (games: Game[]) => {
+    /* Join find */
+    socket.on("joined_find", (games: Game[]) => {
       SocketDispatch({ type: "update_games", payload: games });
     });
 

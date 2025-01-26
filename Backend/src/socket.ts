@@ -115,12 +115,12 @@ export class ServerSocket {
       if (inGameOwnerUid === uid) {
         this.SendMessage("game_owner_left", [inGameId]);
         if (this.gameIsPublic(inGameId)) {
-          this.SendMessage("remove_game", ["Lobby"], inGameId);
+          this.SendMessage("remove_game", ["Find"], inGameId);
         }
       } else if (this.gameIsPublic(inGameId)) {
         this.SendMessage(
           "update_game_num_players",
-          ["Lobby"],
+          ["Find"],
           [inGameId, this.gamePlayers[inGameId].length]
         );
       }
@@ -262,7 +262,7 @@ export class ServerSocket {
       }
     });
 
-    /* LOBBY */
+    /* FIND */
     socket.on("join_find", (uid: string) => {
       console.info("Received event: join_find from " + socket.id);
 
@@ -272,7 +272,7 @@ export class ServerSocket {
       this.inRoom[uid] = "Find";
 
       this.SendMessage(
-        "joined_lobby",
+        "joined_find",
         [this.users[uid]],
         this.getPublicGameDisplays()
       );
@@ -312,7 +312,7 @@ export class ServerSocket {
         }
 
         if (existingGameIsPublic) {
-          this.SendMessage("remove_game", ["Lobby"], existingGame?.id);
+          this.SendMessage("remove_game", ["Find"], existingGame?.id);
           delete this.publicGames[uid];
         }
 
@@ -321,7 +321,7 @@ export class ServerSocket {
           this.publicGames[uid] = game.id;
 
           if (currentRoom === "Create") {
-            this.SendMessage("add_game", ["Lobby"], gameDisplay);
+            this.SendMessage("add_game", ["Find"], gameDisplay);
           }
         }
 
@@ -369,7 +369,7 @@ export class ServerSocket {
             if (this.gameIsPublic(gameId)) {
               this.SendMessage(
                 "update_game_num_players",
-                ["Lobby"],
+                ["Find"],
                 [gameId, this.gamePlayers[gameId].length]
               );
             }
