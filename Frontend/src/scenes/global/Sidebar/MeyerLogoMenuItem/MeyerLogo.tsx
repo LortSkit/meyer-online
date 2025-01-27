@@ -1,6 +1,6 @@
 import { Box, Typography, useTheme } from "@mui/material";
-import { Dice } from "../../../utils/diceUtils";
-import { tokens } from "../../../theme";
+import { Dice } from "../../../../utils/diceUtils";
+import { tokens } from "../../../../theme";
 
 const MeyerLogo = () => {
   const theme = useTheme();

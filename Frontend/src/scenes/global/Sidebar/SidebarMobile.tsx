@@ -5,8 +5,9 @@ import { Menu, MenuItem, Sidebar } from "react-pro-sidebar";
 import { Box, IconButton, useTheme } from "@mui/material";
 import { MenuOutlined } from "@mui/icons-material";
 import { tokens } from "../../../theme";
-import MenuItems from "./MenuItems";
-import MeyerLogo from "./MeyerLogo";
+import MenuItems from "./MenuItems/MenuItems";
+import MeyerLogo from "./MeyerLogoMenuItem/MeyerLogo";
+import MeyerLogoMenuItem from "./MeyerLogoMenuItem/MeyerLogoMenuItem";
 
 interface Props {
   isVisible: boolean;
@@ -33,27 +34,10 @@ const SidebarMobile = ({ isVisible, setIsVisible, isDanish }: Props) => {
       >
         <Menu>
           {/* LOGO AND MENU ICON */}
-          <MenuItem
-            onClick={() => {
-              localStorage.setItem("isCollapsed", String(!isVisible));
-              setIsVisible(!isVisible);
-            }}
-            icon={<MenuOutlined />}
-            style={{
-              margin: "3.5px 0 20px 0",
-            }}
-          >
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              //ml="15px"
-            >
-              <IconButton onClick={() => setIsVisible(!isVisible)}>
-                <MeyerLogo />
-              </IconButton>
-            </Box>
-          </MenuItem>
+          <MeyerLogoMenuItem
+            isSidebarVisible={isVisible}
+            setIsSidebarVisible={setIsVisible}
+          />
           {/* MENU ITEMS */}
           <MenuItems
             isDanish={isDanish}

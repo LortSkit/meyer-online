@@ -11,8 +11,8 @@ import {
   translateFind,
   translateHome,
   translateRules,
-} from "../../../utils/lang/langMenuItems";
-import { base } from "../../../utils/hostSubDirectory";
+} from "../../../../utils/lang/langMenuItems";
+import { base } from "../../../../utils/hostSubDirectory";
 
 interface Props {
   isDanish: boolean;

@@ -1,4 +1,4 @@
-import { tokens } from "../../../theme";
+import { tokens } from "../../../../theme";
 import { Typography, useTheme } from "@mui/material";
 import { ReactNode } from "react";
 import { MenuItem } from "react-pro-sidebar";

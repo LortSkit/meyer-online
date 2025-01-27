@@ -31,15 +31,15 @@ const BluffButton = ({ isDanish, bluff, onClick }: Props) => {
       result = size === 20 ? size * 3.2 : size * 3.7;
     } else if (bluff == 31) {
       if (isDanish) {
-        result = size === 20 ? size * 6.1 : size * 7;
+        result = size === 20 ? size * 6.5 : size * 7;
       } else {
-        result = size === 20 ? size * 6.5 : size * 7.35;
+        result = size === 20 ? size * 6.8 : size * 7.35;
       }
     } else if (isGreaterThanEqualTo(bluff, 11)) {
       if (isDanish) {
-        result = size === 20 ? size * 3 : size * 4.55;
+        result = size === 20 ? size * 4 : size * 4.55;
       } else {
-        result = size === 20 ? size * 5.6 : size * 6.55; //5.6 for desktop
+        result = size === 20 ? size * 6.02 : size * 6.55;
       }
     } else {
       result = size * 3;

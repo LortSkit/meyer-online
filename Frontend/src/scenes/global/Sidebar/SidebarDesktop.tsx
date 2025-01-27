@@ -6,9 +6,10 @@ import { Box, IconButton, useTheme } from "@mui/material";
 import { MenuOutlined } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 import creator from "../../../assets/alek.jpg";
-import MenuItems from "./MenuItems";
+import MenuItems from "./MenuItems/MenuItems";
 import User from "./User";
-import MeyerLogo from "./MeyerLogo";
+import MeyerLogo from "./MeyerLogoMenuItem/MeyerLogo";
+import MeyerLogoMenuItem from "./MeyerLogoMenuItem/MeyerLogoMenuItem";
 
 interface Props {
   isCollapsed: boolean;
@@ -40,29 +41,10 @@ const SidebarDesktop = ({ isCollapsed, setIsCollapsed, isDanish }: Props) => {
       >
         <Menu>
           {/* LOGO AND MENU ICON */}
-          <MenuItem
-            onClick={() => {
-              localStorage.setItem("isCollapsed", String(!isCollapsed));
-              setIsCollapsed(!isCollapsed);
-            }}
-            icon={<MenuOutlined />}
-            style={{
-              margin: "3.5px 0 20px 0",
-            }}
-          >
-            {!isCollapsed && (
-              <Box
-                display="flex"
-                justifyContent="space-between"
-                alignItems="center"
-                //ml="15px"
-              >
-                <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
-                  <MeyerLogo />
-                </IconButton>
-              </Box>
-            )}
-          </MenuItem>
+          <MeyerLogoMenuItem
+            isSidebarVisible={isCollapsed}
+            setIsSidebarVisible={setIsCollapsed}
+          />
           {/* USER */}
           {!isCollapsed && <User isDanish={isDanish} img={creator} />}
           {/* MENU ITEMS */}
