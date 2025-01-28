@@ -32,7 +32,7 @@ const PlayersHealthsDisplay = ({
             <Box display="flex" flexDirection="column" key={index}>
               <Box display="flex">
                 {currentPlayer == index + 1 && !isGameOver && (
-                  <Box display="flex" bgcolor={colors.primary[500]} zIndex="1">
+                  <Box display="flex" bgcolor={colors.primary[500]}>
                     <ArrowForwardOutlined />
                   </Box>
                 )}
