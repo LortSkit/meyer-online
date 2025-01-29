@@ -4,7 +4,7 @@ import CenteredPage from "../../components/CenteredPage/CenteredPage";
 import PossibleRolls from "./PossibleRolls/PossibleRolls";
 import RulesHowToPlay from "./RulesHowToPlay/RulesHowToPlay";
 import { useMediaQuery } from "usehooks-ts";
-import RulesHealth from "./RulesHealth";
+import RulesHealth from "./RulesHealth/RulesHealth";
 import RulesTurnInformation from "./RulesTurnInformation";
 
 interface Props {

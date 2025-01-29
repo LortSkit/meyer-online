@@ -1,3 +1,5 @@
+import { translateClickMePlease as parentTranslate } from "../RulesHealth/langHealthInterractiveButtons";
+
 export function translateHowToPlayPreviousName1(isDanish: boolean): string {
   return isDanish ? "Det tidligere" : "The previous";
 }
@@ -11,7 +13,7 @@ export function translateHowToPlayPreviousMissing(isDanish: boolean): string {
 }
 
 export function translateClickMePlease(isDanish: boolean): string {
-  return isDanish ? "KLIK HER!" : "CLICK HERE!";
+  return parentTranslate(isDanish);
 }
 
 export function translateHowToPlayCurrentName(isDanish: boolean): string {

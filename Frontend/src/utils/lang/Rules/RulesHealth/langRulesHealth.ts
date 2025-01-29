@@ -32,6 +32,6 @@ export function translateHealthText5(isDanish: boolean): string {
 
 export function translateHealthText6(isDanish: boolean): string {
   return isDanish
-    ? "For bedre at forstå, hvordan liv fungerer i Meyer, har vi gjort nedenstående knapper interraktive:"
-    : "To better understand how life works in Meyer, we made the buttons below interractive:";
+    ? "For bedre at forstå, hvordan liv fungerer i Meyer, har vi gjort knapperne til højre interraktive:"
+    : "To better understand how life works in Meyer, we made the buttons to the right interractive:";
 }

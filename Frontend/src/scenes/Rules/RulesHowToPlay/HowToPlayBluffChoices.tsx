@@ -17,6 +17,7 @@ import {
   translateClickMePlease,
 } from "../../../utils/lang/Rules/RulesHowToPlay/langHowToPlayBluffChoices";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
+import { useMediaQuery } from "usehooks-ts";
 
 interface Props {
   isDanish: boolean;
@@ -35,6 +36,8 @@ const HowToPlayBluffChoices = ({
 }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const queryMatches = useMediaQuery("only screen and (min-width: 600px)");
 
   const [hasClicked, setHasClicked] = useState(false);
 
@@ -56,23 +59,30 @@ const HowToPlayBluffChoices = ({
   }
 
   const clickMePleaseSize = 30;
-  function paddingForClickMePlease(): string {
-    if (isDanish) {
+  function paddingForClickMePleaseByQuery(queryMatches: boolean): string {
+    if (queryMatches) {
+      if (isDanish) {
+        if (!hasClicked) {
+          return "0px";
+        } else if (previousDeclaredExampleRoll === -1) {
+          return `${clickMePleaseSize * 2.76}px`;
+        } else {
+          return `${clickMePleaseSize * 1.63}px`;
+        }
+      }
+
       if (!hasClicked) {
         return "0px";
       } else if (previousDeclaredExampleRoll === -1) {
-        return `${clickMePleaseSize * 2.76}px`;
+        return `${clickMePleaseSize * 3.303}px`;
       } else {
-        return `${clickMePleaseSize * 1.63}px`;
+        return `${clickMePleaseSize * 2.045}px`;
       }
-    }
-
-    if (!hasClicked) {
-      return "0px";
-    } else if (previousDeclaredExampleRoll === -1) {
-      return `${clickMePleaseSize * 3.303}px`;
     } else {
-      return `${clickMePleaseSize * 2.045}px`;
+      if (!hasClicked) {
+        return "0px";
+      }
+      return `${clickMePleaseSize * 0.1}px`;
     }
   }
 
@@ -148,8 +158,8 @@ const HowToPlayBluffChoices = ({
             display="flex"
             justifyContent="flex-end"
             flexDirection="column"
-            paddingLeft={paddingForClickMePlease()}
-            paddingRight={paddingForClickMePlease()}
+            paddingLeft={paddingForClickMePleaseByQuery(queryMatches)}
+            paddingRight={paddingForClickMePleaseByQuery(queryMatches)}
           >
             {!hasClicked && (
               <HowToPlayText
