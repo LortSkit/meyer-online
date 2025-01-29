@@ -33,15 +33,21 @@ import HowToPlayBluffChoices from "./HowToPlayBluffChoices";
 
 interface Props {
   isDanish: boolean;
+  currentRoll: number;
+  previousRoll: number;
+  setCurrentRoll: React.Dispatch<React.SetStateAction<number>>;
+  setPreviousRoll: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const RulesHowToPlay = ({ isDanish }: Props) => {
+const RulesHowToPlay = ({
+  isDanish,
+  currentRoll,
+  previousRoll,
+  setCurrentRoll,
+  setPreviousRoll,
+}: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-
-  const [exampleRoll, setExampleRoll] = useState(43);
-  const [previousDeclaredExampleRoll, setPreviousDeclaredExampleRoll] =
-    useState(-1);
 
   return (
     <Box
@@ -101,7 +107,7 @@ const RulesHowToPlay = ({ isDanish }: Props) => {
         children={
           <RollWithName
             isDanish={isDanish}
-            roll={exampleRoll}
+            roll={currentRoll}
             color={colors.blueAccent[100]}
             sideLength={30}
           />
@@ -133,7 +139,7 @@ const RulesHowToPlay = ({ isDanish }: Props) => {
             {translateHowToPlayTruthBluffSame4(isDanish)}
             <br />
             <br />
-            {translateHowToPlayTruthBluffSame5(isDanish, exampleRoll)}
+            {translateHowToPlayTruthBluffSame5(isDanish, currentRoll)}
             <br />
             {translateHowToPlayTruthBluffSame6(isDanish)}
           </>
@@ -144,10 +150,10 @@ const RulesHowToPlay = ({ isDanish }: Props) => {
       {/* BLUFF CHOICES */}
       <HowToPlayBluffChoices
         isDanish={isDanish}
-        exampleRoll={exampleRoll}
-        previousDeclaredExampleRoll={previousDeclaredExampleRoll}
-        setExampleRoll={setExampleRoll}
-        setPreviousDeclaredExampleRoll={setPreviousDeclaredExampleRoll}
+        currentRoll={currentRoll}
+        previousRoll={previousRoll}
+        setCurrentRoll={setCurrentRoll}
+        setPreviousRoll={setPreviousRoll}
       />
 
       {/* END TEXT */}

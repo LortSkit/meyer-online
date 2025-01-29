@@ -86,7 +86,7 @@ export function translateTurnInfo(
         ? `Spiller ${previousPlayer} sagde, de slog ${translateRollName(
             isDanish,
             previousDeclaredRoll
-          )}, og deres slag var virkelig ${translateRollName(
+          )}, og deres slag var i virkeligheden ${translateRollName(
             isDanish,
             previousRoll
           )}`

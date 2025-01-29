@@ -31,7 +31,6 @@ const PossibleRolls = ({ isDanish }: Props) => {
   const diceSizePair = 18;
   const diceSizeBoring = 16;
   const diceSpace = "8px";
-  const padding = "10px";
   const space = "2px";
 
   return (

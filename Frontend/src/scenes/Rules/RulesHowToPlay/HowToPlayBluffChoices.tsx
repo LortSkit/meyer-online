@@ -21,18 +21,18 @@ import { useMediaQuery } from "usehooks-ts";
 
 interface Props {
   isDanish: boolean;
-  exampleRoll: number;
-  previousDeclaredExampleRoll: number;
-  setExampleRoll: React.Dispatch<React.SetStateAction<number>>;
-  setPreviousDeclaredExampleRoll: React.Dispatch<React.SetStateAction<number>>;
+  currentRoll: number;
+  previousRoll: number;
+  setCurrentRoll: React.Dispatch<React.SetStateAction<number>>;
+  setPreviousRoll: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const HowToPlayBluffChoices = ({
   isDanish,
-  exampleRoll,
-  previousDeclaredExampleRoll,
-  setExampleRoll,
-  setPreviousDeclaredExampleRoll,
+  currentRoll,
+  previousRoll,
+  setCurrentRoll,
+  setPreviousRoll,
 }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -64,7 +64,7 @@ const HowToPlayBluffChoices = ({
       if (isDanish) {
         if (!hasClicked) {
           return "0px";
-        } else if (previousDeclaredExampleRoll === -1) {
+        } else if (previousRoll === -1) {
           return `${clickMePleaseSize * 2.76}px`;
         } else {
           return `${clickMePleaseSize * 1.63}px`;
@@ -73,7 +73,7 @@ const HowToPlayBluffChoices = ({
 
       if (!hasClicked) {
         return "0px";
-      } else if (previousDeclaredExampleRoll === -1) {
+      } else if (previousRoll === -1) {
         return `${clickMePleaseSize * 3.303}px`;
       } else {
         return `${clickMePleaseSize * 2.045}px`;
@@ -105,15 +105,15 @@ const HowToPlayBluffChoices = ({
                       </>
                     }
                   </Box>
-                  {previousDeclaredExampleRoll > -1 && (
+                  {previousRoll > -1 && (
                     <RollWithName
                       isDanish={isDanish}
-                      roll={previousDeclaredExampleRoll}
+                      roll={previousRoll}
                       color={colors.blueAccent[100]}
                       sideLength={25}
                     />
                   )}
-                  {previousDeclaredExampleRoll === -1 && (
+                  {previousRoll === -1 && (
                     <Box
                       display="flex"
                       justifyContent="center"
@@ -131,21 +131,19 @@ const HowToPlayBluffChoices = ({
                 variant="contained"
                 color="secondary"
                 onClick={() => {
-                  setPreviousDeclaredExampleRoll(
-                    getMeyerRollNoCheers(previousDeclaredExampleRoll)
-                  );
+                  setPreviousRoll(getMeyerRollNoCheers(previousRoll));
                   setHasClicked(true);
                 }}
                 children={translateButtonNewPrevious(isDanish)}
               />
-              {previousDeclaredExampleRoll !== -1 && (
+              {previousRoll !== -1 && (
                 <>
                   <Box paddingLeft="4px" />
                   <Button
                     variant="contained"
                     color="secondary"
                     onClick={() => {
-                      setPreviousDeclaredExampleRoll(-1);
+                      setPreviousRoll(-1);
                       setHasClicked(true);
                     }}
                     children={translateDeletePrevious(isDanish)}
@@ -184,7 +182,7 @@ const HowToPlayBluffChoices = ({
                   </Box>
                   <RollWithName
                     isDanish={isDanish}
-                    roll={exampleRoll}
+                    roll={currentRoll}
                     color={colors.blueAccent[100]}
                     sideLength={25}
                   />
@@ -194,7 +192,7 @@ const HowToPlayBluffChoices = ({
             <Button
               variant="contained"
               color="secondary"
-              onClick={() => setExampleRoll(getMeyerRollNoCheers(exampleRoll))}
+              onClick={() => setCurrentRoll(getMeyerRollNoCheers(currentRoll))}
               children={translateButtonNewCurrent(isDanish)}
             />
           </Box>
@@ -203,7 +201,7 @@ const HowToPlayBluffChoices = ({
         <br />
         {/* ACTION AND BLUFF CHOICES */}
         <Box display="flex" justifyContent="center" flexDirection="column">
-          {isGreaterThanEqualTo(exampleRoll, previousDeclaredExampleRoll) && (
+          {isGreaterThanEqualTo(currentRoll, previousRoll) && (
             <>
               <Box display="flex" justifyContent="center">
                 <ActionButton isDanish={isDanish} action="Truth" />
@@ -218,16 +216,14 @@ const HowToPlayBluffChoices = ({
             flexWrap="wrap"
           >
             <Box marginLeft="3px" />
-            {exampleBluffChoices(exampleRoll, previousDeclaredExampleRoll).map(
-              (bluff) => (
-                <span key={bluff}>
-                  <BluffButton isDanish={isDanish} bluff={bluff} />
-                  <Box marginLeft="3px" />
-                </span>
-              )
-            )}
+            {exampleBluffChoices(currentRoll, previousRoll).map((bluff) => (
+              <span key={bluff}>
+                <BluffButton isDanish={isDanish} bluff={bluff} />
+                <Box marginLeft="3px" />
+              </span>
+            ))}
           </Box>
-          {previousDeclaredExampleRoll !== -1 && (
+          {previousRoll !== -1 && (
             <>
               <Box paddingBottom="5px" />
               <Box display="flex" justifyContent="center">

@@ -6,6 +6,7 @@ import RulesHowToPlay from "./RulesHowToPlay/RulesHowToPlay";
 import { useMediaQuery } from "usehooks-ts";
 import RulesHealth from "./RulesHealth/RulesHealth";
 import RulesTurnInformation from "./RulesTurnInformation";
+import { useState } from "react";
 
 interface Props {
   isDanish: boolean;
@@ -13,6 +14,10 @@ interface Props {
 
 const Rules = ({ isDanish }: Props) => {
   const queryMatches = useMediaQuery("only screen and (min-width: 1200px)");
+  const [currentPlayer, setCurrentPlayer] = useState(1);
+  const [currentRoll, setCurrentRoll] = useState(43);
+  const [previousPlayer, setPreviousPlayer] = useState(-1);
+  const [previousRoll, setPreviousRoll] = useState(-1);
 
   function doCheck(queryMatches: boolean) {
     if (queryMatches) {
@@ -28,11 +33,28 @@ const Rules = ({ isDanish }: Props) => {
       <br />
       <PossibleRolls isDanish={isDanish} />
       <br />
-      <RulesHowToPlay isDanish={isDanish} />
+      <RulesHowToPlay
+        isDanish={isDanish}
+        currentRoll={currentRoll}
+        previousRoll={previousRoll}
+        setCurrentRoll={setCurrentRoll}
+        setPreviousRoll={setPreviousRoll}
+      />
       <br />
-      <RulesHealth isDanish={isDanish} />
+      <RulesHealth
+        isDanish={isDanish}
+        currentPlayer={currentPlayer}
+        setCurrentPlayer={setCurrentPlayer}
+        setPreviousPlayer={setPreviousPlayer}
+      />
       <br />
-      <RulesTurnInformation isDanish={isDanish} />
+      <RulesTurnInformation
+        isDanish={isDanish}
+        currentPlayer={currentPlayer}
+        currentRoll={currentRoll}
+        previousPlayer={previousPlayer}
+        previousRoll={previousRoll}
+      />
     </MiddleChild>
   );
 

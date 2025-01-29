@@ -1,5 +1,4 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useState } from "react";
 import {
   translateAction,
   translateClickMePlease,
@@ -37,6 +36,7 @@ interface Props {
   setHasClicked: React.Dispatch<React.SetStateAction<boolean>>;
   setHasHealthRolled: React.Dispatch<React.SetStateAction<boolean[]>>;
   setNumberOfPlayers: React.Dispatch<React.SetStateAction<number>>;
+  setPreviousPlayer: React.Dispatch<React.SetStateAction<number>>;
   setToHealthRoll: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -57,6 +57,7 @@ const HealthInterractiveButtons = ({
   setHasClicked,
   setHasHealthRolled,
   setNumberOfPlayers,
+  setPreviousPlayer,
   setToHealthRoll,
 }: Props) => {
   function clickPaddingByQuery(queryMatches600: boolean, isDanish: boolean) {
@@ -105,6 +106,7 @@ const HealthInterractiveButtons = ({
 
   function _changePlayerInternal(value: number): void {
     setHasClicked(true);
+    setPreviousPlayer(currentPlayer);
     let possibleNextPlayer =
       currentPlayer + value > numberOfPlayers
         ? 1
@@ -120,7 +122,6 @@ const HealthInterractiveButtons = ({
           ? numberOfPlayers
           : possibleNextPlayer + value;
     }
-
     setCurrentPlayer(possibleNextPlayer);
   }
 

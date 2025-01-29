@@ -14,18 +14,26 @@ import {
   RightChild,
 } from "../../../components/CenteredPage/PageChildren";
 import PlayersHealthsDisplay from "../../../components/game/PlayersHealthsDisplay";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import HealthInterractiveButtons from "./HealthInterractiveButtons";
 
 interface Props {
   isDanish: boolean;
+  currentPlayer: number;
+  setCurrentPlayer: React.Dispatch<React.SetStateAction<number>>;
+  setPreviousPlayer: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const RulesHealth = ({ isDanish }: Props) => {
+const RulesHealth = ({
+  isDanish,
+  currentPlayer,
+  setCurrentPlayer,
+  setPreviousPlayer,
+}: Props) => {
   const queryMatches600 = useMediaQuery("only screen and (min-width: 600px)");
   const queryMatches1200 = useMediaQuery("only screen and (min-width: 1200px)");
-  const [currentPlayer, setCurrentPlayer] = useState(1);
+
   const [hasClicked, setHasClicked] = useState(false);
   const [toHealthRoll, setToHealthRoll] = useState(false);
 
@@ -177,6 +185,7 @@ const RulesHealth = ({ isDanish }: Props) => {
         setHasClicked={setHasClicked}
         setHasHealthRolled={setHasHealthRolled}
         setNumberOfPlayers={setNumberOfPlayers}
+        setPreviousPlayer={setPreviousPlayer}
         setToHealthRoll={setToHealthRoll}
       />
     </RightChild>

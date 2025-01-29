@@ -88,16 +88,18 @@ export function onTurnInformationUpdate({
   setHasClicked,
   setIsClicked,
 }: TurnInformationUpdateProps): void {
-  setCounter(0);
+  if (turnInformation.length === 0) {
+    setCounter(0);
+    if (timerId.current != null) clearInterval(timerId.current as number);
+    timerId.current = setInterval(() => {
+      setCounter((i) => i + 1);
+    }, 1000);
+  }
   let init = initClicked(turnInformation);
   setHasClicked(init);
   setIsClicked(init.slice(0, init.length));
   setChosenElements(chosenElements.concat(sortedBuffer(chosenElementsBuffer)));
   setChosenElementsBuffer([]);
-  if (timerId.current != null) clearInterval(timerId.current as number);
-  timerId.current = setInterval(() => {
-    setCounter((i) => i + 1);
-  }, 1000);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
