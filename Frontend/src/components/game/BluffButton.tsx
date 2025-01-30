@@ -66,7 +66,7 @@ const BluffButton = ({ isDanish, bluff, onClick }: Props) => {
           <RollWithName
             isDanish={isDanish}
             roll={bluff}
-            color={colors.blueAccent[100]}
+            color={colors.primary[300]}
             sideLength={doCheck(queryMatches)}
           />
         }
