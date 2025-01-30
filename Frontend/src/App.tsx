@@ -15,6 +15,7 @@ import GameLobby from "./scenes/GameLobby/GameLobby";
 import { isInLobby } from "./utils/appUtils";
 import { useSwipeable } from "react-swipeable";
 import { base } from "./utils/hostSubDirectory";
+import Footer from "./scenes/global/Footer";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -114,6 +115,7 @@ const App = () => {
                 />
               </Routes>
             </main>
+            <Footer />
           </div>
         </div>
       </ThemeProvider>
