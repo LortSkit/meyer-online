@@ -1,5 +1,3 @@
-import { translateHome as parentTranslate } from "../langMenuItems";
-
-export function translateHome(isDanish: boolean): string {
-  return parentTranslate(isDanish);
+export function translateHomeWelcome(isDanish: boolean): string {
+  return isDanish ? "Velkommen til Meyer Online!" : "Welcome to Meyer Online!";
 }

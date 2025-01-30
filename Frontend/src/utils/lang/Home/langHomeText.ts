@@ -14,16 +14,13 @@ export function translateRules(isDanish: boolean): string {
   return parentTranslateRules(isDanish);
 }
 
-export function translateHomeWelcome(isDanish: boolean): string {
-  return isDanish ? "Velkommen til Meyer Online!" : "Welcome to Meyer Online!";
-}
-
 export function translateHomeCreate(isDanish: boolean): string {
   return (
     (isDanish
-      ? `Hvis du har lyst til at oprette et lokalt eller online spil, så navigér til `
-      : `If you want to create a local or online game then navigate to the `) +
+      ? `Hvis du har lyst til at oprette et lokalt eller online spil, så navigér til "`
+      : `If you want to create a local or online game then navigate to the "`) +
     translateCreate(isDanish) +
+    `"` +
     translatePage(isDanish)
   );
 }
@@ -31,9 +28,10 @@ export function translateHomeCreate(isDanish: boolean): string {
 export function translateHomeFind(isDanish: boolean): string {
   return (
     (isDanish
-      ? `Hvis du gerne vil finde offentlige lobbyer, så navigér til `
-      : `If you want to find public lobbies then navigate to the `) +
+      ? `Hvis du gerne vil finde offentlige lobbyer, så navigér til "`
+      : `If you want to find public lobbies then navigate to the "`) +
     translateFind(isDanish) +
+    `"` +
     translatePage(isDanish)
   );
 }
@@ -41,13 +39,14 @@ export function translateHomeFind(isDanish: boolean): string {
 export function translateHomeRules(isDanish: boolean): string {
   return (
     (isDanish
-      ? `Hvis du er helt lost, så klik navigér til `
-      : `If you're completely lost then navigate to the `) +
+      ? `Hvis du er helt lost, så klik navigér til "`
+      : `If you're completely lost then navigate to the "`) +
     translateRules(isDanish) +
+    `"` +
     translatePage(isDanish)
   );
 }
 
 export function translatePage(isDanish: boolean): string {
-  return isDanish ? "-siden." : " page.";
+  return isDanish ? "-siden:" : " page:";
 }

@@ -1,5 +1,3 @@
-import { Box, useTheme } from "@mui/material";
-import { tokens } from "../../theme";
 import HomeHeading from "./HomeHeading";
 import HomeText from "./HomeText";
 import { MiddleChild } from "../../components/CenteredPage/PageChildren";
