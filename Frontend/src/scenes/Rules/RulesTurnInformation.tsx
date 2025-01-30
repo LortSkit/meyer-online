@@ -1,5 +1,10 @@
 import { Box, Button, Typography } from "@mui/material";
-import { translateTurnInformation } from "../../utils/lang/Rules/langRulesTurnInformation";
+import {
+  translateShow,
+  translateTurnInformation,
+  translateTurnInformationText1,
+  translateTurnInformationText2,
+} from "../../utils/lang/Rules/langRulesTurnInformation";
 import { isAction, TurnInfo, TurnInfoType } from "../../utils/gameTypes";
 import React, { useEffect, useState } from "react";
 import TurnInformation from "../../components/game/TurnInformation/TurnInformation";
@@ -101,6 +106,19 @@ const RulesTurnInformation = ({
         style={{ display: "flex", justifyContent: "center" }}
         children={<strong>{translateTurnInformation(isDanish)}</strong>}
       />
+      <Typography
+        fontSize="18px"
+        fontStyle="normal"
+        textTransform="none"
+        children={
+          <>
+            {translateTurnInformationText1(isDanish)}
+            <br />
+            <br />
+            {translateTurnInformationText2(isDanish)}
+          </>
+        }
+      />
       <Box display="flex" justifyContent="center">
         <Button
           variant="contained"
@@ -109,7 +127,7 @@ const RulesTurnInformation = ({
             setTurnInformation(getPossibleTurnInfo());
           }}
           disabled={turnInformation.length >= 1}
-          children="Show"
+          children={translateShow(isDanish)}
         />
       </Box>
       <TurnInformation
