@@ -1,16 +1,16 @@
 import { Box } from "@mui/material";
 import Game from "./Game/Game";
 import GameOver from "./GameOver/GameOver";
-import TurnInformation from "../../../components/game/TurnInformation/TurnInformation";
+import TurnInformation from "../../../../components/game/TurnInformation/TurnInformation";
 import PlayerHealths from "./PlayerHealths";
-import { Meyer } from "../../../utils/gameLogic";
-import { Action, TurnInfo } from "../../../utils/gameTypes";
+import { Meyer } from "../../../../utils/gameLogic";
+import { Action, TurnInfo } from "../../../../utils/gameTypes";
 import { useState } from "react";
 import {
   MiddleChild,
   RightChild,
-} from "../../../components/CenteredPage/PageChildren";
-import CenteredPage from "../../../components/CenteredPage/CenteredPage";
+} from "../../../../components/CenteredPage/PageChildren";
+import CenteredPage from "../../../../components/CenteredPage/CenteredPage";
 
 interface Props {
   isDanish: boolean;
@@ -127,7 +127,7 @@ const InGame = ({
     <RightChild>
       {/* HEALTH */}
       <>
-        <Box paddingTop="72px" />
+        <Box paddingTop="10px" />
         <PlayerHealths
           isDanish={isDanish}
           currentHealths={currentHealths}

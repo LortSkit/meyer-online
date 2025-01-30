@@ -1,7 +1,7 @@
 import { Button, Typography } from "@mui/material";
 import React from "react";
 import { Action } from "../../utils/gameTypes";
-import { translateAction } from "../../utils/lang/game/langActionChoices";
+import { translateAction } from "../../utils/lang/components/game/langActionChoices";
 
 interface Props {
   isDanish: boolean;

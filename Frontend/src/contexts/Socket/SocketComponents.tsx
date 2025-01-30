@@ -69,35 +69,35 @@ const SocketContextComponent: React.FunctionComponent<
   const StartListeners = () => {
     /** Messages */
     socket.on("user_connected", (usersTotal: string) => {
-      console.info("User connected message received");
+      //console.info("User connected message received");
       SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
     });
 
     /** Messages */
     socket.on("user_disconnected", (usersTotal: string) => {
-      console.info("User disconnected message received");
+      //console.info("User disconnected message received");
       SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
     });
 
     /* Reconnect event */
     socket.io.on("reconnect", (attempt) => {
-      console.info("Reconnected on attempt: " + attempt);
+      //console.info("Reconnected on attempt: " + attempt);
       SendHandshake();
     });
 
     /* Reconnect attempt event */
     socket.io.on("reconnect_attempt", (attempt) => {
-      console.info("Reconnection attempt: " + attempt);
+      //console.info("Reconnection attempt: " + attempt);
     });
 
     /* Reconnect error */
     socket.io.on("reconnect_error", (error) => {
-      console.info("Reconnected error: " + error);
+      //console.info("Reconnected error: " + error);
     });
 
     /* Reconnect failed */
     socket.io.on("reconnect_failed", () => {
-      console.info("Reconnection failure");
+      //console.info("Reconnection failure");
       alert(translateReconnectFailure(isDanish));
     });
 
@@ -135,12 +135,12 @@ const SocketContextComponent: React.FunctionComponent<
     });
   };
   const SendHandshake = () => {
-    console.info("Sending handshake");
+    //console.info("Sending handshake");
 
     socket.emit(
       "handshake",
       (reconnect: boolean, uid: string, usersTotal: number, gameId: string) => {
-        console.log("User handshake callback message received");
+        //console.info("User handshake callback message received");
         if (!reconnect) {
           SocketDispatch({ type: "update_uid", payload: uid });
           SocketDispatch({ type: "update_usersTotal", payload: usersTotal });

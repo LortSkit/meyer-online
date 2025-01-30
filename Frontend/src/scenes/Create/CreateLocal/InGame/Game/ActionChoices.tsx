@@ -1,8 +1,8 @@
 import { Box, useTheme } from "@mui/material";
-import { isGreaterThanEqualTo, Meyer } from "../../../../utils/gameLogic";
-import { tokens } from "../../../../theme";
-import { Action, TurnInfo, TurnInfoType } from "../../../../utils/gameTypes";
-import ActionButton from "../../../../components/game/ActionButton";
+import { isGreaterThanEqualTo, Meyer } from "../../../../../utils/gameLogic";
+import { tokens } from "../../../../../theme";
+import { Action, TurnInfo, TurnInfoType } from "../../../../../utils/gameTypes";
+import ActionButton from "../../../../../components/game/ActionButton";
 
 interface ActionProps {
   isDanish: boolean;

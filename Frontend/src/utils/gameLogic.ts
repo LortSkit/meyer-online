@@ -88,9 +88,9 @@ export class Meyer {
   //##############################################################################//
 
   constructor(numberOfPlayers: Int32) {
-    if (numberOfPlayers < 2 || numberOfPlayers > 10) {
+    if (numberOfPlayers < 2 || numberOfPlayers > 20) {
       throw new Error(
-        "Number of players has to be between 2 and 10 (inclusive)"
+        "Number of players has to be between 2 and 20 (inclusive)"
       );
     }
     this.numberOfPlayers = numberOfPlayers;

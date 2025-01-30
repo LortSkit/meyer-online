@@ -1,9 +1,8 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { tokens } from "../../../theme";
 import { TurnInfo } from "../../../utils/gameTypes";
-import { useState } from "react";
 import CircularWithValueLabel from "./CircularProgressWithLabel";
-import { translateTurnInfo } from "../../../utils/lang/game/TurnInformation/langTurnInformationDisplay";
+import { translateTurnInfo } from "../../../utils/lang/components/game/TurnInformation/langTurnInformationDisplay";
 
 type OnClickMiddleMan = (value: TurnInfo, index: number) => () => void;
 

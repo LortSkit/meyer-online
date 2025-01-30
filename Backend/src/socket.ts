@@ -1,4 +1,4 @@
-//Stolen from https://github.com/joeythelantern/Socket-IO-Basics
+//Stolen basics from https://github.com/joeythelantern/Socket-IO-Basics
 
 import { Server as HttpServer } from "http";
 import { Socket, Server } from "socket.io";
@@ -305,7 +305,11 @@ export class ServerSocket {
 
         const currentRoom = this.inRoom[uid];
 
-        if (currentRoom === "Create") {
+        if (
+          currentRoom === "Create" &&
+          0 < gameRequest.name.length &&
+          gameRequest.name.length <= 25
+        ) {
           this.gameBases[uid] = game;
           this.gamesIdIndex[game.id] = uid;
           this.gamePlayers[game.id] = [];
@@ -325,7 +329,11 @@ export class ServerSocket {
           }
         }
 
-        if (currentRoom === "Create") {
+        if (
+          currentRoom === "Create" &&
+          0 < gameRequest.name.length &&
+          gameRequest.name.length <= 25
+        ) {
           callback(game.id);
         } else {
           callback("");

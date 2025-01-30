@@ -1,8 +1,8 @@
-import { Box } from "@mui/material";
-import SetNumberOfPlayers from "./SetNumberOfPlayers";
-import CreateNewGameButtons from "./CreateNewGameButtons";
-import { Meyer } from "../../../utils/gameLogic";
-import SocketContextComponent from "../../../contexts/Socket/SocketComponents";
+import { Box, Typography } from "@mui/material";
+import SetNumberOfPlayers from "../../../../components/SetNumberOfPlayers";
+import CreateNewGameButton from "./CreateNewGameButton";
+import { Meyer } from "../../../../utils/gameLogic";
+import { translateNumberOfPlayers } from "../../../../utils/lang/Create/CreateLocal/CreateNewGame/langCreateNewGame";
 
 interface Props {
   isDanish: boolean;
@@ -24,17 +24,21 @@ const CreateNewGame = ({
   setNumberOfPlayers,
 }: Props) => {
   return (
-    <Box>
+    <Box display="flex" justifyContent="center" flexDirection="column">
+      <Box p={2} />
       {/* INPUT BAR */}
-      <SetNumberOfPlayers
-        isDanish={isDanish}
-        setNumberOfPlayers={setNumberOfPlayers}
-      />
+      <Box display="flex" justifyContent="center">
+        <Typography
+          fontSize="16px"
+          children={translateNumberOfPlayers(isDanish)}
+        />
+        <SetNumberOfPlayers setNumberOfPlayers={setNumberOfPlayers} />
+      </Box>
       <Box p={1} />
       <Box display="flex" justifyContent="center" flexBasis="100%">
         {/* BUTTON */}
 
-        <CreateNewGameButtons
+        <CreateNewGameButton
           isDanish={isDanish}
           numberOfPlayers={numberOfPlayers}
           setCanCreateNewGame={setCanCreateNewGame}

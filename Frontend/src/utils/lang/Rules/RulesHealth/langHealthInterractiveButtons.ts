@@ -1,5 +1,5 @@
 import { Action } from "../../../gameTypes";
-import { translateAction as parentTranslate } from "../../game/langActionChoices";
+import { translateAction as parentTranslate } from "../../components/game/langActionChoices";
 
 export function translateClickMePlease(isDanish: boolean): string {
   return isDanish ? "KLIK HER!" : "CLICK HERE!";

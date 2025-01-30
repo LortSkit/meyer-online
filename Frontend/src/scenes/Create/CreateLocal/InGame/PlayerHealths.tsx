@@ -1,4 +1,4 @@
-import PlayersHealthsDisplay from "../../../components/game/PlayersHealthsDisplay";
+import PlayersHealthsDisplay from "../../../../components/game/PlayersHealthsDisplay";
 
 interface Props {
   isDanish: boolean;

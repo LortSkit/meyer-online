@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useRef, useState } from "react";
 import { ColorModeContext, tokens, useMode } from "./theme";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import Topbar from "./scenes/global/Topbar";
@@ -16,10 +16,11 @@ import { isInLobby } from "./utils/appUtils";
 import { useSwipeable } from "react-swipeable";
 import { base } from "./utils/hostSubDirectory";
 import Footer from "./scenes/global/Footer";
+import CreateLocal from "./scenes/Create/CreateLocal/CreateLocal";
+import CreateOnline from "./scenes/Create/CreateOnline/CreateOnline";
 
 const App = () => {
   const [theme, colorMode] = useMode();
-  const colors = tokens(theme.palette.mode);
 
   const initIsCollapsed = localStorage.getItem("isCollapsed") === "true";
 
@@ -29,6 +30,8 @@ const App = () => {
   const [isCollapsed, setIsCollapsed] = useState(initIsCollapsed);
   const [isVisible, setIsVisible] = useState(false);
   const [isDanish, setIsDanish] = useState(initIsDanish);
+  const [searchLobbyName, setSearchLobbyName] = useState("");
+  const searchBarRef = useRef<{ value: string }>({ value: searchLobbyName });
   const handlers = useSwipeable({
     trackMouse: true,
     onSwipedRight: () => setIsVisible(true),
@@ -70,10 +73,12 @@ const App = () => {
           </div>
           <div className="rest">
             <Topbar
-              setIsVisible={setIsVisible}
               isDanish={isDanish}
-              setIsDanish={setIsDanish}
               pathname={pathname}
+              searchBarRef={searchBarRef}
+              setIsDanish={setIsDanish}
+              setIsVisible={setIsVisible}
+              setSearchLobbyName={setSearchLobbyName}
             />
             <main className="content">
               <Routes>
@@ -83,9 +88,17 @@ const App = () => {
                 />
                 <Route
                   path={base + "/create"}
+                  element={<Create isDanish={isDanish} />}
+                />
+                <Route
+                  path={base + "/create/local"}
+                  element={<CreateLocal isDanish={isDanish} />}
+                />
+                <Route
+                  path={base + "/create/online"}
                   element={
                     <SocketContextComponent isDanish={isDanish}>
-                      <Create isDanish={isDanish} />
+                      <CreateOnline isDanish={isDanish} />
                     </SocketContextComponent>
                   }
                 />
@@ -93,7 +106,12 @@ const App = () => {
                   path={base + "/find"}
                   element={
                     <SocketContextComponent isDanish={isDanish}>
-                      <Find isDanish={isDanish} />
+                      <Find
+                        isDanish={isDanish}
+                        searchBarRef={searchBarRef}
+                        searchLobbyName={searchLobbyName}
+                        setSearchLobbyName={setSearchLobbyName}
+                      />
                     </SocketContextComponent>
                   }
                 />

@@ -1,8 +1,8 @@
 import { Box, useTheme } from "@mui/material";
-import { Meyer } from "../../../../utils/gameLogic";
-import { Action, TurnInfo } from "../../../../utils/gameTypes";
-import { tokens } from "../../../../theme";
-import BluffButton from "../../../../components/game/BluffButton";
+import { Meyer } from "../../../../../utils/gameLogic";
+import { Action, TurnInfo } from "../../../../../utils/gameTypes";
+import { tokens } from "../../../../../theme";
+import BluffButton from "../../../../../components/game/BluffButton";
 
 interface Props {
   isDanish: boolean;
@@ -37,9 +37,6 @@ const BluffChoices = ({
   setTurnInformation,
   setTurnsTotal,
 }: Props) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-
   function endTurn(): void {
     setPreviousPlayer(currentPlayer);
     setCurrentPlayer(meyer.getCurrentPlayer());

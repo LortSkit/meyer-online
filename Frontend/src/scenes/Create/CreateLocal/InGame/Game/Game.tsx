@@ -2,10 +2,10 @@ import { Box, Typography, useTheme } from "@mui/material";
 import GameHeading from "./GameHeading";
 import ActionChoices from "./ActionChoices";
 import BluffChoices from "./BluffChoices";
-import { RollWithName } from "../../../../utils/diceUtils";
-import { Meyer } from "../../../../utils/gameLogic";
-import { Action, TurnInfo } from "../../../../utils/gameTypes";
-import { tokens } from "../../../../theme";
+import { RollWithName } from "../../../../../utils/diceUtils";
+import { Meyer } from "../../../../../utils/gameLogic";
+import { Action, TurnInfo } from "../../../../../utils/gameTypes";
+import { tokens } from "../../../../../theme";
 
 interface Props {
   isDanish: boolean;

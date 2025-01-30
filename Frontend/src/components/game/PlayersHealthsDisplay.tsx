@@ -2,7 +2,7 @@ import { Box, Typography, useTheme } from "@mui/material";
 import { tokens } from "../../theme";
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import { Dice } from "../../utils/diceUtils";
-import { translatePlayerIndex } from "../../utils/lang/game/langPlayersHealthsDisplay";
+import { translatePlayerIndex } from "../../utils/lang/components/game/langPlayersHealthsDisplay";
 
 interface Props {
   isDanish?: boolean;

@@ -1,10 +1,10 @@
 import { Box, Button, Typography } from "@mui/material";
-import { Meyer } from "../../../../utils/gameLogic";
-import { Action, TurnInfo } from "../../../../utils/gameTypes";
+import { Meyer } from "../../../../../utils/gameLogic";
+import { Action, TurnInfo } from "../../../../../utils/gameTypes";
 import {
   translateEndGame,
   translatePlayAgain,
-} from "../../../../utils/lang/Create/InGame/GameOver/langGameOverButtons";
+} from "../../../../../utils/lang/Create/CreateLocal/InGame/GameOver/langGameOverButtons";
 
 interface Props {
   isDanish: boolean;

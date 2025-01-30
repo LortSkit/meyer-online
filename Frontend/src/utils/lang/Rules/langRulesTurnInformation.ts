@@ -1,5 +1,5 @@
 import { TurnInfo } from "../../gameTypes";
-import { translateTurnInfo as parentTranslate } from "../game/TurnInformation/langTurnInformationDisplay";
+import { translateTurnInfo as parentTranslate } from "../components/game/TurnInformation/langTurnInformationDisplay";
 
 export function translateTurnInfo(
   isDanish: boolean,

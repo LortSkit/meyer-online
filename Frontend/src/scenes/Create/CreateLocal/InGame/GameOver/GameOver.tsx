@@ -1,8 +1,8 @@
 import { Box } from "@mui/material";
 import GameOverHeading from "./GameOverHeading";
 import GameOverButtons from "./GameOverButtons";
-import { Meyer } from "../../../../utils/gameLogic";
-import { Action, TurnInfo } from "../../../../utils/gameTypes";
+import { Meyer } from "../../../../../utils/gameLogic";
+import { Action, TurnInfo } from "../../../../../utils/gameTypes";
 
 interface Props {
   isDanish: boolean;

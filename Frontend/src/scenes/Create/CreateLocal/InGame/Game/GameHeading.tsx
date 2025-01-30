@@ -3,7 +3,7 @@ import {
   translateCurrentPlayerTurn,
   translateRound,
   translateTurn,
-} from "../../../../utils/lang/Create/InGame/Game/langeGameHeading";
+} from "../../../../../utils/lang/Create/CreateLocal/InGame/Game/langeGameHeading";
 
 interface Props {
   isDanish: boolean;

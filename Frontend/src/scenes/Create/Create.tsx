@@ -1,75 +1,92 @@
-import { Box } from "@mui/material";
-import { useEffect, useState } from "react";
-import CreateHeading from "./CreateHeading";
-import CreateNewGame from "./CreateNewGame/CreateNewGame";
-import { Meyer } from "../../utils/gameLogic";
-import InGame from "./InGame/InGame";
-import { useGlobalContext } from "../../contexts/Socket/SocketContext";
-import SocketContextComponent from "../../contexts/Socket/SocketComponents";
+import { Box, Button, Typography } from "@mui/material";
 import CenteredPage from "../../components/CenteredPage/CenteredPage";
+import { useNavigate } from "react-router-dom";
+import {
+  translateCreateLocal,
+  translateCreateNewLocalGame,
+  translateCreateNewOnlineGame,
+  translateCreateOnline,
+} from "../../utils/lang/Create/langCreate";
+import { MiddleChild } from "../../components/CenteredPage/PageChildren";
+import CreateHeading from "./CreateHeading";
 
 interface Props {
   isDanish: boolean;
 }
 
 const Create = ({ isDanish }: Props) => {
-  const [numberOfPlayers, setNumberOfPlayers] = useState(-1);
-  const [canCreateNewGame, setCanCreateNewGame] = useState(true);
-  const [currentHealths, setCurrentHealths] = useState([] as number[]);
-  const [inGame, setInGame] = useState(false);
-  const [meyer, setMeyer] = useState(null as unknown as Meyer);
+  const navigate = useNavigate();
 
-  const { SocketState, SocketDispatch } = useGlobalContext();
+  const middleChild = (
+    <MiddleChild widthPercentage={90}>
+      <Box display="flex" flexDirection="column">
+        {/* HEADING */}
+        <CreateHeading isDanish={isDanish} />
 
-  useEffect(() => {
-    /* Connect to the Web Socket */
-    if (SocketState.uid) {
-      SocketState.socket?.emit("join_create", SocketState.uid);
-    }
-  }, [SocketState.uid]);
+        <Box p={2} />
+        {/* LOCAL */}
+        <Box display="flex" justifyContent="center">
+          <Typography
+            fontSize="16px"
+            fontStyle="normal"
+            textTransform="none"
+            children={translateCreateLocal(isDanish)}
+          />
+        </Box>
+        <Box display="flex" justifyContent="center">
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => navigate("./local")}
+            children={
+              <Typography
+                fontSize="20px"
+                fontStyle="normal"
+                textTransform="none"
+              >
+                {translateCreateNewLocalGame(isDanish)}
+              </Typography>
+            }
+          />
+        </Box>
+
+        <Box p={2} />
+
+        {/* ONLINE */}
+        <Box display="flex" justifyContent="center">
+          <Typography
+            fontSize="16px"
+            fontStyle="normal"
+            textTransform="none"
+            children={translateCreateOnline(isDanish)}
+          />
+        </Box>
+        <Box display="flex" justifyContent="center">
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => navigate("./online")}
+            children={
+              <Typography
+                fontSize="20px"
+                fontStyle="normal"
+                textTransform="none"
+              >
+                {translateCreateNewOnlineGame(isDanish)}
+              </Typography>
+            }
+          />
+        </Box>
+      </Box>
+    </MiddleChild>
+  );
 
   return (
-    <>
-      {canCreateNewGame && (
-        <CenteredPage
-          middleChild={
-            <Box display="flex" flexBasis="100%" flexDirection="column">
-              {/* HEADING */}
-              <CreateHeading isDanish={isDanish} />
-
-              {/* CREATE NEW LOCAL GAME */}
-              <CreateNewGame
-                isDanish={isDanish}
-                numberOfPlayers={numberOfPlayers}
-                setCanCreateNewGame={setCanCreateNewGame}
-                setCurrentHealths={setCurrentHealths}
-                setInGame={setInGame}
-                setMeyer={setMeyer}
-                setNumberOfPlayers={setNumberOfPlayers}
-              />
-            </Box>
-          }
-          leftWidthPercentage={5}
-          middleWidthPercentage={90}
-          rightWidthPercentage={5}
-        />
-      )}
-
-      {/* IN GAME */}
-
-      {inGame && (
-        <InGame
-          isDanish={isDanish}
-          currentHealths={currentHealths}
-          meyer={meyer}
-          setCanCreateNewGame={setCanCreateNewGame}
-          setCurrentHealths={setCurrentHealths}
-          setInGame={setInGame}
-          setMeyer={setMeyer}
-          setNumberOfPlayers={setNumberOfPlayers}
-        />
-      )}
-    </>
+    <CenteredPage
+      middleChild={middleChild}
+      leftWidthPercentage={5}
+      rightWidthPercentage={5}
+    />
   );
 };
 

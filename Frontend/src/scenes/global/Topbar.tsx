@@ -10,21 +10,46 @@ import {
   Search,
 } from "@mui/icons-material";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
-import { isInLobby } from "../../utils/appUtils";
+import { isInFind, isInLobby } from "../../utils/appUtils";
+import { useNavigate } from "react-router-dom";
+import { base } from "../../utils/hostSubDirectory";
+import SearchBar from "../../components/SearchBar";
+import { useMediaQuery } from "usehooks-ts";
 
 interface Props {
-  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
   isDanish: boolean;
-  setIsDanish: React.Dispatch<React.SetStateAction<boolean>>;
   pathname: string;
+  searchBarRef: any;
+  setIsDanish: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setSearchLobbyName: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const Topbar = ({ setIsVisible, isDanish, setIsDanish, pathname }: Props) => {
+const Topbar = ({
+  isDanish,
+  pathname,
+  searchBarRef,
+  setIsDanish,
+  setIsVisible,
+  setSearchLobbyName,
+}: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
   const [hovered, setHovered] = useState(false);
   const [justClicked, setJustClicked] = useState(false);
+
+  const queryMatches = useMediaQuery("only screen and (min-width: 400px)");
+
+  const navigate = useNavigate();
+
+  function onChange(event: React.ChangeEvent<HTMLInputElement>): void {
+    searchBarRef.value = event.target.value;
+    setSearchLobbyName(event.target.value);
+    if (queryMatches) {
+      navigate(base + "/find");
+    }
+  }
 
   return (
     <Box
@@ -39,12 +64,7 @@ const Topbar = ({ setIsVisible, isDanish, setIsDanish, pathname }: Props) => {
       sx={{ outline: "1px solid", outlineColor: colors.primary[600] }}
     >
       {/* MOBILE MENU + SEARCH BAR */}
-      <Box
-        display="flex"
-        bgcolor={colors.primary[600]}
-        borderRadius="3px"
-        justifyContent="space-between"
-      >
+      <Box display="flex" justifyContent="space-between">
         {/* MENU BUTTON - Only visible if screen is small enough */}
         {!isInLobby(pathname) && (
           <div
@@ -62,17 +82,13 @@ const Topbar = ({ setIsVisible, isDanish, setIsDanish, pathname }: Props) => {
         )}
 
         {/* SEARCH BAR */}
-        {!isInLobby(pathname) && (
-          <Box display="flex">
-            <InputBase
-              id="search-bar"
-              sx={{ ml: 2, color: colors.grey[400], fontSize: "16px" }}
-              placeholder={isDanish ? "DEN HER GØR INTET" : "THIS DOES NOTHING"}
-            />
-            <IconButton type="button" sx={{ p: 1 }}>
-              <Search />
-            </IconButton>
-          </Box>
+        {!isInLobby(pathname) && !isInFind(pathname) && (
+          <SearchBar
+            isDanish={isDanish}
+            searchBarRef={searchBarRef}
+            retainValue={false}
+            onChange={onChange}
+          />
         )}
       </Box>
       {/* ICONS */}

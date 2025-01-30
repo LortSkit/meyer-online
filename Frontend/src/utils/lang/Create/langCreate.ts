@@ -4,7 +4,7 @@ export function translateCreateLocal(isDanish: boolean): string {
     : "A local game where you control all the players:";
 }
 
-export function translateCreateNewGame(isDanish: boolean): string {
+export function translateCreateNewLocalGame(isDanish: boolean): string {
   return isDanish ? "Opret lokalt spil!" : "Create local game!";
 }
 
@@ -14,10 +14,6 @@ export function translateCreateOnline(isDanish: boolean): string {
     : "Online game where you play against others:";
 }
 
-export function translateCreatePublic(isDanish: boolean): string {
-  return isDanish ? "Opret offentligt spil!" : "Create public game!";
-}
-
-export function translateCreatePrivate(isDanish: boolean): string {
-  return isDanish ? "Opret privat spil!" : "Create private game!";
+export function translateCreateNewOnlineGame(isDanish: boolean): string {
+  return isDanish ? "Opret online spil!" : "Create online game!";
 }

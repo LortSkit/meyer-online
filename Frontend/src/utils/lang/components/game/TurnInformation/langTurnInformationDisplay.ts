@@ -1,5 +1,5 @@
-import { isAction, TurnInfo } from "../../../gameTypes";
-import { translateRollName } from "../../langDiceUtils";
+import { isAction, TurnInfo } from "../../../../gameTypes";
+import { translateRollName } from "../../../langDiceUtils";
 
 export function translateTurnInfo(
   isDanish: boolean,
