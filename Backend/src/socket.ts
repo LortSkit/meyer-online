@@ -185,7 +185,7 @@ export class ServerSocket {
         if (this.gamesIdIndex[gameToLeave] === uid) {
           this.SendMessage("game_owner_left", [gameToLeave]);
         } else {
-          //TODO: tell other party member you've left
+          this.SendMessage("player_left", [gameToLeave], uid);
         }
       } else {
         socket.leave(previousRoom);
@@ -253,10 +253,15 @@ export class ServerSocket {
       const uid = this.GetUidFromSocketID(socket.id);
 
       if (uid) {
+        const gameToLeave = this.playerInGame[uid];
         this.removeUserFromGamesAndRoom(uid);
         delete this.users[uid];
 
         const users = Object.values(this.users);
+
+        if (gameToLeave) {
+          this.SendMessage("player_left", [gameToLeave], uid);
+        }
 
         this.SendMessage("user_disconnected", users, [users.length]);
       }
@@ -347,7 +352,11 @@ export class ServerSocket {
       (
         joiningUid: string,
         gameId: string,
-        callback: (exists: boolean, enoughSpace: boolean) => void
+        callback: (
+          exists: boolean,
+          enoughSpace: boolean,
+          gameName: string
+        ) => void
       ) => {
         console.info("Received event: join_game from " + socket.id);
 
@@ -362,17 +371,23 @@ export class ServerSocket {
               this.gameBases[uid].maxNumberOfPlayers;
 
             if (!hasEnoughSpace) {
-              callback(exists, hasEnoughSpace);
+              callback(exists, false, "");
               return;
             }
             this.leavePreviousRoom(socket, joiningUid);
             socket.join(gameId);
             this.inRoom[joiningUid] = "Game";
 
-            callback(exists, hasEnoughSpace);
-
             this.playerInGame[joiningUid] = gameId;
             this.gamePlayers[gameId].push(joiningUid);
+
+            callback(
+              exists,
+              hasEnoughSpace,
+              this.gameBases[uid].name //If it is to be changed and updated, it should be sent through an event instead
+            );
+
+            this.SendMessage("joined_game", [gameId], this.gamePlayers[gameId]);
 
             if (this.gameIsPublic(gameId)) {
               this.SendMessage(
@@ -385,7 +400,7 @@ export class ServerSocket {
 
           return;
         }
-        callback(false, false);
+        callback(false, false, "");
       }
     );
   };

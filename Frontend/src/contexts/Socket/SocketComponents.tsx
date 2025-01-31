@@ -127,6 +127,16 @@ const SocketContextComponent: React.FunctionComponent<
       SocketDispatch({ type: "update_game_num_players", payload: payload });
     });
 
+    /* Join game */
+    socket.on("joined_game", (gamePlayers: string[]) => {
+      SocketDispatch({ type: "update_game_players", payload: gamePlayers });
+    });
+
+    /* Player left */
+    socket.on("player_left", (playerUid: string) => {
+      SocketDispatch({ type: "remove_game_player", payload: playerUid });
+    });
+
     /* Owner left */
     socket.on("game_owner_left", () => {
       focus();

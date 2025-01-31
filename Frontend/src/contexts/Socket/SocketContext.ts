@@ -19,6 +19,7 @@ export interface ISocketContextState {
   uid: string;
   usersTotal: number;
   games: Game[];
+  gamePlayers: string[];
 }
 
 export const defaultSocketContextState: ISocketContextState = {
@@ -26,6 +27,7 @@ export const defaultSocketContextState: ISocketContextState = {
   uid: "",
   usersTotal: 0,
   games: [],
+  gamePlayers: [],
 };
 
 export type TSocketContextActions =
@@ -35,7 +37,9 @@ export type TSocketContextActions =
   | "add_game"
   | "update_game_num_players"
   | "update_games"
-  | "remove_game";
+  | "remove_game"
+  | "update_game_players"
+  | "remove_game_player";
 
 export type TSocketContextPayload =
   | string
@@ -94,6 +98,21 @@ export const SocketReducer = (
           (game: Game) => game.id !== (action.payload as string)
         ),
       };
+
+    case "update_game_players":
+      return {
+        ...state,
+        gamePlayers: action.payload as string[],
+      };
+
+    case "remove_game_player": {
+      return {
+        ...state,
+        gamePlayers: state.gamePlayers.filter(
+          (uid: string) => uid !== (action.payload as string)
+        ),
+      };
+    }
   }
 };
 

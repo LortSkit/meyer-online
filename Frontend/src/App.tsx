@@ -123,7 +123,7 @@ const App = () => {
                   path={base + "/game/:gameId"}
                   element={
                     <SocketContextComponent isDanish={isDanish}>
-                      <GameLobby />
+                      <GameLobby isDanish={isDanish} />
                     </SocketContextComponent>
                   }
                 />

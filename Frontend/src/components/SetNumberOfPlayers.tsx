@@ -20,8 +20,8 @@ const SetNumberOfPlayers = ({ setNumberOfPlayers }: Props) => {
 
     event.target.value.slice(0, 1) === "0"
       ? (event.target.value = "")
-      : 20 < Number(event.target.value) && Number(event.target.value) < 100
-      ? (event.target.value = event.target.value.slice(0, 1))
+      : 20 < Number(event.target.value)
+      ? (event.target.value = "20")
       : fallback();
   }
   return (
@@ -38,7 +38,7 @@ const SetNumberOfPlayers = ({ setNumberOfPlayers }: Props) => {
         required={true}
         inputProps={{
           min: 2,
-          max: 25,
+          max: 20,
           maxLength: 2,
           pattern: "[0-9]*",
         }}

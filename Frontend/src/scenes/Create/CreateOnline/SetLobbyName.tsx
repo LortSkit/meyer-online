@@ -19,7 +19,7 @@ const SetLobbyName = ({ setLobbyName }: Props) => {
   return (
     <Box bgcolor={colors.primary[600]} width="max-content">
       <InputBase
-        id="num-players-bar"
+        id="lobby-name-bar"
         sx={{
           ml: 1,
           mr: 1,

@@ -35,7 +35,7 @@ const CreateNewGameButton = ({
           variant="contained"
           color="secondary"
           onClick={onClickLocal}
-          disabled={numberOfPlayers < 2 || numberOfPlayers > 25}
+          disabled={numberOfPlayers < 2 || numberOfPlayers > 20}
         >
           <Typography
             fontSize="20px"
