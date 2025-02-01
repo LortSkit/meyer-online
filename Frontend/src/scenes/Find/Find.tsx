@@ -43,7 +43,7 @@ const Find = ({
   useEffect(() => {
     /* Connect to the Web Socket */
     if (SocketState.uid) {
-      SocketState.socket?.emit("join_find", SocketState.uid);
+      SocketState.socket?.emit("join_find");
     }
   }, [SocketState.uid]);
 

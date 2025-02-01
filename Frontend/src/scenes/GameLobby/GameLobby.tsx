@@ -8,10 +8,15 @@ import { MiddleChild } from "../../components/CenteredPage/PageChildren";
 import CenteredPage from "../../components/CenteredPage/CenteredPage";
 import { IosShareOutlined, StarOutlined } from "@mui/icons-material";
 import {
+  translateChooseName,
+  translateGameDoesNotExist,
   translateGameId,
   translateGameOwner,
+  translateNotEnoughSpace,
   translateShare,
 } from "../../utils/lang/GameLobby/langGameLobby";
+import PlayersHealthsDisplay from "../../components/game/PlayersHealthsDisplay";
+import SetPlayerName from "./SetPlayerName";
 
 function baseMessage(message: string) {
   return (
@@ -23,19 +28,27 @@ function baseMessage(message: string) {
   );
 }
 
-const StandardErrorMessage = () => {
-  return baseMessage("Game does not exist!");
-};
-
-const NotEnoughSpaceMessage = () => {
-  return baseMessage("This game is full!");
-};
+function initHealths(numberOfPlayers: number): number[] {
+  let result = [];
+  for (let i = 0; i < numberOfPlayers; i++) {
+    result.push(6);
+  }
+  return result;
+}
 
 interface Props {
   isDanish: boolean;
 }
 
 const GameLobby = ({ isDanish }: Props) => {
+  const StandardErrorMessage = () => {
+    return baseMessage(translateGameDoesNotExist(isDanish));
+  };
+
+  const NotEnoughSpaceMessage = () => {
+    return baseMessage(translateNotEnoughSpace(isDanish));
+  };
+
   const { gameId } = useParams();
   const navigate = useNavigate();
 
@@ -43,16 +56,46 @@ const GameLobby = ({ isDanish }: Props) => {
   const [gameExists, setGameExists] = useState(false);
   const [hasEnoughSpace, setHasEnoughSpace] = useState(false);
   const [lobbyName, setLobbyName] = useState("");
+  const [chosenPlayerName, setChosenPlayerName] = useState("");
+
+  function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      console.log("clicked!");
+      SocketState.socket?.emit("change_player_name", chosenPlayerName);
+    }
+  }
+
+  function thisPlayerName(): string {
+    if (!SocketState.gamePlayers) {
+      return "";
+    }
+
+    const playerIndex = SocketState.gamePlayers.findIndex(
+      (value) => value === SocketState.uid
+    );
+
+    return SocketState.gamePlayersNames[playerIndex];
+  }
 
   useEffect(() => {
     if (!isValidUUID(gameId) && gameId !== "unknown") {
       navigate(base + "/game/unknown");
     } else {
+      const chosenPlayerName =
+        localStorage.getItem("playerName") === null
+          ? ""
+          : localStorage.getItem("playerName");
+
       SocketState.socket?.emit(
         "join_game",
-        SocketState.uid,
         gameId,
-        (exists: boolean, enoughSpace: boolean, gameName: string) => {
+        chosenPlayerName,
+        (
+          exists: boolean,
+          enoughSpace: boolean,
+          gameName: string,
+          givenPlayerName: string
+        ) => {
           setGameExists(exists);
           setHasEnoughSpace(enoughSpace);
           setLobbyName(gameName);
@@ -65,10 +108,23 @@ const GameLobby = ({ isDanish }: Props) => {
 
   if (gameId === "unknown") {
     middleChild = <StandardErrorMessage />;
-  } else if (!gameExists) {
+  } else if (!gameExists || SocketState.gamePlayers.length === 0) {
     middleChild = <StandardErrorMessage />;
   } else if (!hasEnoughSpace) {
     middleChild = <NotEnoughSpaceMessage />;
+  } else if (thisPlayerName() === "") {
+    middleChild = (
+      <Box display="flex" flexDirection="column">
+        <Box display="flex" justifyContent="center">
+          {translateChooseName(isDanish)}
+        </Box>
+        <SetPlayerName
+          value={chosenPlayerName}
+          setChosenPlayerName={setChosenPlayerName}
+          onKeyDown={onKeyDown}
+        />
+      </Box>
+    );
   } else {
     middleChild = (
       <MiddleChild widthPercentage={90}>
@@ -101,6 +157,7 @@ const GameLobby = ({ isDanish }: Props) => {
                 <IosShareOutlined />
               </IconButton>
             </Box>
+
             {SocketState.uid === SocketState.gamePlayers[0] && (
               <Box
                 display="flex"
@@ -108,13 +165,20 @@ const GameLobby = ({ isDanish }: Props) => {
                 onMouseEnter={undefined}
               >
                 {translateGameOwner(isDanish)}
+                <Box paddingLeft="5px" />
                 <StarOutlined />
               </Box>
             )}
             <Box p={5} />
-            {SocketState.gamePlayers.map((player: string) => (
-              <Box key={player}>{player}</Box>
-            ))}
+
+            <Box display="flex" justifyContent="center">
+              <PlayersHealthsDisplay
+                currentHealths={initHealths(
+                  SocketState.gamePlayersNames.length
+                )}
+                playerNames={SocketState.gamePlayersNames}
+              />
+            </Box>
           </Box>
         </Box>
       </MiddleChild>

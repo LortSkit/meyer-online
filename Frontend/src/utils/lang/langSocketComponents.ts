@@ -15,3 +15,9 @@ export function translateRedirecting(isDanish: boolean): string {
         translateFind(isDanish) +
         " page.";
 }
+
+export function translateLoading(isDanish: boolean): string {
+  return isDanish
+    ? "Forbinder dig til serveren..."
+    : "Connecting you to server...";
+}

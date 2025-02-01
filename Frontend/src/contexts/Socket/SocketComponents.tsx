@@ -8,6 +8,7 @@ import {
 import { useSocket } from "../../hooks/useSocket";
 import { useNavigate } from "react-router-dom";
 import {
+  translateLoading,
   translateReconnectFailure,
   translateRedirecting,
 } from "../../utils/lang/langSocketComponents";
@@ -128,13 +129,24 @@ const SocketContextComponent: React.FunctionComponent<
     });
 
     /* Join game */
-    socket.on("joined_game", (gamePlayers: string[]) => {
-      SocketDispatch({ type: "update_game_players", payload: gamePlayers });
+    socket.on("joined_game", (payload: string[][]) => {
+      SocketDispatch({ type: "update_game_players", payload: payload });
+    });
+
+    /* Player joined */
+    socket.on("player_joined", (payload: string[]) => {
+      SocketDispatch({ type: "add_game_player", payload: payload });
     });
 
     /* Player left */
     socket.on("player_left", (playerUid: string) => {
       SocketDispatch({ type: "remove_game_player", payload: playerUid });
+    });
+
+    /* Player name changed */
+    socket.on("player_name_changed", (payload: string[]) => {
+      SocketDispatch({ type: "change_player_name", payload: payload });
+      localStorage.setItem("playerName", payload[1]);
     });
 
     /* Owner left */
@@ -163,7 +175,7 @@ const SocketContextComponent: React.FunctionComponent<
     );
   };
 
-  if (loading) return <p>Loading Socket IO ...</p>;
+  if (loading) return <p>{translateLoading(isDanish)}</p>;
 
   return (
     <SocketContextProvider value={{ SocketState, SocketDispatch }}>

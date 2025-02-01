@@ -1,5 +1,17 @@
 import { translateGameId as parentTranslate } from "../Find/langFind";
 
+export function translateGameDoesNotExist(isDanish: boolean): string {
+  return isDanish ? "Spillet eksisterer ikke" : "Game does not exist!";
+}
+
+export function translateNotEnoughSpace(isDanish: boolean): string {
+  return isDanish ? "Spillet er fyldt!" : "This game is full!";
+}
+
+export function translateChooseName(isDanish: boolean): string {
+  return isDanish ? "Du skal vælge et navn:" : "You have to choose a name:";
+}
+
 export function translateGameId(isDanish: boolean): string {
   return parentTranslate(isDanish);
 }

@@ -3,6 +3,8 @@ import { tokens } from "../../theme";
 import { ArrowForwardOutlined } from "@mui/icons-material";
 import { Dice } from "../../utils/diceUtils";
 import { translatePlayerIndex } from "../../utils/lang/components/game/langPlayersHealthsDisplay";
+import { useMediaQuery } from "usehooks-ts";
+import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
 
 interface Props {
   isDanish?: boolean;
@@ -24,8 +26,18 @@ const PlayersHealthsDisplay = ({
 
   const displayNames = playerNames ? true : false;
 
+  const queryMatches = useMediaQuery("only screen and (min-width: 400px)");
+
+  function fontSizeByQuery() {
+    if (queryMatches) {
+      return "14px";
+    } else {
+      return "12px";
+    }
+  }
+
   return (
-    <Box display="flex" flexDirection="column">
+    <Box display="flex" flexDirection="column" flexWrap="wrap">
       {currentHealths.map(
         (health, index) =>
           health > 0 && (
@@ -39,26 +51,45 @@ const PlayersHealthsDisplay = ({
                 {!(currentPlayer == index + 1 && !isGameOver) && (
                   <Box paddingLeft="calc(20.5px + 5px)" />
                 )}
-                <Dice
-                  eyes={health}
-                  color={colors.blueAccent[100]}
-                  sideLength={25}
-                />
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                >
+                  <Dice
+                    eyes={health}
+                    color={colors.blueAccent[100]}
+                    sideLength={25}
+                  />
+                </Box>
                 <Box marginRight="3px" />
                 <Box
                   display="flex"
                   flexDirection="column"
                   justifyContent="center"
                 >
-                  <Typography
-                    display="flex"
-                    fontSize="14px"
-                    children={
-                      displayNames
-                        ? (playerNames as string[])[index]
-                        : translatePlayerIndex(isDanish as boolean, index)
-                    }
-                  />
+                  {((displayNames && (playerNames as string[])[index] !== "") ||
+                    !displayNames) && (
+                    <Typography
+                      fontSize={fontSizeByQuery()}
+                      component="div"
+                      style={{
+                        wordBreak: "break-all",
+                      }}
+                      children={
+                        displayNames
+                          ? (playerNames as string[])[index]
+                          : translatePlayerIndex(isDanish as boolean, index)
+                      }
+                    />
+                  )}
+                  {displayNames && (playerNames as string[])[index] === "" && (
+                    <img
+                      src={loading}
+                      width="35px"
+                      style={{ paddingLeft: "5px" }}
+                    />
+                  )}
                 </Box>
               </Box>
               <Box paddingTop="5px" />

@@ -30,7 +30,7 @@ const CreateOnline = ({ isDanish }: Props) => {
   useEffect(() => {
     /* Connect to the Web Socket */
     if (SocketState.uid) {
-      SocketState.socket?.emit("join_create", SocketState.uid);
+      SocketState.socket?.emit("join_create");
     }
   }, [SocketState.uid]);
 
@@ -47,15 +47,9 @@ const CreateOnline = ({ isDanish }: Props) => {
       name: lobbyName,
       maxNumberOfPlayers: numberOfPlayers,
     };
-    SocketState.socket?.emit(
-      "create_game",
-      SocketState.uid,
-      game,
-      true,
-      (gameId: string) => {
-        navigate(`${base}/game/${gameId}`);
-      }
-    );
+    SocketState.socket?.emit("create_game", game, true, (gameId: string) => {
+      navigate(`${base}/game/${gameId}`);
+    });
   }
 
   function onClickPrivate(): void {
@@ -63,15 +57,9 @@ const CreateOnline = ({ isDanish }: Props) => {
       name: lobbyName,
       maxNumberOfPlayers: numberOfPlayers,
     };
-    SocketState.socket?.emit(
-      "create_game",
-      SocketState.uid,
-      game,
-      false,
-      (gameId: string) => {
-        navigate(`${base}/game/${gameId}`);
-      }
-    );
+    SocketState.socket?.emit("create_game", game, false, (gameId: string) => {
+      navigate(`${base}/game/${gameId}`);
+    });
   }
 
   const middleChild = (

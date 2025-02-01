@@ -20,6 +20,7 @@ export interface ISocketContextState {
   usersTotal: number;
   games: Game[];
   gamePlayers: string[];
+  gamePlayersNames: string[];
 }
 
 export const defaultSocketContextState: ISocketContextState = {
@@ -28,6 +29,7 @@ export const defaultSocketContextState: ISocketContextState = {
   usersTotal: 0,
   games: [],
   gamePlayers: [],
+  gamePlayersNames: [],
 };
 
 export type TSocketContextActions =
@@ -39,11 +41,14 @@ export type TSocketContextActions =
   | "update_games"
   | "remove_game"
   | "update_game_players"
-  | "remove_game_player";
+  | "add_game_player"
+  | "remove_game_player"
+  | "change_player_name";
 
 export type TSocketContextPayload =
   | string
   | string[]
+  | string[][]
   | Socket
   | Game
   | Game[]
@@ -100,19 +105,50 @@ export const SocketReducer = (
       };
 
     case "update_game_players":
+      const newGamePlayers = (action.payload as string[][])[0];
+      const newGamePlayersNames = (action.payload as string[][])[1];
       return {
         ...state,
-        gamePlayers: action.payload as string[],
+        gamePlayers: newGamePlayers,
+        gamePlayersNames: newGamePlayersNames,
       };
 
+    case "add_game_player": {
+      const uid = (action.payload as string[])[0];
+      const playerName = (action.payload as string[])[1];
+      return {
+        ...state,
+        gamePlayers: state.gamePlayers.includes(uid)
+          ? state.gamePlayers
+          : state.gamePlayers.concat([uid]),
+        gamePlayersNames: state.gamePlayers.includes(uid)
+          ? state.gamePlayersNames
+          : state.gamePlayersNames.concat([playerName]),
+      };
+    }
+
     case "remove_game_player": {
+      let playerIndex = state.gamePlayers.findIndex(
+        (value) => value === (action.payload as string)
+      );
       return {
         ...state,
         gamePlayers: state.gamePlayers.filter(
-          (uid: string) => uid !== (action.payload as string)
+          (value, index) => index !== playerIndex
+        ),
+        gamePlayersNames: state.gamePlayers.filter(
+          (value, index) => index !== playerIndex
         ),
       };
     }
+
+    case "change_player_name":
+      const uid = (action.payload as string[])[0];
+      const givenPlayerName = (action.payload as string[])[1];
+
+      const playerIndex = state.gamePlayers.findIndex((value) => value === uid);
+      state.gamePlayersNames[playerIndex] = givenPlayerName;
+      return { ...state, gamePlayersNames: state.gamePlayersNames };
   }
 };
 
