@@ -519,5 +519,76 @@ export class ServerSocket {
         this.SendMessage("player_name_changed", [inGameId], [uid, playerName]);
       }
     });
+
+    socket.on("change_lobby_name", (newLobbyName: string) => {
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid) {
+        const owningGame = this.gameBases[uid];
+        if (
+          owningGame &&
+          0 < newLobbyName.length &&
+          newLobbyName.length <= 25
+        ) {
+          this.gameBases[uid].name = newLobbyName;
+
+          this.SendMessage("lobby_name_changed", [owningGame.id], newLobbyName);
+          if (this.gameIsPublic(owningGame.id)) {
+            this.SendMessage(
+              "update_game_name",
+              ["Find"],
+              [owningGame.id, newLobbyName]
+            );
+          }
+        }
+      }
+    });
+
+    socket.on("change_max_players", (newMaxNumberOfPlayers) => {
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid) {
+        const owningGame = this.gameBases[uid];
+        if (
+          owningGame &&
+          1 < newMaxNumberOfPlayers &&
+          newMaxNumberOfPlayers <= 20
+        ) {
+          this.gameBases[uid].maxNumberOfPlayers = newMaxNumberOfPlayers;
+
+          //TODO: Kick players joined after max number
+          if (this.gamePlayers[owningGame.id].length > newMaxNumberOfPlayers) {
+            const playersToKick = this.gamePlayers[owningGame.id].slice(
+              newMaxNumberOfPlayers,
+              this.gamePlayers[owningGame.id].length
+            );
+            playersToKick.forEach((uid) => {
+              this.removeUserFromGamesAndRoom(uid);
+              this.SendMessage("player_left", [owningGame.id], uid);
+            }); //kicks them
+            this.SendMessage("been_kicked", playersToKick); //Informs them they've been kicked
+
+            if (this.gameIsPublic(owningGame.id)) {
+              this.SendMessage(
+                "update_game_num_players",
+                ["Find"],
+                [owningGame.id, this.gamePlayers[owningGame.id].length]
+              );
+            }
+          }
+
+          this.SendMessage(
+            "max_players_changed",
+            [owningGame.id],
+            newMaxNumberOfPlayers
+          );
+          if (this.gameIsPublic(owningGame.id)) {
+            this.SendMessage(
+              "update_max_players",
+              ["Find"],
+              [owningGame.id, newMaxNumberOfPlayers]
+            );
+          }
+        }
+      }
+    });
   };
 }

@@ -46,11 +46,15 @@ export type TSocketContextActions =
   | "update_game_num_players"
   | "update_games"
   | "remove_game"
+  | "update_game_name"
+  | "update_max_players"
   | "set_this_game"
   | "update_game_players"
   | "add_game_player"
   | "remove_game_player"
-  | "change_player_name";
+  | "update_player_name"
+  | "update_lobby_name"
+  | "update_this_max_players";
 
 export type TSocketContextPayload =
   | string
@@ -72,6 +76,7 @@ export const SocketReducer = (
   state: ISocketContextState,
   action: ISocketContextActions
 ) => {
+  let gameIndex;
   switch (action.type) {
     case "update_socket":
       return { ...state, socket: action.payload as Socket };
@@ -111,6 +116,22 @@ export const SocketReducer = (
           (game: Game) => game.id !== (action.payload as string)
         ),
       };
+
+    case "update_game_name":
+      gameIndex = state.games.findIndex(
+        (game) => game.id === (action.payload as string[])[0]
+      );
+      state.games[gameIndex].name = (action.payload as string[])[1];
+      return { ...state, games: state.games };
+
+    case "update_max_players":
+      gameIndex = state.games.findIndex(
+        (game) => game.id === (action.payload as [string, number])[0]
+      );
+      state.games[gameIndex].maxNumberOfPlayers = (
+        action.payload as [string, number]
+      )[1];
+      return { ...state, games: state.games };
 
     case "set_this_game":
       return { ...state, thisGame: action.payload as GameInfo };
@@ -162,7 +183,7 @@ export const SocketReducer = (
       };
     }
 
-    case "change_player_name":
+    case "update_player_name":
       const uid = (action.payload as string[])[0];
       const givenPlayerName = (action.payload as string[])[1];
 
@@ -175,6 +196,21 @@ export const SocketReducer = (
         thisGame: {
           ...state.thisGame,
           gamePlayersNames: state.thisGame.gamePlayersNames,
+        },
+      };
+
+    case "update_lobby_name":
+      return {
+        ...state,
+        thisGame: { ...state.thisGame, name: action.payload as string },
+      };
+
+    case "update_this_max_players":
+      return {
+        ...state,
+        thisGame: {
+          ...state.thisGame,
+          maxNumberOfPlayers: action.payload as number,
         },
       };
   }

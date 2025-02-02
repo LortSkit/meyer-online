@@ -1,5 +1,4 @@
-import { translateGameId as parentTranslateGameId } from "../Find/langFind";
-import { translatePlayers as parentTranslatePlayers } from "../Find/langFind";
+import { translateGameId as parentTranslate } from "../Find/langFind";
 
 export function translateGameDoesNotExist(isDanish: boolean): string {
   return isDanish ? "Spillet eksisterer ikke" : "Game does not exist!";
@@ -14,7 +13,7 @@ export function translateChooseName(isDanish: boolean): string {
 }
 
 export function translateGameId(isDanish: boolean): string {
-  return parentTranslateGameId(isDanish);
+  return parentTranslate(isDanish);
 }
 
 export function translateShare(isDanish: boolean): string {
@@ -23,10 +22,6 @@ export function translateShare(isDanish: boolean): string {
 
 export function translateGameOwner(isDanish: boolean): string {
   return isDanish ? "Du er spilejeren" : "You are the game owner";
-}
-
-export function translatePlayers(isDanish: boolean): string {
-  return parentTranslatePlayers(isDanish);
 }
 
 export function translateNeedPlayers(isDanish: boolean): string {

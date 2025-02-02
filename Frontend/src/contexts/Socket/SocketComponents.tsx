@@ -9,6 +9,7 @@ import {
 import { useSocket } from "../../hooks/useSocket";
 import { useNavigate } from "react-router-dom";
 import {
+  translateKicked,
   translateLoading,
   translateReconnectFailure,
   translateRedirecting,
@@ -124,6 +125,16 @@ const SocketContextComponent: React.FunctionComponent<
       });
     });
 
+    /* Update game name */
+    socket.on("update_game_name", (payload: string[]) => {
+      SocketDispatch({ type: "update_game_name", payload: payload });
+    });
+
+    /* Update max number of players */
+    socket.on("update_max_players", (payload: [string, number]) => {
+      SocketDispatch({ type: "update_max_players", payload: payload });
+    });
+
     /* Update game number of players*/
     socket.on("update_game_num_players", (payload: [string, number]) => {
       SocketDispatch({ type: "update_game_num_players", payload: payload });
@@ -150,14 +161,32 @@ const SocketContextComponent: React.FunctionComponent<
 
     /* Player name changed */
     socket.on("player_name_changed", (payload: string[]) => {
-      SocketDispatch({ type: "change_player_name", payload: payload });
+      SocketDispatch({ type: "update_player_name", payload: payload });
       localStorage.setItem("playerName", payload[1]);
+    });
+
+    /* Lobby name changed */
+    socket.on("lobby_name_changed", (newLobbyName: string) => {
+      SocketDispatch({ type: "update_lobby_name", payload: newLobbyName });
+    });
+
+    /* Max number of players changed */
+    socket.on("max_players_changed", (newMaxNumberOfPlayers: number) => {
+      SocketDispatch({
+        type: "update_this_max_players",
+        payload: newMaxNumberOfPlayers,
+      });
     });
 
     /* Owner left */
     socket.on("game_owner_left", () => {
       focus();
       confirm(translateRedirecting(isDanish));
+      navigate(base + "/find");
+    });
+
+    socket.on("been_kicked", () => {
+      confirm(translateKicked(isDanish));
       navigate(base + "/find");
     });
   };

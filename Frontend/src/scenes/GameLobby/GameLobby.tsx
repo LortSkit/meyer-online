@@ -3,14 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { validate as isValidUUID } from "uuid";
 import { useGlobalContext } from "../../contexts/Socket/SocketContext";
 import { base } from "../../utils/hostSubDirectory";
-import {
-  Box,
-  Button,
-  IconButton,
-  InputBase,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { Box, Button, IconButton, Typography, useTheme } from "@mui/material";
 import { MiddleChild } from "../../components/CenteredPage/PageChildren";
 import CenteredPage from "../../components/CenteredPage/CenteredPage";
 import { IosShareOutlined, StarOutlined } from "@mui/icons-material";
@@ -22,7 +15,6 @@ import {
   translateNeedName,
   translateNeedPlayers,
   translateNotEnoughSpace,
-  translatePlayers,
   translateShare,
   translateStartGame,
   translateWaiting,
@@ -32,8 +24,8 @@ import SetPlayerName from "./SetPlayerName";
 import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
 import { tokens } from "../../theme";
 import GameLobbyName from "./GameLobbyName";
-import SocketContextComponent from "../../contexts/Socket/SocketComponents";
 import { Socket } from "socket.io-client";
+import GameLobbyPlayers from "./GameLobbyPlayers";
 
 function baseMessage(message: string) {
   return (
@@ -170,6 +162,7 @@ const GameLobby = ({ isDanish }: Props) => {
           <Box display="flex" justifyContent="center" flexDirection="column">
             {/* HEADING */}
             <GameLobbyName
+              isOwner={isOwner()}
               name={SocketState.thisGame?.name}
               socket={SocketState.socket as Socket}
             />
@@ -186,6 +179,8 @@ const GameLobby = ({ isDanish }: Props) => {
                 display="flex"
                 justifyContent="center"
                 flexDirection="column"
+                paddingTop="5px"
+                paddingBottom="5px"
               >
                 {translateShare(isDanish)}
               </Box>
@@ -193,6 +188,10 @@ const GameLobby = ({ isDanish }: Props) => {
                 onClick={() =>
                   navigator.clipboard.writeText(window.location.href)
                 } //SHARING BUTTON - ONLY WORKS WITH HTTPS PROTOCOL!
+                sx={{
+                  position: "fixed",
+                  transform: "translate(150%,-16%)",
+                }}
               >
                 <IosShareOutlined style={{ color: colors.blackAccent[100] }} />
               </IconButton>
@@ -207,22 +206,30 @@ const GameLobby = ({ isDanish }: Props) => {
               >
                 {translateGameOwner(isDanish)}
                 <Box paddingLeft="5px" />
-                <StarOutlined />
+                <StarOutlined
+                  sx={{
+                    position: "fixed",
+                    transform: `translate(${isDanish ? 270 : 380}%,-10%)`,
+                  }}
+                />
               </Box>
             )}
             <Box p={2} />
 
             {/* NUMBER OF PLAYERS */}
-            <Box display="flex" justifyContent="center">
-              {translatePlayers(isDanish)}
-              <Box paddingLeft="5px" />
-              {SocketState.thisGame?.gamePlayers.length}/
-              {SocketState.thisGame?.maxNumberOfPlayers}
-            </Box>
+
+            <GameLobbyPlayers
+              isDanish={isDanish}
+              isOwner={isOwner()}
+              numberOfPlayers={SocketState.thisGame?.gamePlayers.length}
+              maxNumberOfPlayers={SocketState.thisGame?.maxNumberOfPlayers}
+              socket={SocketState.socket as Socket}
+            />
+
             <Box paddingBottom="5px" />
 
             {/* PLAYERS */}
-            <Box display="flex" justifyContent="center">
+            <Box display="flex" justifyContent="center" paddingRight="70px">
               <PlayersHealthsDisplay
                 currentHealths={initHealths(
                   SocketState.thisGame?.gamePlayersNames.length

@@ -1,4 +1,5 @@
 import { translateFind } from "./langMenuItems";
+import { translatePage } from "./Home/langHomeText";
 
 export function translateReconnectFailure(isDanish: boolean): string {
   return isDanish
@@ -7,13 +8,23 @@ export function translateReconnectFailure(isDanish: boolean): string {
 }
 
 export function translateRedirecting(isDanish: boolean): string {
-  return isDanish
-    ? "Ejeren har forladt spillet, omdirigerer dig til " +
-        translateFind(isDanish) +
-        "-siden."
-    : "Game owner has left, redirecting you to the " +
-        translateFind(isDanish) +
-        " page.";
+  return (
+    (isDanish
+      ? "Ejeren har forladt spillet, omdirigerer dig til "
+      : "Game owner has left, redirecting you to the ") +
+    translateFind(isDanish) +
+    translatePage(isDanish)
+  );
+}
+
+export function translateKicked(isDanish: boolean): string {
+  return (
+    (isDanish
+      ? "Ejeren har smidt dig ud af spillet... Omdirigerer dig til "
+      : "Owner kicked you from the game... Redirecting you to the ") +
+    translateFind(isDanish) +
+    translatePage(isDanish)
+  );
 }
 
 export function translateLoading(isDanish: boolean): string {
