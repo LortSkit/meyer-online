@@ -8,10 +8,6 @@ export function translateGameId(isDanish: boolean): string {
   return isDanish ? "Spil-ID: " : "Game ID: ";
 }
 
-export function translateGameName(isDanish: boolean): string {
-  return isDanish ? "Spilnavn: " : "Lobby name: ";
-}
-
 export function translatePlayers(isDanish: boolean): string {
   return isDanish ? "Spillere: " : "Players: ";
 }

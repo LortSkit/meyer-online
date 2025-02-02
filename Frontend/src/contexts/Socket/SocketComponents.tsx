@@ -2,6 +2,7 @@ import { PropsWithChildren, useEffect, useReducer, useState } from "react";
 import {
   defaultSocketContextState,
   Game,
+  GameInfo,
   SocketContextProvider,
   SocketReducer,
 } from "./SocketContext";
@@ -129,8 +130,12 @@ const SocketContextComponent: React.FunctionComponent<
     });
 
     /* Join game */
-    socket.on("joined_game", (payload: string[][]) => {
-      SocketDispatch({ type: "update_game_players", payload: payload });
+    socket.on("joined_game", (payload: [GameInfo, string[], string[]]) => {
+      SocketDispatch({ type: "set_this_game", payload: payload[0] });
+      SocketDispatch({
+        type: "update_game_players",
+        payload: payload.slice(1, 3) as string[][],
+      });
     });
 
     /* Player joined */

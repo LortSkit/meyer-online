@@ -9,7 +9,6 @@ import { base } from "../../utils/hostSubDirectory";
 import SearchBar from "../../components/SearchBar";
 import {
   translateGameId,
-  translateGameName,
   translateNoFiltered,
   translateNoGames,
   translatePlayers,
@@ -19,26 +18,14 @@ import {
 
 interface Props {
   isDanish: boolean;
-  searchBarRef: any;
   searchLobbyName: string;
   setSearchLobbyName: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const Find = ({
-  isDanish,
-  searchBarRef,
-  searchLobbyName,
-  setSearchLobbyName,
-}: Props) => {
+const Find = ({ isDanish, searchLobbyName, setSearchLobbyName }: Props) => {
   const navigate = useNavigate();
 
   const { SocketState, SocketDispatch } = useGlobalContext();
-
-  useEffect(() => {
-    if (searchBarRef.value) {
-      document.getElementById("search-bar")?.focus(); //Doesn't work on ios - Made something else work okay-ish though
-    }
-  }, []);
 
   useEffect(() => {
     /* Connect to the Web Socket */
@@ -65,34 +52,41 @@ const Find = ({
             color="secondary"
             onClick={onClick(game.id)}
             disabled={game.numberOfPlayers >= game.maxNumberOfPlayers}
+            style={{ width: "310px", wordBreak: "break-all" }}
             key={game.id}
           >
             <Box>
               <Typography
+                variant="h4"
+                fontStyle="normal"
+                textTransform="none"
+                children={<strong>{game.name}</strong>}
+              />
+              <Typography
+                fontSize="16px"
+                fontStyle="normal"
+                textTransform="none"
+                children={
+                  <>
+                    {translatePlayers(isDanish)}
+                    <strong>
+                      {game.numberOfPlayers}/{game.maxNumberOfPlayers}
+                    </strong>
+                    <br />
+                  </>
+                }
+              />
+              <Typography
                 fontSize="12px"
                 fontStyle="normal"
                 textTransform="none"
-                component="span"
-              >
-                {translateGameId(isDanish)}
-                <Typography
-                  fontSize="12px"
-                  textTransform="uppercase"
-                  component="strong"
-                >
-                  <strong>{game.id}</strong>
-                </Typography>
-                <br />
-
-                {translateGameName(isDanish)}
-                <strong>{game.name}</strong>
-
-                <br />
-                {translatePlayers(isDanish)}
-                <strong>
-                  {game.numberOfPlayers}/{game.maxNumberOfPlayers}
-                </strong>
-              </Typography>
+                children={
+                  <>
+                    {translateGameId(isDanish)}
+                    <strong>{game.id}</strong>
+                  </>
+                }
+              />
             </Box>
           </Button>
         </Box>
@@ -117,11 +111,6 @@ const Find = ({
     showFilteredItems(getFilter())
   );
 
-  function onChange(event: React.ChangeEvent<HTMLInputElement>): void {
-    searchBarRef.value = event.target.value;
-    setSearchLobbyName(event.target.value);
-  }
-
   useEffect(() => {
     setFilteredResults(showFilteredItems(getFilter()));
   }, [searchLobbyName, SocketState, isDanish]);
@@ -143,10 +132,9 @@ const Find = ({
       <Box display="flex" justifyContent="center">
         <SearchBar
           isDanish={isDanish}
-          searchBarRef={searchBarRef}
-          retainValue
+          searchLobbyName={searchLobbyName}
           width="315px"
-          onChange={onChange}
+          setSearchLobbyName={setSearchLobbyName}
         />
       </Box>
       <Box paddingTop="10px" />

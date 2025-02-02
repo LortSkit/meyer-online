@@ -1,5 +1,5 @@
 import { createContext, useRef, useState } from "react";
-import { ColorModeContext, tokens, useMode } from "./theme";
+import { ColorModeContext, useMode } from "./theme";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import Topbar from "./scenes/global/Topbar";
 import SidebarDesktop from "./scenes/global/Sidebar/SidebarDesktop";
@@ -31,7 +31,6 @@ const App = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isDanish, setIsDanish] = useState(initIsDanish);
   const [searchLobbyName, setSearchLobbyName] = useState("");
-  const searchBarRef = useRef<{ value: string }>({ value: searchLobbyName });
   const handlers = useSwipeable({
     trackMouse: true,
     onSwipedRight: () => setIsVisible(true),
@@ -75,7 +74,7 @@ const App = () => {
             <Topbar
               isDanish={isDanish}
               pathname={pathname}
-              searchBarRef={searchBarRef}
+              searchLobbyName={searchLobbyName}
               setIsDanish={setIsDanish}
               setIsVisible={setIsVisible}
               setSearchLobbyName={setSearchLobbyName}
@@ -108,7 +107,6 @@ const App = () => {
                     <SocketContextComponent isDanish={isDanish}>
                       <Find
                         isDanish={isDanish}
-                        searchBarRef={searchBarRef}
                         searchLobbyName={searchLobbyName}
                         setSearchLobbyName={setSearchLobbyName}
                       />

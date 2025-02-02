@@ -1,25 +1,21 @@
 //Stolen from https://github.com/ed-roh/react-admin-dashboard
 
-import { Box, InputBase, IconButton, useTheme } from "@mui/material";
+import { Box, IconButton, useTheme } from "@mui/material";
 import { useContext, useState } from "react";
 import { ColorModeContext, tokens } from "../../theme";
 import {
   MenuOutlined,
   LightModeOutlined,
   DarkModeOutlined,
-  Search,
 } from "@mui/icons-material";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
 import { isInFind, isInLobby } from "../../utils/appUtils";
-import { useNavigate } from "react-router-dom";
-import { base } from "../../utils/hostSubDirectory";
 import SearchBar from "../../components/SearchBar";
-import { useMediaQuery } from "usehooks-ts";
 
 interface Props {
   isDanish: boolean;
   pathname: string;
-  searchBarRef: any;
+  searchLobbyName: string;
   setIsDanish: React.Dispatch<React.SetStateAction<boolean>>;
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSearchLobbyName: React.Dispatch<React.SetStateAction<string>>;
@@ -28,7 +24,7 @@ interface Props {
 const Topbar = ({
   isDanish,
   pathname,
-  searchBarRef,
+  searchLobbyName,
   setIsDanish,
   setIsVisible,
   setSearchLobbyName,
@@ -38,18 +34,6 @@ const Topbar = ({
   const colorMode = useContext(ColorModeContext);
   const [hovered, setHovered] = useState(false);
   const [justClicked, setJustClicked] = useState(false);
-
-  const queryMatches = useMediaQuery("only screen and (min-width: 400px)");
-
-  const navigate = useNavigate();
-
-  function onChange(event: React.ChangeEvent<HTMLInputElement>): void {
-    searchBarRef.value = event.target.value;
-    setSearchLobbyName(event.target.value);
-    if (queryMatches) {
-      navigate(base + "/find");
-    }
-  }
 
   return (
     <Box
@@ -85,9 +69,8 @@ const Topbar = ({
         {!isInLobby(pathname) && !isInFind(pathname) && (
           <SearchBar
             isDanish={isDanish}
-            searchBarRef={searchBarRef}
-            retainValue={false}
-            onChange={onChange}
+            searchLobbyName={searchLobbyName}
+            setSearchLobbyName={setSearchLobbyName}
           />
         )}
       </Box>

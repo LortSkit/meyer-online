@@ -3,7 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { validate as isValidUUID } from "uuid";
 import { useGlobalContext } from "../../contexts/Socket/SocketContext";
 import { base } from "../../utils/hostSubDirectory";
-import { Box, IconButton, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  InputBase,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { MiddleChild } from "../../components/CenteredPage/PageChildren";
 import CenteredPage from "../../components/CenteredPage/CenteredPage";
 import { IosShareOutlined, StarOutlined } from "@mui/icons-material";
@@ -12,11 +19,21 @@ import {
   translateGameDoesNotExist,
   translateGameId,
   translateGameOwner,
+  translateNeedName,
+  translateNeedPlayers,
   translateNotEnoughSpace,
+  translatePlayers,
   translateShare,
+  translateStartGame,
+  translateWaiting,
 } from "../../utils/lang/GameLobby/langGameLobby";
 import PlayersHealthsDisplay from "../../components/game/PlayersHealthsDisplay";
 import SetPlayerName from "./SetPlayerName";
+import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
+import { tokens } from "../../theme";
+import GameLobbyName from "./GameLobbyName";
+import SocketContextComponent from "../../contexts/Socket/SocketComponents";
+import { Socket } from "socket.io-client";
 
 function baseMessage(message: string) {
   return (
@@ -41,6 +58,9 @@ interface Props {
 }
 
 const GameLobby = ({ isDanish }: Props) => {
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
   const StandardErrorMessage = () => {
     return baseMessage(translateGameDoesNotExist(isDanish));
   };
@@ -55,26 +75,45 @@ const GameLobby = ({ isDanish }: Props) => {
   const { SocketState, SocketDispatch } = useGlobalContext();
   const [gameExists, setGameExists] = useState(false);
   const [hasEnoughSpace, setHasEnoughSpace] = useState(false);
-  const [lobbyName, setLobbyName] = useState("");
   const [chosenPlayerName, setChosenPlayerName] = useState("");
 
   function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") {
-      console.log("clicked!");
+      //TODO: Implement this event on the socket side!
       SocketState.socket?.emit("change_player_name", chosenPlayerName);
     }
   }
 
   function thisPlayerName(): string {
-    if (!SocketState.gamePlayers) {
+    if (!SocketState.thisGame?.gamePlayers) {
       return "";
     }
 
-    const playerIndex = SocketState.gamePlayers.findIndex(
+    const playerIndex = SocketState.thisGame?.gamePlayers.findIndex(
       (value) => value === SocketState.uid
     );
 
-    return SocketState.gamePlayersNames[playerIndex];
+    return SocketState.thisGame?.gamePlayersNames[playerIndex];
+  }
+
+  function isOwner(): boolean {
+    return SocketState.uid === SocketState.thisGame?.gamePlayers[0];
+  }
+
+  function isMissingPlayers(): boolean {
+    return SocketState.thisGame?.gamePlayers.length < 2;
+  }
+
+  function isMissingNames(): boolean {
+    return SocketState.thisGame?.gamePlayersNames.includes("");
+  }
+
+  function canStartGame(): boolean {
+    if (isMissingPlayers() || isMissingNames()) {
+      return false;
+    }
+
+    return true;
   }
 
   useEffect(() => {
@@ -98,7 +137,6 @@ const GameLobby = ({ isDanish }: Props) => {
         ) => {
           setGameExists(exists);
           setHasEnoughSpace(enoughSpace);
-          setLobbyName(gameName);
         }
       );
     }
@@ -108,7 +146,7 @@ const GameLobby = ({ isDanish }: Props) => {
 
   if (gameId === "unknown") {
     middleChild = <StandardErrorMessage />;
-  } else if (!gameExists || SocketState.gamePlayers.length === 0) {
+  } else if (!gameExists || SocketState.thisGame?.gamePlayers.length === 0) {
     middleChild = <StandardErrorMessage />;
   } else if (!hasEnoughSpace) {
     middleChild = <NotEnoughSpaceMessage />;
@@ -130,17 +168,19 @@ const GameLobby = ({ isDanish }: Props) => {
       <MiddleChild widthPercentage={90}>
         <Box display="flex" justifyContent="center">
           <Box display="flex" justifyContent="center" flexDirection="column">
-            <Typography
-              variant="h1"
-              fontStyle="normal"
-              textTransform="none"
-              sx={{ display: "flex", justifyContent: "center" }}
-              children={<strong>{lobbyName}</strong>}
+            {/* HEADING */}
+            <GameLobbyName
+              name={SocketState.thisGame?.name}
+              socket={SocketState.socket as Socket}
             />
+
+            {/* GAME ID */}
             <Box display="flex" justifyContent="center">
               {translateGameId(isDanish)} <Box paddingLeft="5px" />
               <strong>{gameId}</strong>
             </Box>
+
+            {/* INVITE LINK */}
             <Box display="flex" justifyContent="center">
               <Box
                 display="flex"
@@ -154,11 +194,12 @@ const GameLobby = ({ isDanish }: Props) => {
                   navigator.clipboard.writeText(window.location.href)
                 } //SHARING BUTTON - ONLY WORKS WITH HTTPS PROTOCOL!
               >
-                <IosShareOutlined />
+                <IosShareOutlined style={{ color: colors.blackAccent[100] }} />
               </IconButton>
             </Box>
 
-            {SocketState.uid === SocketState.gamePlayers[0] && (
+            {/* YOU ARE GAME OWNER - (if you are) */}
+            {isOwner() && (
               <Box
                 display="flex"
                 justifyContent="center"
@@ -169,16 +210,91 @@ const GameLobby = ({ isDanish }: Props) => {
                 <StarOutlined />
               </Box>
             )}
-            <Box p={5} />
+            <Box p={2} />
 
+            {/* NUMBER OF PLAYERS */}
+            <Box display="flex" justifyContent="center">
+              {translatePlayers(isDanish)}
+              <Box paddingLeft="5px" />
+              {SocketState.thisGame?.gamePlayers.length}/
+              {SocketState.thisGame?.maxNumberOfPlayers}
+            </Box>
+            <Box paddingBottom="5px" />
+
+            {/* PLAYERS */}
             <Box display="flex" justifyContent="center">
               <PlayersHealthsDisplay
                 currentHealths={initHealths(
-                  SocketState.gamePlayersNames.length
+                  SocketState.thisGame?.gamePlayersNames.length
                 )}
-                playerNames={SocketState.gamePlayersNames}
+                playerNames={SocketState.thisGame?.gamePlayersNames}
               />
             </Box>
+
+            <Box p={1} />
+            {/* NEED AT LEAST TWO PLAYERS */}
+            {isMissingPlayers() && (
+              <Box display="flex" justifyContent="center">
+                {translateNeedPlayers(isDanish)}
+              </Box>
+            )}
+
+            {/* PLAYERS HAVE TO HAVE A NAME */}
+            {isMissingNames() && (
+              <Box display="flex" justifyContent="center">
+                {translateNeedName(isDanish)}
+                <Box
+                  display="flex"
+                  justifyContent="center"
+                  flexDirection="column"
+                >
+                  <img
+                    src={loading}
+                    width="35px"
+                    style={{ paddingLeft: "5px" }}
+                  />
+                </Box>
+              </Box>
+            )}
+
+            {/* START GAME */}
+            {isOwner() && (
+              <Box display="flex" justifyContent="center">
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  disabled={!canStartGame()}
+                >
+                  <Typography
+                    fontSize="16px"
+                    fontStyle="normal"
+                    textTransform="none"
+                    children={translateStartGame(isDanish)}
+                  />
+                </Button>
+              </Box>
+            )}
+            {!isOwner() && canStartGame() && (
+              <Box display="flex" justifyContent="center">
+                <Typography
+                  fontSize="16px"
+                  fontStyle="normal"
+                  textTransform="none"
+                  children={translateWaiting(isDanish)}
+                />
+                <Box
+                  display="flex"
+                  justifyContent="flex-end"
+                  flexDirection="column"
+                >
+                  <img
+                    src={loading}
+                    width="35px"
+                    style={{ paddingLeft: "5px", paddingBottom: "5.5px" }}
+                  />
+                </Box>
+              </Box>
+            )}
           </Box>
         </Box>
       </MiddleChild>

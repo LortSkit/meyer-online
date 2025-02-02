@@ -1,4 +1,3 @@
-import { Games } from "@mui/icons-material";
 import { createContext, useContext } from "react";
 import { Socket } from "socket.io-client";
 
@@ -7,6 +6,15 @@ export type Game = {
   name: string;
   numberOfPlayers: number;
   maxNumberOfPlayers: number;
+};
+
+export type GameInfo = {
+  id: string;
+  name: string;
+  gamePlayers: string[];
+  gamePlayersNames: string[];
+  maxNumberOfPlayers: number;
+  isPublic: boolean;
 };
 
 export type GameRequest = {
@@ -18,18 +26,16 @@ export interface ISocketContextState {
   socket: Socket | undefined;
   uid: string;
   usersTotal: number;
+  thisGame: GameInfo;
   games: Game[];
-  gamePlayers: string[];
-  gamePlayersNames: string[];
 }
 
 export const defaultSocketContextState: ISocketContextState = {
   socket: undefined,
   uid: "",
   usersTotal: 0,
+  thisGame: null as unknown as GameInfo,
   games: [],
-  gamePlayers: [],
-  gamePlayersNames: [],
 };
 
 export type TSocketContextActions =
@@ -40,6 +46,7 @@ export type TSocketContextActions =
   | "update_game_num_players"
   | "update_games"
   | "remove_game"
+  | "set_this_game"
   | "update_game_players"
   | "add_game_player"
   | "remove_game_player"
@@ -52,6 +59,7 @@ export type TSocketContextPayload =
   | Socket
   | Game
   | Game[]
+  | GameInfo
   | number
   | [string, number];
 
@@ -104,13 +112,19 @@ export const SocketReducer = (
         ),
       };
 
+    case "set_this_game":
+      return { ...state, thisGame: action.payload as GameInfo };
+
     case "update_game_players":
       const newGamePlayers = (action.payload as string[][])[0];
       const newGamePlayersNames = (action.payload as string[][])[1];
       return {
         ...state,
-        gamePlayers: newGamePlayers,
-        gamePlayersNames: newGamePlayersNames,
+        thisGame: {
+          ...state.thisGame,
+          gamePlayers: newGamePlayers,
+          gamePlayersNames: newGamePlayersNames,
+        },
       };
 
     case "add_game_player": {
@@ -118,27 +132,33 @@ export const SocketReducer = (
       const playerName = (action.payload as string[])[1];
       return {
         ...state,
-        gamePlayers: state.gamePlayers.includes(uid)
-          ? state.gamePlayers
-          : state.gamePlayers.concat([uid]),
-        gamePlayersNames: state.gamePlayers.includes(uid)
-          ? state.gamePlayersNames
-          : state.gamePlayersNames.concat([playerName]),
+        thisGame: {
+          ...state.thisGame,
+          gamePlayers: state.thisGame.gamePlayers.includes(uid)
+            ? state.thisGame.gamePlayers
+            : state.thisGame.gamePlayers.concat([uid]),
+          gamePlayersNames: state.thisGame.gamePlayers.includes(uid)
+            ? state.thisGame.gamePlayersNames
+            : state.thisGame.gamePlayersNames.concat([playerName]),
+        },
       };
     }
 
     case "remove_game_player": {
-      let playerIndex = state.gamePlayers.findIndex(
+      let playerIndex = state.thisGame.gamePlayers.findIndex(
         (value) => value === (action.payload as string)
       );
       return {
         ...state,
-        gamePlayers: state.gamePlayers.filter(
-          (value, index) => index !== playerIndex
-        ),
-        gamePlayersNames: state.gamePlayers.filter(
-          (value, index) => index !== playerIndex
-        ),
+        thisGame: {
+          ...state.thisGame,
+          gamePlayers: state.thisGame.gamePlayers.filter(
+            (value, index) => index !== playerIndex
+          ),
+          gamePlayersNames: state.thisGame.gamePlayersNames.filter(
+            (value, index) => index !== playerIndex
+          ),
+        },
       };
     }
 
@@ -146,9 +166,17 @@ export const SocketReducer = (
       const uid = (action.payload as string[])[0];
       const givenPlayerName = (action.payload as string[])[1];
 
-      const playerIndex = state.gamePlayers.findIndex((value) => value === uid);
-      state.gamePlayersNames[playerIndex] = givenPlayerName;
-      return { ...state, gamePlayersNames: state.gamePlayersNames };
+      const playerIndex = state.thisGame.gamePlayers.findIndex(
+        (value) => value === uid
+      );
+      state.thisGame.gamePlayersNames[playerIndex] = givenPlayerName;
+      return {
+        ...state,
+        thisGame: {
+          ...state.thisGame,
+          gamePlayersNames: state.thisGame.gamePlayersNames,
+        },
+      };
   }
 };
 

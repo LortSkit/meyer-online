@@ -25,6 +25,15 @@ type GameDisplay = {
   maxNumberOfPlayers: number;
 };
 
+type GameInfo = {
+  id: string;
+  name: string;
+  gamePlayers: string[];
+  gamePlayersNames: string[];
+  maxNumberOfPlayers: number;
+  isPublic: boolean;
+};
+
 type GameRequest = {
   name: string;
   maxNumberOfPlayers: number;
@@ -55,6 +64,17 @@ function gameBaseToGameDisplay(gameBase: GameBase): GameDisplay {
     name: gameBase.name,
     numberOfPlayers: 0,
     maxNumberOfPlayers: gameBase.maxNumberOfPlayers,
+  };
+}
+
+function gameBaseToGameInfo(gameBase: GameBase): GameInfo {
+  return {
+    id: gameBase.id,
+    name: gameBase.name,
+    gamePlayers: [],
+    gamePlayersNames: [],
+    maxNumberOfPlayers: gameBase.maxNumberOfPlayers,
+    isPublic: false,
   };
 }
 
@@ -446,7 +466,18 @@ export class ServerSocket {
               this.SendMessage(
                 "joined_game",
                 [joiningUid],
-                [this.gamePlayers[gameId], this.gamePlayersNames[gameId]]
+                [
+                  {
+                    ...gameBaseToGameInfo(
+                      this.gameBases[this.gamesIdIndex[gameId]]
+                    ),
+                    gamePlayers: this.gamePlayers[gameId],
+                    gamePlayersNames: this.gamePlayersNames[gameId],
+                    isPublic: this.gameIsPublic(gameId),
+                  } as GameInfo,
+                  this.gamePlayers[gameId],
+                  this.gamePlayersNames[gameId],
+                ]
               );
 
               if (this.gameIsPublic(gameId)) {
