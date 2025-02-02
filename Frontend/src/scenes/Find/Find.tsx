@@ -52,7 +52,7 @@ const Find = ({ isDanish, searchLobbyName, setSearchLobbyName }: Props) => {
             color="secondary"
             onClick={onClick(game.id)}
             disabled={game.numberOfPlayers >= game.maxNumberOfPlayers}
-            style={{ width: "310px", wordBreak: "break-all" }}
+            style={{ width: "335px", wordBreak: "break-all" }}
             key={game.id}
           >
             <Box>

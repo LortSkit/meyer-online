@@ -8,7 +8,7 @@ import {
 import { useEffect, useState } from "react";
 import { tokens } from "../../theme";
 import { Socket } from "socket.io-client";
-import { Edit } from "@mui/icons-material";
+import { Edit, Height } from "@mui/icons-material";
 
 interface Props {
   isOwner: boolean;
@@ -87,7 +87,7 @@ const GameLobbyName = ({ isOwner, name, socket }: Props) => {
             <>
               <strong>{name}</strong>
               {toggleEditLobbyNameIcon && isOwner && (
-                <IconButton onClick={onEdit} sx={{ position: "fixed" }}>
+                <IconButton onClick={onEdit} sx={{ position: "static" }}>
                   <Edit />
                 </IconButton>
               )}

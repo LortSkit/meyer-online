@@ -102,34 +102,27 @@ const GameLobbyPlayers = ({
             <Box paddingLeft="5px" />
             {numberOfPlayers}/
             {!toggleEditMax && (
-              <Box
-                display="flex"
-                justifyContent="center"
-                flexDirection="column"
-                width={isOwner ? "40px" : undefined}
-              >
+              <>
                 <Box paddingLeft="2px" />
                 {maxNumberOfPlayers}
                 {isOwner && (
                   <IconButton
                     onClick={onEdit}
                     sx={{
-                      position: "fixed",
-                      width: "20px",
-                      height: "20px",
-                      transform: "translateX(100%)",
+                      position: "relative",
+                      width: "25px",
+                      height: "25px",
                     }}
                   >
-                    <Edit sx={{ width: "15px" }} />
+                    <Edit sx={{ width: "16px" }} />
                   </IconButton>
                 )}
-              </Box>
+              </>
             )}
           </Typography>
         </Box>
         {toggleEditMax && (
           <Box display="flex" justifyContent="center" flexDirection="column">
-            <Box paddingLeft="2px" />
             <Box
               display="flex"
               justifyContent="center"
@@ -142,7 +135,8 @@ const GameLobbyPlayers = ({
                 id="max-players-bar"
                 sx={{
                   color: colors.blackAccent[100],
-                  width: "40px",
+                  paddingLeft: "2px",
+                  width: "42.9px",
                   fontSize: "16px",
                   "& .MuiInputBase-inputMultiline": {
                     padding: "0",

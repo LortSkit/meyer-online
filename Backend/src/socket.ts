@@ -554,7 +554,6 @@ export class ServerSocket {
         ) {
           this.gameBases[uid].maxNumberOfPlayers = newMaxNumberOfPlayers;
 
-          //TODO: Kick players joined after max number
           if (this.gamePlayers[owningGame.id].length > newMaxNumberOfPlayers) {
             const playersToKick = this.gamePlayers[owningGame.id].slice(
               newMaxNumberOfPlayers,
@@ -587,6 +586,18 @@ export class ServerSocket {
               [owningGame.id, newMaxNumberOfPlayers]
             );
           }
+        }
+      }
+    });
+
+    socket.on("kick_player", (kickingUid: string) => {
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid) {
+        const owningGame = this.gameBases[uid];
+        if (owningGame) {
+          this.removeUserFromGamesAndRoom(kickingUid);
+          this.SendMessage("been_kicked", [kickingUid]); //Informs them they've been kicked
+          this.SendMessage("player_left", [owningGame.id], kickingUid);
         }
       }
     });

@@ -12,6 +12,7 @@ import {
   translateGameDoesNotExist,
   translateGameId,
   translateGameOwner,
+  translateLeave,
   translateNeedName,
   translateNeedPlayers,
   translateNotEnoughSpace,
@@ -19,30 +20,20 @@ import {
   translateStartGame,
   translateWaiting,
 } from "../../utils/lang/GameLobby/langGameLobby";
-import PlayersHealthsDisplay from "../../components/game/PlayersHealthsDisplay";
 import SetPlayerName from "./SetPlayerName";
 import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
 import { tokens } from "../../theme";
 import GameLobbyName from "./GameLobbyName";
 import { Socket } from "socket.io-client";
 import GameLobbyPlayers from "./GameLobbyPlayers";
+import PlayerDisplay from "./PlayersDisplay";
 
 function baseMessage(message: string) {
   return (
-    <MiddleChild widthPercentage={90}>
-      <Box display="flex" justifyContent="center">
-        {message}
-      </Box>
-    </MiddleChild>
+    <Box display="flex" justifyContent="center">
+      {message}
+    </Box>
   );
-}
-
-function initHealths(numberOfPlayers: number): number[] {
-  let result = [];
-  for (let i = 0; i < numberOfPlayers; i++) {
-    result.push(6);
-  }
-  return result;
 }
 
 interface Props {
@@ -71,7 +62,6 @@ const GameLobby = ({ isDanish }: Props) => {
 
   function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") {
-      //TODO: Implement this event on the socket side!
       SocketState.socket?.emit("change_player_name", chosenPlayerName);
     }
   }
@@ -108,6 +98,20 @@ const GameLobby = ({ isDanish }: Props) => {
     return true;
   }
 
+  const LeaveGameButton = () => {
+    return (
+      <Box display="flex" justifyContent="center">
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => navigate(base + "/find")}
+        >
+          {translateLeave(isDanish)}
+        </Button>
+      </Box>
+    );
+  };
+
   useEffect(() => {
     if (!isValidUUID(gameId) && gameId !== "unknown") {
       navigate(base + "/game/unknown");
@@ -137,23 +141,44 @@ const GameLobby = ({ isDanish }: Props) => {
   let middleChild: JSX.Element;
 
   if (gameId === "unknown") {
-    middleChild = <StandardErrorMessage />;
+    middleChild = (
+      <MiddleChild widthPercentage={90}>
+        <Box p={4} />
+        <StandardErrorMessage />
+        <LeaveGameButton />
+      </MiddleChild>
+    );
   } else if (!gameExists || SocketState.thisGame?.gamePlayers.length === 0) {
-    middleChild = <StandardErrorMessage />;
+    middleChild = (
+      <MiddleChild widthPercentage={90}>
+        <Box p={4} />
+        <StandardErrorMessage />
+        <LeaveGameButton />
+      </MiddleChild>
+    );
   } else if (!hasEnoughSpace) {
-    middleChild = <NotEnoughSpaceMessage />;
+    middleChild = (
+      <MiddleChild widthPercentage={90}>
+        <Box p={4} />
+        <NotEnoughSpaceMessage />
+        <LeaveGameButton />
+      </MiddleChild>
+    );
   } else if (thisPlayerName() === "") {
     middleChild = (
-      <Box display="flex" flexDirection="column">
+      <MiddleChild widthPercentage={90}>
+        <Box p={4} />
         <Box display="flex" justifyContent="center">
           {translateChooseName(isDanish)}
         </Box>
-        <SetPlayerName
-          value={chosenPlayerName}
-          setChosenPlayerName={setChosenPlayerName}
-          onKeyDown={onKeyDown}
-        />
-      </Box>
+        <Box display="flex" justifyContent="center">
+          <SetPlayerName
+            value={chosenPlayerName}
+            setChosenPlayerName={setChosenPlayerName}
+            onKeyDown={onKeyDown}
+          />
+        </Box>
+      </MiddleChild>
     );
   } else {
     middleChild = (
@@ -189,8 +214,7 @@ const GameLobby = ({ isDanish }: Props) => {
                   navigator.clipboard.writeText(window.location.href)
                 } //SHARING BUTTON - ONLY WORKS WITH HTTPS PROTOCOL!
                 sx={{
-                  position: "fixed",
-                  transform: "translate(150%,-16%)",
+                  position: "relative",
                 }}
               >
                 <IosShareOutlined style={{ color: colors.blackAccent[100] }} />
@@ -208,12 +232,14 @@ const GameLobby = ({ isDanish }: Props) => {
                 <Box paddingLeft="5px" />
                 <StarOutlined
                   sx={{
-                    position: "fixed",
-                    transform: `translate(${isDanish ? 270 : 380}%,-10%)`,
+                    position: "relative",
                   }}
                 />
               </Box>
             )}
+
+            {/* LEAVE GAME BUTTON */}
+            <LeaveGameButton />
             <Box p={2} />
 
             {/* NUMBER OF PLAYERS */}
@@ -229,12 +255,22 @@ const GameLobby = ({ isDanish }: Props) => {
             <Box paddingBottom="5px" />
 
             {/* PLAYERS */}
-            <Box display="flex" justifyContent="center" paddingRight="70px">
-              <PlayersHealthsDisplay
-                currentHealths={initHealths(
-                  SocketState.thisGame?.gamePlayersNames.length
-                )}
-                playerNames={SocketState.thisGame?.gamePlayersNames}
+            <Box
+              display="flex"
+              justifyContent="center"
+              paddingLeft="85px"
+              paddingTop="10px"
+              paddingBottom="3px"
+              bgcolor={colors.primary[600]}
+              borderRadius="50px"
+            >
+              <PlayerDisplay
+                currentName={thisPlayerName()}
+                currentUid={SocketState.uid}
+                isOwner={isOwner()}
+                playerNames={SocketState.thisGame.gamePlayersNames}
+                playerUids={SocketState.thisGame.gamePlayers}
+                socket={SocketState.socket as Socket}
               />
             </Box>
 
@@ -252,7 +288,7 @@ const GameLobby = ({ isDanish }: Props) => {
                 {translateNeedName(isDanish)}
                 <Box
                   display="flex"
-                  justifyContent="center"
+                  justifyContent="flex-end"
                   flexDirection="column"
                 >
                   <img

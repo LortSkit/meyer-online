@@ -4,6 +4,10 @@ export function translateGameDoesNotExist(isDanish: boolean): string {
   return isDanish ? "Spillet eksisterer ikke" : "Game does not exist!";
 }
 
+export function translateLeave(isDanish: boolean): string {
+  return isDanish ? "Forlad spillet" : "Leave game";
+}
+
 export function translateNotEnoughSpace(isDanish: boolean): string {
   return isDanish ? "Spillet er fyldt!" : "This game is full!";
 }
