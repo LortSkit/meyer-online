@@ -590,6 +590,28 @@ export class ServerSocket {
       }
     });
 
+    socket.on("toggle_public_private", () => {
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid) {
+        const owningGame = this.gameBases[uid];
+        if (owningGame) {
+          if (this.gameIsPublic(owningGame.id)) {
+            delete this.publicGames[uid];
+            this.SendMessage("remove_game", ["Find"], owningGame.id);
+            this.SendMessage("change_game_private", [owningGame.id]);
+          } else {
+            this.publicGames[uid] = owningGame.id;
+
+            const gameDisplay = gameBaseToGameDisplay(owningGame);
+            gameDisplay.numberOfPlayers =
+              this.gamePlayers[owningGame.id].length;
+            this.SendMessage("add_game", ["Find"], gameDisplay);
+            this.SendMessage("change_game_public", [owningGame.id]);
+          }
+        }
+      }
+    });
+
     socket.on("kick_player", (kickingUid: string) => {
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {

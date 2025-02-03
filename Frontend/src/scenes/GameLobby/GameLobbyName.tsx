@@ -8,15 +8,28 @@ import {
 import { useEffect, useState } from "react";
 import { tokens } from "../../theme";
 import { Socket } from "socket.io-client";
-import { Edit, Height } from "@mui/icons-material";
+import { Edit, LockOpenOutlined, LockOutlined } from "@mui/icons-material";
+import {
+  translateEditLobbyName,
+  translatePrivate,
+  translatePublic,
+} from "../../utils/lang/GameLobby/langGameLobbyName";
 
 interface Props {
+  isDanish: boolean;
   isOwner: boolean;
+  isPublic: boolean;
   name: string;
   socket: Socket;
 }
 
-const GameLobbyName = ({ isOwner, name, socket }: Props) => {
+const GameLobbyName = ({
+  isDanish,
+  isOwner,
+  isPublic,
+  name,
+  socket,
+}: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -54,6 +67,12 @@ const GameLobbyName = ({ isOwner, name, socket }: Props) => {
     }
   }
 
+  function togglePublicPrivate(): void {
+    if (isOwner) {
+      socket.emit("toggle_public_private");
+    }
+  }
+
   useEffect(() => {
     setLobbyNameChanger(name);
   }, [name]);
@@ -69,73 +88,94 @@ const GameLobbyName = ({ isOwner, name, socket }: Props) => {
   }, [toggleEditLobbyName]);
 
   return (
-    <Box display="flex" justifyContent="center">
-      {/* NOT EDITING */}
-      {!toggleEditLobbyName && (
-        <Typography
-          variant="h1"
-          fontStyle="normal"
-          textTransform="none"
-          paddingTop="9.5px"
-          paddingBottom="10.8px"
-          style={{
-            wordBreak: "break-all",
-            textAlign: "center",
-          }}
-          onDoubleClick={onEdit}
-          children={
-            <>
-              <strong>{name}</strong>
-              {toggleEditLobbyNameIcon && isOwner && (
-                <IconButton onClick={onEdit} sx={{ position: "static" }}>
-                  <Edit />
-                </IconButton>
-              )}
-            </>
-          }
-        />
-      )}
-
-      {/* EDITING */}
-      {toggleEditLobbyName && (
-        <Box
-          display="flex"
-          bgcolor={colors.primary[600]}
-          borderRadius="3px"
-          onBlur={onBlur}
-        >
-          <InputBase
-            id="lobby-name-bar"
-            sx={{
-              color: colors.blackAccent[100],
-              fontSize: "40px",
-              fontStyle: "normal",
-              textTransform: "none",
-              fontWeight: "bold",
-              width: "100%",
-              "& .MuiInputBase-inputMultiline": {
-                padding: "0",
-                align: "center",
-                wordBreak: "break-all",
-                textAlign: "center",
-                "& input": {
-                  textAlign: "center",
-                },
-              },
+    <Box display="flex" flexDirection="column">
+      <Box display="flex" justifyContent="center">
+        {/* NOT EDITING */}
+        {!toggleEditLobbyName && (
+          <Typography
+            variant="h1"
+            fontStyle="normal"
+            textTransform="none"
+            paddingTop="9.5px"
+            paddingBottom="10.8px"
+            style={{
+              wordBreak: "break-all",
+              textAlign: "center",
             }}
-            multiline
-            type="text"
-            required={true}
-            inputProps={{
-              maxLength: 25,
-            }}
-            fullWidth
-            inputMode="text"
-            value={lobbyNameChanger}
-            onChange={onChange}
-            onInput={onInput}
-            onKeyDown={onKeyDown}
+            onDoubleClick={onEdit}
+            children={<strong>{name}</strong>}
           />
+        )}
+
+        {/* EDITING */}
+        {toggleEditLobbyName && (
+          <Box
+            display="flex"
+            bgcolor={colors.primary[600]}
+            borderRadius="3px"
+            onBlur={onBlur}
+          >
+            <InputBase
+              id="lobby-name-bar"
+              sx={{
+                color: colors.blackAccent[100],
+                fontSize: "40px",
+                fontStyle: "normal",
+                textTransform: "none",
+                fontWeight: "bold",
+                width: "100%",
+                "& .MuiInputBase-inputMultiline": {
+                  padding: "0",
+                  align: "center",
+                  wordBreak: "break-all",
+                  textAlign: "center",
+                  "& input": {
+                    textAlign: "center",
+                  },
+                },
+              }}
+              multiline
+              type="text"
+              required={true}
+              inputProps={{
+                maxLength: 25,
+              }}
+              fullWidth
+              inputMode="text"
+              value={lobbyNameChanger}
+              onChange={onChange}
+              onInput={onInput}
+              onKeyDown={onKeyDown}
+            />
+          </Box>
+        )}
+      </Box>
+      {isOwner && (
+        <Box display="flex" justifyContent="center">
+          {/* EDIT NAME */}
+          <IconButton onClick={onEdit} disabled={toggleEditLobbyName}>
+            <Typography
+              fontSize="16px"
+              children={translateEditLobbyName(isDanish)}
+            />
+
+            <Edit />
+          </IconButton>
+
+          {/* TOGGLE PUBLIC/PRIVATE */}
+          <IconButton onClick={togglePublicPrivate}>
+            <Typography
+              fontSize="16px"
+              children={
+                isPublic
+                  ? translatePublic(isDanish)
+                  : translatePrivate(isDanish)
+              }
+            />
+
+            {!isPublic && <LockOutlined />}
+            {isPublic && <LockOpenOutlined />}
+          </IconButton>
         </Box>
       )}
     </Box>

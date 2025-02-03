@@ -178,6 +178,14 @@ const SocketContextComponent: React.FunctionComponent<
       });
     });
 
+    socket.on("change_game_public", () => {
+      SocketDispatch({ type: "change_game_public", payload: null });
+    });
+
+    socket.on("change_game_private", () => {
+      SocketDispatch({ type: "change_game_private", payload: null });
+    });
+
     /* Owner left */
     socket.on("game_owner_left", () => {
       focus();

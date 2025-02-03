@@ -184,10 +184,17 @@ const GameLobby = ({ isDanish }: Props) => {
     middleChild = (
       <MiddleChild widthPercentage={90}>
         <Box display="flex" justifyContent="center">
-          <Box display="flex" justifyContent="center" flexDirection="column">
+          <Box
+            display="flex"
+            justifyContent="center"
+            flexDirection="column"
+            width="90%"
+          >
             {/* HEADING */}
             <GameLobbyName
+              isDanish={isDanish}
               isOwner={isOwner()}
+              isPublic={SocketState.thisGame?.isPublic}
               name={SocketState.thisGame?.name}
               socket={SocketState.socket as Socket}
             />
@@ -255,23 +262,25 @@ const GameLobby = ({ isDanish }: Props) => {
             <Box paddingBottom="5px" />
 
             {/* PLAYERS */}
-            <Box
-              display="flex"
-              justifyContent="center"
-              paddingLeft="85px"
-              paddingTop="10px"
-              paddingBottom="3px"
-              bgcolor={colors.primary[600]}
-              borderRadius="50px"
-            >
-              <PlayerDisplay
-                currentName={thisPlayerName()}
-                currentUid={SocketState.uid}
-                isOwner={isOwner()}
-                playerNames={SocketState.thisGame.gamePlayersNames}
-                playerUids={SocketState.thisGame.gamePlayers}
-                socket={SocketState.socket as Socket}
-              />
+            <Box display="flex" justifyContent="center">
+              <Box
+                display="flex"
+                justifyContent="center"
+                paddingLeft="85px"
+                paddingTop="10px"
+                paddingBottom="3px"
+                bgcolor={colors.primary[600]}
+                borderRadius="50px"
+              >
+                <PlayerDisplay
+                  currentName={thisPlayerName()}
+                  currentUid={SocketState.uid}
+                  isOwner={isOwner()}
+                  playerNames={SocketState.thisGame.gamePlayersNames}
+                  playerUids={SocketState.thisGame.gamePlayers}
+                  socket={SocketState.socket as Socket}
+                />
+              </Box>
             </Box>
 
             <Box p={1} />

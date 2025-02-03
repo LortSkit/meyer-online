@@ -54,9 +54,12 @@ export type TSocketContextActions =
   | "remove_game_player"
   | "update_player_name"
   | "update_lobby_name"
-  | "update_this_max_players";
+  | "update_this_max_players"
+  | "change_game_public"
+  | "change_game_private";
 
 export type TSocketContextPayload =
+  | null
   | string
   | string[]
   | string[][]
@@ -212,6 +215,20 @@ export const SocketReducer = (
           ...state.thisGame,
           maxNumberOfPlayers: action.payload as number,
         },
+      };
+
+    case "change_game_public":
+      console.log("public?", state.thisGame.isPublic);
+      return {
+        ...state,
+        thisGame: { ...state.thisGame, isPublic: true },
+      };
+
+    case "change_game_private":
+      console.log("public?", state.thisGame.isPublic);
+      return {
+        ...state,
+        thisGame: { ...state.thisGame, isPublic: false },
       };
   }
 };
