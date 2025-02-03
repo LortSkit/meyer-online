@@ -102,9 +102,7 @@ const PlayerDisplay = ({
   }
 
   function onEdit(): void {
-    if (isOwner) {
-      setToggleEditName(true);
-    }
+    setToggleEditName(true);
   }
 
   function onChange(event: React.ChangeEvent<HTMLInputElement>): void {
