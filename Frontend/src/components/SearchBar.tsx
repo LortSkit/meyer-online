@@ -92,6 +92,7 @@ const SearchBar = ({
             setSearchLobbyName("");
           }
         }}
+        autoComplete="off"
         onFocus={() => setSearchingColor(colors.primary[700])}
         onChange={onChange}
         onInput={onInput}
