@@ -86,7 +86,7 @@ npm run preview
 
 If the .env file is unchanged, you should now be able to see your application at http://localhost:80
 
-NOTE: The `npm run build` command creates a `Frontend/dist/` folder, which has the single-page application as an html, js, css, and many svg files. The `npm run preview` simply host this single-page application, however if you wish to host the folder differently, then you're free to do so.
+NOTE: The `npm run build` command creates a `Frontend/dist/` folder, which has the single-page application as an html, js, css, and many svg files. The `npm run preview` simply hosts this single-page application, however if you wish to host the folder differently, then you're free to do so.
 
 #### Development
 
