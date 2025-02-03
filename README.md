@@ -33,11 +33,11 @@ VITE_HOSTPORT      =                # Frontend port, defaults to 3000 when using
                                     # MODE = production -> PROTOCOL = http -> port will be 80
                                     # MODE = production -> PROTOCOL = https -> port will be 443
 
-VITE_BASE          =                # Should be left blank if landing page is just at VITE_HOSTNAME:VITE_HOSTPORT, 
-                                    # however if you want to host the page as a subdirectory of an existing website, 
+VITE_BASE          =                # Should be left blank if landing page is just at VITE_HOSTNAME:VITE_HOSTPORT,
+                                    # however if you want to host the page as a subdirectory of an existing website,
                                     # you should put the subdirectory here
 
-VITE_SOCKETPORT    =                # Change to reflect which port the socket is communicating on 
+VITE_SOCKETPORT    =                # Change to reflect which port the socket is communicating on
 ```
 
 #### Backend .env file:
@@ -46,7 +46,7 @@ VITE_SOCKETPORT    =                # Change to reflect which port the socket is
 #Check .env file in the Frontend, they have to coincide!
 
 MODE         =                # Use "development" when using "npm run dev" to boot frontend and "production" when using "npm run preview"
-                              # Defaults to development 
+                              # Defaults to development
 
 
 CERTS_FOLDER =                # Only used if PROTOCOL = https, defaults to "./certs/"
@@ -85,6 +85,8 @@ npm run preview
 ```
 
 If the .env file is unchanged, you should now be able to see your application at http://localhost:80
+
+NOTE: The `npm run build` command creates a `Frontend/dist/` folder, which has the single-page application as an html, js, css, and many svg files. The `npm run preview` simply host this single-page application, however if you wish to host the folder differently, then you're free to do so.
 
 #### Development
 
