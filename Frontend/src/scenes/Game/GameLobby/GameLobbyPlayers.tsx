@@ -6,8 +6,8 @@ import {
   useTheme,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { tokens } from "../../theme";
-import { translatePlayers } from "../../utils/lang/GameLobby/langGameLobbyPlayers";
+import { tokens } from "../../../theme";
+import { translatePlayers } from "../../../utils/lang/Game/GameLobby/langGameLobbyPlayers";
 import { Edit } from "@mui/icons-material";
 import { Socket } from "socket.io-client";
 

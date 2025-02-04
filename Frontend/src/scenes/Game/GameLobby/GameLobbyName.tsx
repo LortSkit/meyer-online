@@ -6,14 +6,14 @@ import {
   useTheme,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { tokens } from "../../theme";
+import { tokens } from "../../../theme";
 import { Socket } from "socket.io-client";
 import { Edit, LockOpenOutlined, LockOutlined } from "@mui/icons-material";
 import {
   translateEditLobbyName,
   translatePrivate,
   translatePublic,
-} from "../../utils/lang/GameLobby/langGameLobbyName";
+} from "../../../utils/lang/Game/GameLobby/langGameLobbyName";
 
 interface Props {
   isDanish: boolean;

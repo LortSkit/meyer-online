@@ -4,6 +4,7 @@ import { Server as HttpServer } from "http";
 import { Socket, Server } from "socket.io";
 import { v4 } from "uuid";
 import { frontendURL } from "./environmentUtils";
+import { Meyer } from "./Meyer/gameLogic";
 
 type Game = {
   id: string;
@@ -32,6 +33,7 @@ type GameInfo = {
   gamePlayersNames: string[];
   maxNumberOfPlayers: number;
   isPublic: boolean;
+  isInProgress: boolean;
 };
 
 type GameRequest = {
@@ -75,6 +77,7 @@ function gameBaseToGameInfo(gameBase: GameBase): GameInfo {
     gamePlayersNames: [],
     maxNumberOfPlayers: gameBase.maxNumberOfPlayers,
     isPublic: false,
+    isInProgress: false,
   };
 }
 
@@ -90,8 +93,9 @@ export class ServerSocket {
   public gamePlayersNames: { [gameId: string]: string[] }; // gameId -> string[]
   public playerInGame: { [uid: string]: string }; // uid -> gameId
   public publicGames: { [uid: string]: string }; // uid -> gameId
+  public gameMeyer: { [gameId: string]: Meyer }; //gameId -> Meyer
 
-  public inRoom: { [uid: string]: Room };
+  public inRoom: { [uid: string]: Room }; //uid -> Room
 
   constructor(server: HttpServer) {
     ServerSocket.instance = this;
@@ -102,6 +106,7 @@ export class ServerSocket {
     this.gamePlayersNames = {};
     this.playerInGame = {};
     this.publicGames = {};
+    this.gameMeyer = {};
 
     this.inRoom = {};
 
@@ -219,6 +224,18 @@ export class ServerSocket {
     }
 
     if (this.publicGames[this.gamesIdIndex[gameId]]) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public gameIsInProgress(gameId: string): boolean {
+    if (!this.gameExists(gameId)) {
+      return false;
+    }
+
+    if (this.gameMeyer[gameId]) {
       return true;
     }
 
@@ -450,7 +467,11 @@ export class ServerSocket {
       (
         gameId: string,
         chosenPlayerName: string,
-        callback: (exists: boolean, enoughSpace: boolean) => void
+        callback: (
+          exists: boolean,
+          inProgress: boolean,
+          enoughSpace: boolean
+        ) => void
       ) => {
         console.info("Received event: join_game from " + socket.id);
 
@@ -466,8 +487,10 @@ export class ServerSocket {
                 this.gamePlayers[gameId].length <
                 this.gameBases[uid].maxNumberOfPlayers;
 
-              if (!hasEnoughSpace) {
-                callback(exists, false);
+              if (this.gameIsInProgress(gameId)) {
+                callback(exists, true, false);
+              } else if (!hasEnoughSpace) {
+                callback(exists, false, false);
                 return;
               }
               const playerName =
@@ -490,7 +513,7 @@ export class ServerSocket {
               this.gamePlayers[gameId].push(joiningUid);
               this.gamePlayersNames[gameId].push(playerName);
 
-              callback(exists, hasEnoughSpace);
+              callback(exists, false, hasEnoughSpace);
 
               /* (User) */
               this.SendMessage(
@@ -504,6 +527,7 @@ export class ServerSocket {
                     gamePlayers: this.gamePlayers[gameId],
                     gamePlayersNames: this.gamePlayersNames[gameId],
                     isPublic: this.gameIsPublic(gameId),
+                    isInProgress: this.gameIsInProgress(gameId),
                   } as GameInfo,
                   this.gamePlayers[gameId],
                   this.gamePlayersNames[gameId],
@@ -522,7 +546,7 @@ export class ServerSocket {
 
             return;
           }
-          callback(false, false);
+          callback(false, true, false);
         }
       }
     );
@@ -531,6 +555,8 @@ export class ServerSocket {
     /* From Room: Game */
     /* Sends to: Game */
     socket.on("change_player_name", (chosenPlayerName: string) => {
+      console.info("Received event: change_player_name from " + socket.id);
+
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {
         const playerName =
@@ -559,6 +585,8 @@ export class ServerSocket {
     /* From Room: Game */
     /* Sends to: Game, Find */
     socket.on("change_lobby_name", (newLobbyName: string) => {
+      console.info("Received event: change_lobby_name from " + socket.id);
+
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {
         const owningGame = this.gameBases[uid];
@@ -589,6 +617,8 @@ export class ServerSocket {
        Through leavePreviousRoom call: Game, Find
     */
     socket.on("change_max_players", (newMaxNumberOfPlayers) => {
+      console.info("Received event: change_max_players from " + socket.id);
+
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {
         const owningGame = this.gameBases[uid];
@@ -643,6 +673,8 @@ export class ServerSocket {
     /* From Room: Game */
     /* Sends to: Find, Game */
     socket.on("toggle_public_private", () => {
+      console.info("Received event: toggle_public_private from " + socket.id);
+
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {
         const owningGame = this.gameBases[uid];
@@ -682,6 +714,8 @@ export class ServerSocket {
     /* From Room: Game */
     /* Sends to: (User), Game */
     socket.on("kick_player", (kickingUid: string) => {
+      console.info("Received event: kick_player from " + socket.id);
+
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {
         const owningGame = this.gameBases[uid];

@@ -1,15 +1,26 @@
 import { useTheme, Box, InputBase } from "@mui/material";
-import { tokens } from "../../theme";
+import { tokens } from "../../../theme";
+import { Socket } from "socket.io-client";
 
 interface Props {
-    value: string;
-  onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  chosenPlayerName: string;
+  socket: Socket;
   setChosenPlayerName: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const SetPlayerName = ({ value, onKeyDown, setChosenPlayerName }: Props) => {
+const SetPlayerName = ({
+  chosenPlayerName,
+  socket,
+  setChosenPlayerName,
+}: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      socket.emit("change_player_name", chosenPlayerName);
+    }
+  }
 
   function onChange(event: React.ChangeEvent<HTMLInputElement>): void {
     setChosenPlayerName(event.target.value);
@@ -35,7 +46,7 @@ const SetPlayerName = ({ value, onKeyDown, setChosenPlayerName }: Props) => {
           maxLength: 12,
         }}
         inputMode="text"
-        value={value}
+        value={chosenPlayerName}
         onChange={onChange}
         onInput={onInput}
         onKeyDown={onKeyDown}

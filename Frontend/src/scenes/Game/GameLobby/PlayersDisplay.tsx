@@ -5,10 +5,10 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { tokens } from "../../theme";
+import { tokens } from "../../../theme";
 import { CloseOutlined, Edit } from "@mui/icons-material";
-import { Dice } from "../../utils/diceUtils";
-import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
+import { Dice } from "../../../utils/diceUtils";
+import loading from "../../../assets/discordLoadingDotsDiscordLoading.gif";
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 

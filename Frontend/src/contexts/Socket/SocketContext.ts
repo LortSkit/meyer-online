@@ -15,6 +15,7 @@ export type GameInfo = {
   gamePlayersNames: string[];
   maxNumberOfPlayers: number;
   isPublic: boolean;
+  isInProgress: boolean;
 };
 
 export type GameRequest = {
@@ -220,14 +221,12 @@ export const SocketReducer = (
       };
 
     case "change_game_public":
-      console.log("public?", state.thisGame.isPublic);
       return {
         ...state,
         thisGame: { ...state.thisGame, isPublic: true },
       };
 
     case "change_game_private":
-      console.log("public?", state.thisGame.isPublic);
       return {
         ...state,
         thisGame: { ...state.thisGame, isPublic: false },

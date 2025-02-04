@@ -11,7 +11,7 @@ import Create from "./scenes/Create/Create";
 import Find from "./scenes/Find/Find";
 import Rules from "./scenes/Rules/Rules";
 import SocketContextComponent from "./contexts/Socket/SocketComponents";
-import GameLobby from "./scenes/GameLobby/GameLobby";
+import Game from "./scenes/Game/Game";
 import { isInLobby } from "./utils/appUtils";
 import { useSwipeable } from "react-swipeable";
 import { base } from "./utils/hostSubDirectory";
@@ -121,7 +121,7 @@ const App = () => {
                   path={base + "/game/:gameId"}
                   element={
                     <SocketContextComponent isDanish={isDanish}>
-                      <GameLobby isDanish={isDanish} />
+                      <Game isDanish={isDanish} />
                     </SocketContextComponent>
                   }
                 />

@@ -1,42 +1,41 @@
-import { Int32 } from "react-native/Libraries/Types/CodegenTypes";
 import { getDiceRoll, getMeyerRoll } from "./diceUtils";
 import { Action } from "./gameTypes";
 
 //For the static functions below
-const allPossibleRollsOrdered: Int32[] = [
+const allPossibleRollsOrdered: number[] = [
   41, 42, 43, 51, 52, 53, 54, 61, 62, 63, 64, 65, 11, 22, 33, 44, 55, 66, 31,
   21, 32,
 ];
 
 //Static logic functions for meyer game
-function getRollsGreaterThanEqualTo(rol: Int32): Int32[] {
+function getRollsGreaterThanEqualTo(rol: number): number[] {
   let index = allPossibleRollsOrdered.indexOf(rol);
   return allPossibleRollsOrdered.slice(index, allPossibleRollsOrdered.length);
 }
 
-export function isGreaterThanEqualTo(roll1: Int32, roll2: Int32): boolean {
+export function isGreaterThanEqualTo(roll1: number, roll2: number): boolean {
   return getRollsGreaterThanEqualTo(roll2).includes(roll1) || roll2 <= 0;
 }
 
-function isLessThan(roll1: Int32, roll2: Int32): boolean {
+function isLessThan(roll1: number, roll2: number): boolean {
   return !isGreaterThanEqualTo(roll1, roll2);
 }
 
-function isEqualTo(roll1: Int32, roll2: Int32): boolean {
+function isEqualTo(roll1: number, roll2: number): boolean {
   return (
     getRollsGreaterThanEqualTo(roll2).includes(roll1) &&
     getRollsGreaterThanEqualTo(roll1).includes(roll2)
   );
 }
 
-function isLessThanEqualTo(roll1: Int32, roll2: Int32): boolean {
+function isLessThanEqualTo(roll1: number, roll2: number): boolean {
   return isEqualTo(roll1, roll2) || isLessThan(roll1, roll2);
 }
 
 export function bluffChoices(
-  currentRoll: Int32,
-  previousDeclaredRoll: Int32,
-  turn: Int32
+  currentRoll: number,
+  previousDeclaredRoll: number,
+  turn: number
 ) {
   let bluffchoices = allPossibleRollsOrdered.slice(
     0,
@@ -60,34 +59,35 @@ export function bluffChoices(
   return bluffchoices;
 }
 export class Meyer {
+  //TODO: Remake this class to fit online play better.
   //###############################CURRENT+PREVIOUS###############################//
-  private roll: Int32 = -1;
-  private previousRoll: Int32 = -1;
+  private roll: number = -1;
+  private previousRoll: number = -1;
 
-  private declaredRoll: Int32 = -1;
-  private previousDeclaredRoll: Int32 = -1;
+  private declaredRoll: number = -1;
+  private previousDeclaredRoll: number = -1;
 
-  private currentPlayer: Int32 = 1;
-  private previousPlayer: Int32 = -1;
+  private currentPlayer: number = 1;
+  private previousPlayer: number = -1;
 
   private currentAction: Action = "Error";
   private previousAction: Action = "Error";
   //##############################################################################//
 
   //####################################GLOBAL####################################//
-  private readonly numberOfPlayers: Int32 = -1;
+  private readonly numberOfPlayers: number = -1;
 
-  private winner: Int32 = -1;
+  private winner: number = -1;
 
-  private healths: Int32[] = [];
+  private healths: number[] = [];
   private hasHealthRolled: boolean[] = [];
 
   private canAdvanceTurn: boolean = false;
-  private turn: Int32 = 1;
-  private round: Int32 = 1;
+  private turn: number = 1;
+  private round: number = 1;
   //##############################################################################//
 
-  constructor(numberOfPlayers: Int32) {
+  constructor(numberOfPlayers: number) {
     if (numberOfPlayers < 2 || numberOfPlayers > 20) {
       throw new Error(
         "Number of players has to be between 2 and 20 (inclusive)"
@@ -107,7 +107,7 @@ export class Meyer {
     }
   }
 
-  private getNextPlayer(player: Int32): Int32 {
+  private getNextPlayer(player: number): number {
     let nextplayer = player + 1;
     if (nextplayer > this.numberOfPlayers) {
       nextplayer = 1;
@@ -128,7 +128,7 @@ export class Meyer {
     return false;
   }
 
-  private decreaseHealth(player: Int32, lostHealth: Int32): void {
+  private decreaseHealth(player: number, lostHealth: number): void {
     this.healths[player - 1] -= lostHealth;
   }
 
@@ -166,7 +166,7 @@ export class Meyer {
     this.canAdvanceTurn = false;
   }
 
-  private endTurnToHealthRoll(player: Int32): void {
+  private endTurnToHealthRoll(player: number): void {
     this.resetRoll();
     this.previousPlayer = this.currentPlayer;
     this.currentPlayer = player;
@@ -204,33 +204,37 @@ export class Meyer {
 
   ////////////////////////////////PUBLIC FUNCTIONS//////////////////////////////////
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%FRONTEND SHARED GETTERS%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
-  public getCurrentPlayer(): Int32 {
+  public getCurrentPlayer(): number {
+    //TODO: Does this cause information leakage?
     return this.currentPlayer;
   }
 
   public getCurrentAction(): Action {
+    //TODO: Does this cause information leakage?
     return this.currentAction;
   }
 
-  public getCurrentHealths(): Int32[] {
+  public getCurrentHealths(): number[] {
     return this.healths;
   }
-  public getRoll(): Int32 {
+  public getRoll(): number {
+    //TODO: Does this cause information leakage?
     if (this.currentAction == "SameRollOrHigher") {
       return -1;
     }
     return this.roll;
   }
 
-  public getPreviousRoll(): Int32 {
+  public getPreviousRoll(): number {
+    //TODO: Does this cause information leakage?
     return this.previousRoll;
   }
 
-  public getRound(): Int32 {
+  public getRound(): number {
     return this.round;
   }
 
-  public getTurn(): Int32 {
+  public getTurn(): number {
     return this.turn;
   }
 
@@ -262,7 +266,7 @@ export class Meyer {
     return ["Bluff", "SameRollOrHigher"];
   }
 
-  public getBluffChoices(): Int32[] {
+  public getBluffChoices(): number[] {
     if (this.isGameOver() || this.getRoll() == -1) {
       return [];
     }
@@ -403,7 +407,7 @@ export class Meyer {
     }
   }
 
-  public chooseBluff(choice: Int32): void {
+  public chooseBluff(choice: number): void {
     if (!this.getBluffChoices().includes(choice)) {
       throw new Error(
         `"${choice}" is not a valid bluff choice in the current state! Valid bluff choices are: ${this.getBluffChoices()}`
