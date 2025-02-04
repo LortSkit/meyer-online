@@ -161,11 +161,14 @@ export class ServerSocket {
       );
 
       if (inGameOwnerUid === uid) {
+        /* Game */
         this.SendMessage("game_owner_left", [inGameId]);
         if (this.gameIsPublic(inGameId)) {
+          /* Find */
           this.SendMessage("remove_game", ["Find"], inGameId);
         }
       } else if (this.gameIsPublic(inGameId)) {
+        /* Find */
         this.SendMessage(
           "update_game_num_players",
           ["Find"],
@@ -231,8 +234,10 @@ export class ServerSocket {
         socket.leave(gameToLeave);
         this.removeUserFromGamesAndRoom(uid);
         if (this.gamesIdIndex[gameToLeave] === uid) {
+          /* Game */
           this.SendMessage("game_owner_left", [gameToLeave]);
         } else {
+          /* Game */
           this.SendMessage("player_left", [gameToLeave], uid);
         }
       } else {
@@ -245,7 +250,10 @@ export class ServerSocket {
   StartListeners = (socket: Socket) => {
     console.info("Message received from " + socket.id);
 
+    ////////////////////////////////////////BUILT-IN////////////////////////////////////////
     /* HANDSHAKE - Happens on socket contact */
+    /* From Room: (All) */
+    /* Sends to: (All) */
     socket.on(
       "handshake",
       (
@@ -290,6 +298,7 @@ export class ServerSocket {
         callback(reconnected, uid, users.length, "");
 
         /* Send new user to all connected users */
+        /* (ALL) */
         this.SendMessage(
           "user_connected",
           users.filter((id) => id !== socket.id),
@@ -299,6 +308,8 @@ export class ServerSocket {
     );
 
     /* DISCONNECT - Happens on socket disconnect*/
+    /* From Room: (All) */
+    /* Sends to: Game, (All) */
     socket.on("disconnect", () => {
       console.info("Disconnect received from: " + socket.id);
 
@@ -312,14 +323,22 @@ export class ServerSocket {
         const users = Object.values(this.users);
 
         if (gameToLeave) {
+          /* Game */
           this.SendMessage("player_left", [gameToLeave], uid);
         }
 
+        /* (All) */
         this.SendMessage("user_disconnected", users, users.length);
       }
     });
+    ////////////////////////////////////////////////////////////////////////////////////////
 
+    //////////////////////////////////////////FIND//////////////////////////////////////////
     /* FIND - Happens when user goes to /find */
+    /* From Room: Find */
+    /* Sends to: (User)
+       Through leavePreviousRoom call: Game, Find
+    */
     socket.on("join_find", () => {
       console.info("Received event: join_find from " + socket.id);
 
@@ -330,6 +349,7 @@ export class ServerSocket {
         socket.join("Find");
         this.inRoom[uid] = "Find";
 
+        /* (User) */
         this.SendMessage(
           "joined_find",
           [this.users[uid]],
@@ -337,8 +357,14 @@ export class ServerSocket {
         );
       }
     });
+    ////////////////////////////////////////////////////////////////////////////////////////
 
+    /////////////////////////////////////////CREATE/////////////////////////////////////////
     /* CREATE - Happens when user goes to /create/online */
+    /* From Room: Create */
+    /* Sends to: (None)
+       Through leavePreviousRoom call: Game, Find
+    */
     socket.on("join_create", () => {
       console.info("Received event: join_create from " + socket.id);
       const uid = this.GetUidFromSocketID(socket.id);
@@ -351,6 +377,8 @@ export class ServerSocket {
     });
 
     /* NEW GAME - Happens when user creates game from /create/online */
+    /* From Room: Create */
+    /* Sends to: Find */
     socket.on(
       "create_game",
       (
@@ -381,6 +409,7 @@ export class ServerSocket {
           }
 
           if (existingGameIsPublic) {
+            /* Find */
             this.SendMessage("remove_game", ["Find"], existingGame?.id);
             delete this.publicGames[uid];
           }
@@ -390,6 +419,7 @@ export class ServerSocket {
             this.publicGames[uid] = game.id;
 
             if (currentRoom === "Create") {
+              /* Find */
               this.SendMessage("add_game", ["Find"], gameDisplay);
             }
           }
@@ -406,19 +436,21 @@ export class ServerSocket {
         }
       }
     );
+    ////////////////////////////////////////////////////////////////////////////////////////
 
+    //////////////////////////////////////////GAME//////////////////////////////////////////
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%LOBBY%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
     /* JOIN GAME - Happens when user joins game link */
+    /* From Room: Game */
+    /* Sends to: Game, (User), Find
+       Through leavePreviousRoom call: Game, Find
+    */
     socket.on(
       "join_game",
       (
         gameId: string,
         chosenPlayerName: string,
-        callback: (
-          exists: boolean,
-          enoughSpace: boolean,
-          gameName: string,
-          givenPlayerName: string
-        ) => void
+        callback: (exists: boolean, enoughSpace: boolean) => void
       ) => {
         console.info("Received event: join_game from " + socket.id);
 
@@ -435,13 +467,15 @@ export class ServerSocket {
                 this.gameBases[uid].maxNumberOfPlayers;
 
               if (!hasEnoughSpace) {
-                callback(exists, false, "", "");
+                callback(exists, false);
                 return;
               }
               const playerName =
                 chosenPlayerName.length === 0 || chosenPlayerName.length > 12
                   ? ""
                   : chosenPlayerName;
+
+              /* Game */
               this.SendMessage(
                 "player_joined",
                 [gameId],
@@ -456,13 +490,9 @@ export class ServerSocket {
               this.gamePlayers[gameId].push(joiningUid);
               this.gamePlayersNames[gameId].push(playerName);
 
-              callback(
-                exists,
-                hasEnoughSpace,
-                this.gameBases[uid].name, //If it is to be changed and updated, it should be sent through an event instead
-                playerName
-              );
+              callback(exists, hasEnoughSpace);
 
+              /* (User) */
               this.SendMessage(
                 "joined_game",
                 [joiningUid],
@@ -481,6 +511,7 @@ export class ServerSocket {
               );
 
               if (this.gameIsPublic(gameId)) {
+                /* Find */
                 this.SendMessage(
                   "update_game_num_players",
                   ["Find"],
@@ -491,11 +522,14 @@ export class ServerSocket {
 
             return;
           }
-          callback(false, false, "", "");
+          callback(false, false);
         }
       }
     );
 
+    /* CHANGE NAME - Happens when a player edits their name and presses 'enter' */
+    /* From Room: Game */
+    /* Sends to: Game */
     socket.on("change_player_name", (chosenPlayerName: string) => {
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {
@@ -516,10 +550,14 @@ export class ServerSocket {
 
         this.gamePlayersNames[inGameId][playerIndex] = playerName;
 
+        /* Game */
         this.SendMessage("player_name_changed", [inGameId], [uid, playerName]);
       }
     });
 
+    /* CHANGE LOBBY NAME - Happens when the lobby owner edits the lobby name and presses 'enter' */
+    /* From Room: Game */
+    /* Sends to: Game, Find */
     socket.on("change_lobby_name", (newLobbyName: string) => {
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {
@@ -531,8 +569,10 @@ export class ServerSocket {
         ) {
           this.gameBases[uid].name = newLobbyName;
 
+          /* Game */
           this.SendMessage("lobby_name_changed", [owningGame.id], newLobbyName);
           if (this.gameIsPublic(owningGame.id)) {
+            /* Find */
             this.SendMessage(
               "update_game_name",
               ["Find"],
@@ -543,6 +583,11 @@ export class ServerSocket {
       }
     });
 
+    /* CHANGE MAX NUMBER OF PLAYERS - Happens when the lobby owner edits the number of max players */
+    /* From Room: Game */
+    /* Sends to: (User), Game, Find 
+       Through leavePreviousRoom call: Game, Find
+    */
     socket.on("change_max_players", (newMaxNumberOfPlayers) => {
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {
@@ -560,12 +605,14 @@ export class ServerSocket {
               this.gamePlayers[owningGame.id].length
             );
             playersToKick.forEach((uid) => {
-              this.removeUserFromGamesAndRoom(uid);
-              this.SendMessage("player_left", [owningGame.id], uid);
+              this.leavePreviousRoom(socket, uid);
             }); //kicks them
+
+            /* (User) */
             this.SendMessage("been_kicked", playersToKick); //Informs them they've been kicked
 
             if (this.gameIsPublic(owningGame.id)) {
+              /* Find */
               this.SendMessage(
                 "update_game_num_players",
                 ["Find"],
@@ -574,12 +621,14 @@ export class ServerSocket {
             }
           }
 
+          /* Game */
           this.SendMessage(
             "max_players_changed",
             [owningGame.id],
             newMaxNumberOfPlayers
           );
           if (this.gameIsPublic(owningGame.id)) {
+            /* Find */
             this.SendMessage(
               "update_max_players",
               ["Find"],
@@ -590,6 +639,9 @@ export class ServerSocket {
       }
     });
 
+    /* TOGGLE PUBLIC/PRIVATE - Happens when the lobby owner clicks the public/private button */
+    /* From Room: Game */
+    /* Sends to: Find, Game */
     socket.on("toggle_public_private", () => {
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {
@@ -597,7 +649,11 @@ export class ServerSocket {
         if (owningGame) {
           if (this.gameIsPublic(owningGame.id)) {
             delete this.publicGames[uid];
+
+            /* Find */
             this.SendMessage("remove_game", ["Find"], owningGame.id);
+
+            /* Game */
             this.SendMessage("change_game_private", [owningGame.id]);
           } else {
             this.publicGames[uid] = owningGame.id;
@@ -605,23 +661,42 @@ export class ServerSocket {
             const gameDisplay = gameBaseToGameDisplay(owningGame);
             gameDisplay.numberOfPlayers =
               this.gamePlayers[owningGame.id].length;
+
+            /* Find */
             this.SendMessage("add_game", ["Find"], gameDisplay);
+
+            /* Game */
             this.SendMessage("change_game_public", [owningGame.id]);
           }
         }
       }
     });
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%IN GAME%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MIXED%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+    /* KICK PLAYER - Happens when lobby owner presses the x-button next to a player's name */
+    /* From Room: Game */
+    /* Sends to: (User), Game */
     socket.on("kick_player", (kickingUid: string) => {
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {
         const owningGame = this.gameBases[uid];
         if (owningGame) {
           this.removeUserFromGamesAndRoom(kickingUid);
+
+          /* (User) */
           this.SendMessage("been_kicked", [kickingUid]); //Informs them they've been kicked
+
+          /* Game */
           this.SendMessage("player_left", [owningGame.id], kickingUid);
         }
       }
     });
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    ////////////////////////////////////////////////////////////////////////////////////////
   };
 }

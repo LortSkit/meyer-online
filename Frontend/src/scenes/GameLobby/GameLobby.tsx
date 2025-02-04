@@ -125,12 +125,7 @@ const GameLobby = ({ isDanish }: Props) => {
         "join_game",
         gameId,
         chosenPlayerName,
-        (
-          exists: boolean,
-          enoughSpace: boolean,
-          gameName: string,
-          givenPlayerName: string
-        ) => {
+        (exists: boolean, enoughSpace: boolean) => {
           setGameExists(exists);
           setHasEnoughSpace(enoughSpace);
         }

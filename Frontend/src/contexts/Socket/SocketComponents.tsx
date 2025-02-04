@@ -15,6 +15,7 @@ import {
   translateRedirecting,
 } from "../../utils/lang/langSocketComponents";
 import { base } from "../../utils/hostSubDirectory";
+import { Box } from "@mui/material";
 
 export interface ISocketContextComponentProps extends PropsWithChildren {
   isDanish: boolean;
@@ -52,6 +53,23 @@ const SocketContextComponent: React.FunctionComponent<
     },
   });
 
+  const SendHandshake = () => {
+    socket.emit(
+      "handshake",
+      (reconnect: boolean, uid: string, usersTotal: number, gameId: string) => {
+        //console.info("User handshake callback message received");
+        if (!reconnect) {
+          SocketDispatch({ type: "update_uid", payload: uid });
+          SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
+        }
+        if (gameId !== "") {
+          SocketDispatch({ type: "remove_game", payload: gameId });
+        }
+        setLoading(false);
+      }
+    );
+  };
+
   useEffect(() => {
     /* Connect to the Web Socket */
     if (loading) {
@@ -70,46 +88,57 @@ const SocketContextComponent: React.FunctionComponent<
   }, []);
 
   const StartListeners = () => {
+    ////////////////////////////////////////BUILT-IN////////////////////////////////////////
     /** Messages */
+    /* From Room: (All) */
     socket.on("user_connected", (usersTotal: string) => {
       //console.info("User connected message received");
       SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
     });
 
     /** Messages */
+    /* From Room: (All) */
     socket.on("user_disconnected", (usersTotal: string) => {
       //console.info("User disconnected message received");
       SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
     });
 
     /* Reconnect event */
+    /* From Room: (All) */
     socket.io.on("reconnect", (attempt) => {
       //console.info("Reconnected on attempt: " + attempt);
       SendHandshake();
     });
 
     /* Reconnect attempt event */
+    /* From Room: (All) */
     socket.io.on("reconnect_attempt", (attempt) => {
       //console.info("Reconnection attempt: " + attempt);
     });
 
     /* Reconnect error */
+    /* From Room: (All) */
     socket.io.on("reconnect_error", (error) => {
       //console.info("Reconnected error: " + error);
     });
 
     /* Reconnect failed */
+    /* From Room: (All) */
     socket.io.on("reconnect_failed", () => {
       //console.info("Reconnection failure");
       alert(translateReconnectFailure(isDanish));
     });
+    ////////////////////////////////////////////////////////////////////////////////////////
 
+    //////////////////////////////////////////FIND//////////////////////////////////////////
     /* Join find */
+    /* From Room: (User) */
     socket.on("joined_find", (games: Game[]) => {
       SocketDispatch({ type: "update_games", payload: games });
     });
 
     /* Add game */
+    /* From Room: Find */
     socket.on("add_game", (game: Game) => {
       SocketDispatch({
         type: "add_game",
@@ -118,6 +147,7 @@ const SocketContextComponent: React.FunctionComponent<
     });
 
     /* Remove game */
+    /* From Room: Find */
     socket.on("remove_game", (gameId: string) => {
       SocketDispatch({
         type: "remove_game",
@@ -126,51 +156,59 @@ const SocketContextComponent: React.FunctionComponent<
     });
 
     /* Update game name */
+    /* From Room: Find */
     socket.on("update_game_name", (payload: string[]) => {
       SocketDispatch({ type: "update_game_name", payload: payload });
     });
 
     /* Update max number of players */
+    /* From Room: Find */
     socket.on("update_max_players", (payload: [string, number]) => {
       SocketDispatch({ type: "update_max_players", payload: payload });
     });
 
     /* Update game number of players*/
+    /* From Room: Find */
     socket.on("update_game_num_players", (payload: [string, number]) => {
       SocketDispatch({ type: "update_game_num_players", payload: payload });
     });
+    ////////////////////////////////////////////////////////////////////////////////////////
 
+    //////////////////////////////////////////GAME//////////////////////////////////////////
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%LOBBY%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
     /* Join game */
+    /* From Room: (User) */
     socket.on("joined_game", (payload: [GameInfo, string[], string[]]) => {
-      SocketDispatch({ type: "set_this_game", payload: payload[0] });
-      SocketDispatch({
-        type: "update_game_players",
-        payload: payload.slice(1, 3) as string[][],
-      });
+      SocketDispatch({ type: "set_this_game", payload: payload });
     });
 
     /* Player joined */
+    /* From Room: Game */
     socket.on("player_joined", (payload: string[]) => {
       SocketDispatch({ type: "add_game_player", payload: payload });
     });
 
     /* Player left */
+    /* From Room: Game */
     socket.on("player_left", (playerUid: string) => {
       SocketDispatch({ type: "remove_game_player", payload: playerUid });
     });
 
     /* Player name changed */
+    /* From Room: Game */
     socket.on("player_name_changed", (payload: string[]) => {
       SocketDispatch({ type: "update_player_name", payload: payload });
       localStorage.setItem("playerName", payload[1]);
     });
 
     /* Lobby name changed */
+    /* From Room: Game */
     socket.on("lobby_name_changed", (newLobbyName: string) => {
       SocketDispatch({ type: "update_lobby_name", payload: newLobbyName });
     });
 
     /* Max number of players changed */
+    /* From Room: Game */
     socket.on("max_players_changed", (newMaxNumberOfPlayers: number) => {
       SocketDispatch({
         type: "update_this_max_players",
@@ -178,46 +216,49 @@ const SocketContextComponent: React.FunctionComponent<
       });
     });
 
+    /* Game changed to public */
+    /* From Room: Game */
     socket.on("change_game_public", () => {
       SocketDispatch({ type: "change_game_public", payload: null });
     });
 
+    /* Game changed to private */
+    /* From Room: Game */
     socket.on("change_game_private", () => {
       SocketDispatch({ type: "change_game_private", payload: null });
     });
 
     /* Owner left */
+    /* From Room: Game */
     socket.on("game_owner_left", () => {
       focus();
       confirm(translateRedirecting(isDanish));
       navigate(base + "/find");
     });
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%IN GAME%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MIXED%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    /* When getting kicked */
+    /* From Room: Game */
     socket.on("been_kicked", () => {
       confirm(translateKicked(isDanish));
       navigate(base + "/find");
     });
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    ////////////////////////////////////////////////////////////////////////////////////////
   };
-  const SendHandshake = () => {
-    //console.info("Sending handshake");
 
-    socket.emit(
-      "handshake",
-      (reconnect: boolean, uid: string, usersTotal: number, gameId: string) => {
-        //console.info("User handshake callback message received");
-        if (!reconnect) {
-          SocketDispatch({ type: "update_uid", payload: uid });
-          SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
-        }
-        if (gameId !== "") {
-          SocketDispatch({ type: "remove_game", payload: gameId });
-        }
-        setLoading(false);
-      }
+  if (loading)
+    return (
+      <Box display="flex" justifyContent="center" flexBasis="100%">
+        <Box display="flex" justifyContent="center" flexDirection="column">
+          {translateLoading(isDanish)}
+        </Box>
+      </Box>
     );
-  };
-
-  if (loading) return <p>{translateLoading(isDanish)}</p>;
 
   return (
     <SocketContextProvider value={{ SocketState, SocketDispatch }}>

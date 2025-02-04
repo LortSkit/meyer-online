@@ -49,7 +49,6 @@ export type TSocketContextActions =
   | "update_game_name"
   | "update_max_players"
   | "set_this_game"
-  | "update_game_players"
   | "add_game_player"
   | "remove_game_player"
   | "update_player_name"
@@ -62,7 +61,7 @@ export type TSocketContextPayload =
   | null
   | string
   | string[]
-  | string[][]
+  | [GameInfo, string[], string[]]
   | Socket
   | Game
   | Game[]
@@ -137,15 +136,18 @@ export const SocketReducer = (
       return { ...state, games: state.games };
 
     case "set_this_game":
-      return { ...state, thisGame: action.payload as GameInfo };
+      const newThisGame = (action.payload as [GameInfo, string[], string[]])[0];
+      const newGamePlayers = (
+        action.payload as [GameInfo, string[], string[]]
+      )[1];
+      const newGamePlayersNames = (
+        action.payload as [GameInfo, string[], string[]]
+      )[2];
 
-    case "update_game_players":
-      const newGamePlayers = (action.payload as string[][])[0];
-      const newGamePlayersNames = (action.payload as string[][])[1];
       return {
         ...state,
         thisGame: {
-          ...state.thisGame,
+          ...newThisGame,
           gamePlayers: newGamePlayers,
           gamePlayersNames: newGamePlayersNames,
         },

@@ -116,7 +116,7 @@ const Find = ({ isDanish, searchLobbyName, setSearchLobbyName }: Props) => {
   }, [searchLobbyName, SocketState, isDanish]);
 
   const middleChild = (
-    <MiddleChild widthPercentage={25}>
+    <MiddleChild widthPercentage={90}>
       {/* HEADING */}
       <FindHeading isDanish={isDanish} />
 
@@ -154,7 +154,7 @@ const Find = ({ isDanish, searchLobbyName, setSearchLobbyName }: Props) => {
       {SocketState.games.length !== 0 && (
         <Box display="flex" justifyContent="center" flexDirection="column">
           {searchLobbyName.length > 0 && filteredResults.length > 0 && (
-            <Box display="flex" justifyContent="left">
+            <Box display="flex" justifyContent="center">
               {translateShowingFiltered(isDanish)}
             </Box>
           )}
@@ -172,8 +172,8 @@ const Find = ({ isDanish, searchLobbyName, setSearchLobbyName }: Props) => {
   return (
     <CenteredPage
       middleChild={middleChild}
-      leftWidthPercentage={37.5}
-      rightWidthPercentage={37.5}
+      leftWidthPercentage={5}
+      rightWidthPercentage={5}
     />
   );
 };

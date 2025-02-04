@@ -42,6 +42,7 @@ const SetNumberOfPlayers = ({ setNumberOfPlayers }: Props) => {
           maxLength: 2,
           pattern: "[0-9]*",
         }}
+        autoComplete="off"
         inputMode="tel"
         onChange={onChange}
         onInput={onInput}
