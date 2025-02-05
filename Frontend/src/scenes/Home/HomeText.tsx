@@ -38,6 +38,10 @@ const HomeText = ({ isDanish }: Props) => {
       <Typography
         fontSize={doCheck(queryMatches)}
         fontWeight="bold"
+        style={{
+          wordBreak: "break-word",
+          textAlign: "center",
+        }}
         sx={{ display: "flex", justifyContent: "center" }}
         children={translateHomeCreate(isDanish)}
       />
@@ -57,6 +61,10 @@ const HomeText = ({ isDanish }: Props) => {
       <Typography
         fontSize={doCheck(queryMatches)}
         fontWeight="bold"
+        style={{
+          wordBreak: "break-word",
+          textAlign: "center",
+        }}
         sx={{ display: "flex", justifyContent: "center" }}
         children={translateHomeFind(isDanish)}
       />
@@ -76,6 +84,10 @@ const HomeText = ({ isDanish }: Props) => {
       <Typography
         fontSize={doCheck(queryMatches)}
         fontWeight="bold"
+        style={{
+          wordBreak: "break-word",
+          textAlign: "center",
+        }}
         sx={{ display: "flex", justifyContent: "center" }}
         children={translateHomeRules(isDanish)}
       />

@@ -3,6 +3,7 @@ import {
   defaultSocketContextState,
   Game,
   GameInfo,
+  MeyerInfo,
   SocketContextProvider,
   SocketReducer,
 } from "./SocketContext";
@@ -16,7 +17,7 @@ import {
 } from "../../utils/lang/langSocketComponents";
 import { base } from "../../utils/hostSubDirectory";
 import { Box } from "@mui/material";
-
+import { debounce } from "lodash";
 export interface ISocketContextComponentProps extends PropsWithChildren {
   isDanish: boolean;
 }
@@ -56,14 +57,11 @@ const SocketContextComponent: React.FunctionComponent<
   const SendHandshake = () => {
     socket.emit(
       "handshake",
-      (reconnect: boolean, uid: string, usersTotal: number, gameId: string) => {
+      (reconnect: boolean, uid: string, usersTotal: number) => {
         //console.info("User handshake callback message received");
         if (!reconnect) {
           SocketDispatch({ type: "update_uid", payload: uid });
           SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
-        }
-        if (gameId !== "") {
-          SocketDispatch({ type: "remove_game", payload: gameId });
         }
         setLoading(false);
       }
@@ -84,46 +82,57 @@ const SocketContextComponent: React.FunctionComponent<
     /* Send the handshake */
     if (loading) {
       SendHandshake();
+
+      // var debouncedReconnect = debounce(
+      //   () => {
+      //     socket.connect();
+      //     SendHandshake();
+      //   },
+      //   250,
+      //   { leading: true, trailing: false }
+      // );
+
+      // window.addEventListener("focus", debouncedReconnect);
     }
   }, []);
 
   const StartListeners = () => {
     ////////////////////////////////////////BUILT-IN////////////////////////////////////////
     /** Messages */
-    /* From Room: (All) */
+    /* For Room: (All) */
     socket.on("user_connected", (usersTotal: string) => {
       //console.info("User connected message received");
       SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
     });
 
     /** Messages */
-    /* From Room: (All) */
+    /* For Room: (All) */
     socket.on("user_disconnected", (usersTotal: string) => {
       //console.info("User disconnected message received");
       SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
     });
 
     /* Reconnect event */
-    /* From Room: (All) */
+    /* For Room: (All) */
     socket.io.on("reconnect", (attempt) => {
       //console.info("Reconnected on attempt: " + attempt);
       SendHandshake();
     });
 
     /* Reconnect attempt event */
-    /* From Room: (All) */
+    /* For Room: (All) */
     socket.io.on("reconnect_attempt", (attempt) => {
       //console.info("Reconnection attempt: " + attempt);
     });
 
     /* Reconnect error */
-    /* From Room: (All) */
+    /* For Room: (All) */
     socket.io.on("reconnect_error", (error) => {
       //console.info("Reconnected error: " + error);
     });
 
     /* Reconnect failed */
-    /* From Room: (All) */
+    /* For Room: (All) */
     socket.io.on("reconnect_failed", () => {
       //console.info("Reconnection failure");
       alert(translateReconnectFailure(isDanish));
@@ -132,13 +141,13 @@ const SocketContextComponent: React.FunctionComponent<
 
     //////////////////////////////////////////FIND//////////////////////////////////////////
     /* Join find */
-    /* From Room: (User) */
+    /* For Room: (User) */
     socket.on("joined_find", (games: Game[]) => {
       SocketDispatch({ type: "update_games", payload: games });
     });
 
     /* Add game */
-    /* From Room: Find */
+    /* For Room: Find */
     socket.on("add_game", (game: Game) => {
       SocketDispatch({
         type: "add_game",
@@ -147,7 +156,7 @@ const SocketContextComponent: React.FunctionComponent<
     });
 
     /* Remove game */
-    /* From Room: Find */
+    /* For Room: Find */
     socket.on("remove_game", (gameId: string) => {
       SocketDispatch({
         type: "remove_game",
@@ -156,59 +165,68 @@ const SocketContextComponent: React.FunctionComponent<
     });
 
     /* Update game name */
-    /* From Room: Find */
+    /* For Room: Find */
     socket.on("update_game_name", (payload: string[]) => {
       SocketDispatch({ type: "update_game_name", payload: payload });
     });
 
     /* Update max number of players */
-    /* From Room: Find */
+    /* For Room: Find */
     socket.on("update_max_players", (payload: [string, number]) => {
       SocketDispatch({ type: "update_max_players", payload: payload });
     });
 
     /* Update game number of players*/
-    /* From Room: Find */
+    /* For Room: Find */
     socket.on("update_game_num_players", (payload: [string, number]) => {
       SocketDispatch({ type: "update_game_num_players", payload: payload });
+    });
+
+    /* Game in progress - no longer joinable so remove */
+    /* For Room: Find */
+    socket.on("game_in_progress", (gameId: string) => {
+      SocketDispatch({
+        type: "remove_game",
+        payload: gameId,
+      });
     });
     ////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////GAME//////////////////////////////////////////
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%LOBBY%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
     /* Join game */
-    /* From Room: (User) */
+    /* For Room: (User) */
     socket.on("joined_game", (payload: [GameInfo, string[], string[]]) => {
       SocketDispatch({ type: "set_this_game", payload: payload });
     });
 
     /* Player joined */
-    /* From Room: Game */
+    /* For Room: Game */
     socket.on("player_joined", (payload: string[]) => {
       SocketDispatch({ type: "add_game_player", payload: payload });
     });
 
     /* Player left */
-    /* From Room: Game */
+    /* For Room: Game */
     socket.on("player_left", (playerUid: string) => {
       SocketDispatch({ type: "remove_game_player", payload: playerUid });
     });
 
     /* Player name changed */
-    /* From Room: Game */
+    /* For Room: Game */
     socket.on("player_name_changed", (payload: string[]) => {
       SocketDispatch({ type: "update_player_name", payload: payload });
       localStorage.setItem("playerName", payload[1]);
     });
 
     /* Lobby name changed */
-    /* From Room: Game */
+    /* For Room: Game */
     socket.on("lobby_name_changed", (newLobbyName: string) => {
       SocketDispatch({ type: "update_lobby_name", payload: newLobbyName });
     });
 
     /* Max number of players changed */
-    /* From Room: Game */
+    /* For Room: Game */
     socket.on("max_players_changed", (newMaxNumberOfPlayers: number) => {
       SocketDispatch({
         type: "update_this_max_players",
@@ -217,32 +235,37 @@ const SocketContextComponent: React.FunctionComponent<
     });
 
     /* Game changed to public */
-    /* From Room: Game */
+    /* For Room: Game */
     socket.on("change_game_public", () => {
       SocketDispatch({ type: "change_game_public", payload: null });
     });
 
     /* Game changed to private */
-    /* From Room: Game */
+    /* For Room: Game */
     socket.on("change_game_private", () => {
       SocketDispatch({ type: "change_game_private", payload: null });
     });
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%IN GAME%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    /* Game started */
+    /* For Room: (User) */
+    socket.on("game_started", (meyerInfo: MeyerInfo) => {
+      SocketDispatch({ type: "game_in_progress", payload: meyerInfo });
+    });
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MIXED%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
     /* Owner left */
-    /* From Room: Game */
+    /* For Room: Game */
     socket.on("game_owner_left", () => {
       focus();
       confirm(translateRedirecting(isDanish));
       navigate(base + "/find");
     });
-    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
-    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%IN GAME%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
-    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
-
-    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MIXED%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
     /* When getting kicked */
-    /* From Room: Game */
+    /* For Room: Game */
     socket.on("been_kicked", () => {
       confirm(translateKicked(isDanish));
       navigate(base + "/find");

@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
 import { Socket } from "socket.io-client";
+import { Action, TurnInfo } from "../../utils/gameTypes";
 
 export type Game = {
   id: string;
@@ -23,32 +24,50 @@ export type GameRequest = {
   maxNumberOfPlayers: number;
 };
 
+export type MeyerInfo = {
+  round: number;
+  turn: number;
+  isGameOver: boolean;
+  healths: number[];
+  currentPlayer: string;
+  roll: number;
+  actionChoices: Action[];
+  bluffChoices: number[];
+  turnInformation: TurnInfo[];
+};
+
 export interface ISocketContextState {
   socket: Socket | undefined;
   uid: string;
   usersTotal: number;
-  thisGame: GameInfo;
   games: Game[];
+  thisGame: GameInfo;
+  meyerInfo: MeyerInfo;
 }
 
 export const defaultSocketContextState: ISocketContextState = {
   socket: undefined,
   uid: "",
   usersTotal: 0,
-  thisGame: null as unknown as GameInfo,
   games: [],
+  thisGame: null as unknown as GameInfo,
+  meyerInfo: null as unknown as MeyerInfo,
 };
 
 export type TSocketContextActions =
+  //BUILT-IN//
   | "update_socket"
   | "update_uid"
   | "update_usersTotal"
-  | "add_game"
-  | "update_game_num_players"
+  //FIND//
   | "update_games"
+  | "add_game"
   | "remove_game"
   | "update_game_name"
   | "update_max_players"
+  | "update_game_num_players"
+  | "game_in_progress"
+  //GAME//
   | "set_this_game"
   | "add_game_player"
   | "remove_game_player"
@@ -60,15 +79,16 @@ export type TSocketContextActions =
 
 export type TSocketContextPayload =
   | null
+  | Socket
   | string
   | string[]
-  | [GameInfo, string[], string[]]
-  | Socket
+  | number
+  | [string, number]
   | Game
   | Game[]
   | GameInfo
-  | number
-  | [string, number];
+  | [GameInfo, string[], string[]]
+  | MeyerInfo;
 
 export interface ISocketContextActions {
   type: TSocketContextActions;
@@ -81,6 +101,7 @@ export const SocketReducer = (
 ) => {
   let gameIndex;
   switch (action.type) {
+    ////////////////////////////////////////BUILT-IN////////////////////////////////////////
     case "update_socket":
       return { ...state, socket: action.payload as Socket };
 
@@ -89,6 +110,11 @@ export const SocketReducer = (
 
     case "update_usersTotal":
       return { ...state, usersTotal: action.payload as number };
+    ////////////////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////FIND//////////////////////////////////////////
+    case "update_games":
+      return { ...state, games: action.payload as Game[] };
 
     case "add_game":
       if (!state.games.includes(action.payload as Game)) {
@@ -99,18 +125,6 @@ export const SocketReducer = (
       }
 
       return state;
-
-    case "update_game_num_players":
-      let index = state.games.findIndex(
-        (value: Game) => value.id === (action.payload as [string, number])[0]
-      );
-      state.games[index].numberOfPlayers = (
-        action.payload as [string, number]
-      )[1];
-      return { ...state, games: state.games };
-
-    case "update_games":
-      return { ...state, games: action.payload as Game[] };
 
     case "remove_game":
       return {
@@ -136,6 +150,24 @@ export const SocketReducer = (
       )[1];
       return { ...state, games: state.games };
 
+    case "update_game_num_players":
+      let index = state.games.findIndex(
+        (value: Game) => value.id === (action.payload as [string, number])[0]
+      );
+      state.games[index].numberOfPlayers = (
+        action.payload as [string, number]
+      )[1];
+      return { ...state, games: state.games };
+
+    case "game_in_progress":
+      return {
+        ...state,
+        thisGame: { ...state.thisGame, isInProgress: true },
+        meyerInfo: action.payload as MeyerInfo,
+      };
+    ////////////////////////////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////GAME//////////////////////////////////////////
     case "set_this_game":
       const newThisGame = (action.payload as [GameInfo, string[], string[]])[0];
       const newGamePlayers = (
@@ -231,6 +263,7 @@ export const SocketReducer = (
         ...state,
         thisGame: { ...state.thisGame, isPublic: false },
       };
+    ////////////////////////////////////////////////////////////////////////////////////////
   }
 };
 

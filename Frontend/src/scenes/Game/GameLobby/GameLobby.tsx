@@ -14,7 +14,7 @@ import {
 import { IosShareOutlined, StarOutlined } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 import GameLobbyPlayers from "./GameLobbyPlayers";
-import PlayerDisplay from "./PlayersDisplay";
+import PlayerDisplay from "../PlayersDisplay";
 import loading from "../../../assets/discordLoadingDotsDiscordLoading.gif";
 import LeaveGameButton from "../LeaveGameButton";
 
@@ -61,12 +61,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
 
   return (
     <Box display="flex" justifyContent="center">
-      <Box
-        display="flex"
-        justifyContent="center"
-        flexDirection="column"
-        width="90%"
-      >
+      <Box display="flex" justifyContent="center" flexDirection="column">
         {/* HEADING */}
         <GameLobbyName
           isDanish={isDanish}
@@ -137,7 +132,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
           <Box
             display="flex"
             justifyContent="center"
-            paddingLeft="85px"
+            paddingLeft="55px"
             paddingTop="10px"
             paddingBottom="3px"
             bgcolor={colors.primary[600]}
@@ -183,6 +178,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
               variant="contained"
               color="secondary"
               disabled={!canStartGame()}
+              onClick={() => SocketState.socket?.emit("start_game")}
             >
               <Typography
                 fontSize="16px"

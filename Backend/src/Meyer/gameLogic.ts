@@ -75,7 +75,9 @@ export class Meyer {
   //##############################################################################//
 
   //####################################GLOBAL####################################//
-  private readonly numberOfPlayers: number = -1;
+  private numberOfPlayers: number = -1; //In online play, can change
+  private readonly playerUids: string[] = [];
+  private playersLeft: number[] = [];
 
   private winner: number = -1;
 
@@ -87,13 +89,14 @@ export class Meyer {
   private round: number = 1;
   //##############################################################################//
 
-  constructor(numberOfPlayers: number) {
-    if (numberOfPlayers < 2 || numberOfPlayers > 20) {
+  constructor(playerUids: string[]) {
+    this.numberOfPlayers = playerUids.length;
+    if (this.numberOfPlayers < 2 || this.numberOfPlayers > 20) {
       throw new Error(
         "Number of players has to be between 2 and 20 (inclusive)"
       );
     }
-    this.numberOfPlayers = numberOfPlayers;
+    this.playerUids = playerUids;
     this.setHealths();
   }
 
@@ -205,20 +208,26 @@ export class Meyer {
   ////////////////////////////////PUBLIC FUNCTIONS//////////////////////////////////
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%FRONTEND SHARED GETTERS%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
   public getCurrentPlayer(): number {
-    //TODO: Does this cause information leakage?
     return this.currentPlayer;
   }
 
+  public getCurrentPlayerUid(): string {
+    return this.playerUids[this.getCurrentPlayer() - 1];
+  }
+
   public getCurrentAction(): Action {
-    //TODO: Does this cause information leakage?
     return this.currentAction;
   }
 
   public getCurrentHealths(): number[] {
-    return this.healths;
+    if (this.playerLeft.length === 0) {
+
+      return this.healths;
+    }
+
+    return this.healths.filter((value,index) => !this.playersLeft.includes(index+1))
   }
   public getRoll(): number {
-    //TODO: Does this cause information leakage?
     if (this.currentAction == "SameRollOrHigher") {
       return -1;
     }
@@ -226,7 +235,6 @@ export class Meyer {
   }
 
   public getPreviousRoll(): number {
-    //TODO: Does this cause information leakage?
     return this.previousRoll;
   }
 
@@ -276,6 +284,31 @@ export class Meyer {
       this.previousDeclaredRoll,
       this.getTurn()
     );
+  }
+
+  public playerLeft(uid: string): void {
+    if (!this.isGameOver()) {
+      const playerIndex = this.playerUids.findIndex((value) => value === uid);
+      const playerValue = playerIndex + 1;
+      this.healths[playerIndex] = 0;
+      this.playersLeft.push(playerValue);
+
+      if (
+        playerValue === this.currentPlayer ||
+        (playerValue === this.previousPlayer &&
+          this.getActionChoices().includes("Check"))
+      ) {
+        this.endRoundBase();
+        this.currentPlayer = this.getNextPlayer(this.currentPlayer);
+        this.previousPlayer = -1;
+      } else if (playerValue === this.previousPlayer) {
+        this.previousPlayer = this.currentPlayer;
+      }
+
+      if (this.isCurrentPlayerWinner()) {
+        this.winner = this.currentPlayer;
+      }
+    }
   }
 
   public isGameOver(): boolean {

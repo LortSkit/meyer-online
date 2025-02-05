@@ -5,6 +5,7 @@ import { Socket, Server } from "socket.io";
 import { v4 } from "uuid";
 import { frontendURL } from "./environmentUtils";
 import { Meyer } from "./Meyer/gameLogic";
+import { Action, TurnInfo } from "./Meyer/gameTypes";
 
 type Game = {
   id: string;
@@ -39,6 +40,30 @@ type GameInfo = {
 type GameRequest = {
   name: string;
   maxNumberOfPlayers: number;
+};
+
+type MeyerInfo = {
+  round: number;
+  turn: number;
+  isGameOver: boolean;
+  healths: number[];
+  currentPlayer: string;
+  roll: number;
+  actionChoices: Action[];
+  bluffChoices: number[];
+  turnInformation: TurnInfo[];
+};
+
+const MeyerInfoDefault: MeyerInfo = {
+  round: 1,
+  turn: 1,
+  isGameOver: false,
+  healths: [],
+  currentPlayer: "",
+  roll: -1,
+  actionChoices: [],
+  bluffChoices: [],
+  turnInformation: [],
 };
 
 type Room = "Find" | "Create" | "Game";
@@ -274,12 +299,7 @@ export class ServerSocket {
     socket.on(
       "handshake",
       (
-        callback: (
-          reconnect: boolean,
-          uid: string,
-          userstotal: number,
-          gameId: string
-        ) => void
+        callback: (reconnect: boolean, uid: string, userstotal: number) => void
       ) => {
         console.info("Handshake received from: " + socket.id);
 
@@ -299,7 +319,8 @@ export class ServerSocket {
             if (gameBase) {
               gameId = gameBase.id;
             }
-            callback(reconnected, "", -1, gameId);
+            const users = Object.values(this.users);
+            callback(reconnected, uid, users.length);
           }
           return;
         }
@@ -312,7 +333,7 @@ export class ServerSocket {
 
         const users = Object.values(this.users);
         console.info("Sending callback for handshake ...");
-        callback(reconnected, uid, users.length, "");
+        callback(reconnected, uid, users.length);
 
         /* Send new user to all connected users */
         /* (ALL) */
@@ -565,19 +586,24 @@ export class ServerSocket {
             : chosenPlayerName;
 
         const inGameId = this.playerInGame[uid];
+        if (inGameId && !this.gameIsInProgress(inGameId)) {
+          if (playerName === "" || !inGameId) {
+            return;
+          }
 
-        if (playerName === "" || !inGameId) {
-          return;
+          const playerIndex = this.gamePlayers[inGameId].findIndex(
+            (value) => value === uid
+          );
+
+          this.gamePlayersNames[inGameId][playerIndex] = playerName;
+
+          /* Game */
+          this.SendMessage(
+            "player_name_changed",
+            [inGameId],
+            [uid, playerName]
+          );
         }
-
-        const playerIndex = this.gamePlayers[inGameId].findIndex(
-          (value) => value === uid
-        );
-
-        this.gamePlayersNames[inGameId][playerIndex] = playerName;
-
-        /* Game */
-        this.SendMessage("player_name_changed", [inGameId], [uid, playerName]);
       }
     });
 
@@ -592,6 +618,7 @@ export class ServerSocket {
         const owningGame = this.gameBases[uid];
         if (
           owningGame &&
+          !this.gameIsInProgress(owningGame.id) &&
           0 < newLobbyName.length &&
           newLobbyName.length <= 25
         ) {
@@ -624,6 +651,7 @@ export class ServerSocket {
         const owningGame = this.gameBases[uid];
         if (
           owningGame &&
+          !this.gameIsInProgress(owningGame.id) &&
           1 < newMaxNumberOfPlayers &&
           newMaxNumberOfPlayers <= 20
         ) {
@@ -678,7 +706,7 @@ export class ServerSocket {
       const uid = this.GetUidFromSocketID(socket.id);
       if (uid) {
         const owningGame = this.gameBases[uid];
-        if (owningGame) {
+        if (owningGame && !this.gameIsInProgress(owningGame.id)) {
           if (this.gameIsPublic(owningGame.id)) {
             delete this.publicGames[uid];
 
@@ -703,6 +731,53 @@ export class ServerSocket {
         }
       }
     });
+
+    /* START GAME */
+    /* From Room: Game */
+    /* Sends to: (User), Find */
+    socket.on("start_game", () => {
+      console.info("Received event: start_game from " + socket.id);
+
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid) {
+        const owningGame = this.gameBases[uid];
+        if (
+          owningGame &&
+          !this.gameIsInProgress(owningGame.id) &&
+          this.gamePlayers[owningGame.id].length > 1
+        ) {
+          this.gameMeyer[owningGame.id] = new Meyer(
+            this.gamePlayers[owningGame.id]
+          );
+          const currentPlayer =
+            this.gameMeyer[owningGame.id].getCurrentPlayerUid();
+          const restPlayers = this.gamePlayers[owningGame.id].filter(
+            (value) => value !== currentPlayer
+          );
+          /* (User) */
+          this.SendMessage("game_started", [currentPlayer], {
+            ...MeyerInfoDefault,
+            healths: this.gameMeyer[owningGame.id].getCurrentHealths(),
+            currentPlayer: currentPlayer,
+            actionChoices: this.gameMeyer[owningGame.id].getActionChoices(),
+          });
+
+          /* (User) */
+          this.SendMessage("game_started", restPlayers, {
+            ...MeyerInfoDefault,
+            healths: this.gameMeyer[owningGame.id].getCurrentHealths(),
+            currentPlayer: currentPlayer,
+          });
+
+          if (this.gameIsPublic(owningGame.id)) {
+            delete this.publicGames[uid];
+            /* Find */
+            this.SendMessage("game_in_progress", ["Find"], owningGame.id);
+          }
+        }
+      }
+    });
+
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%IN GAME%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
@@ -721,6 +796,10 @@ export class ServerSocket {
         const owningGame = this.gameBases[uid];
         if (owningGame) {
           this.removeUserFromGamesAndRoom(kickingUid);
+
+          if (this.gameIsInProgress(owningGame.id)) {
+            this.gameMeyer[owningGame.id].playerLeft(kickingUid);
+          }
 
           /* (User) */
           this.SendMessage("been_kicked", [kickingUid]); //Informs them they've been kicked

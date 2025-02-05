@@ -16,6 +16,10 @@ const HomeHeading = ({ isDanish }: Props) => {
         variant="h1"
         color={colors.blueAccent[100]}
         fontWeight="bold"
+        style={{
+          wordBreak: "break-word",
+          textAlign: "center",
+        }}
         children={translateHomeWelcome(isDanish)}
       />
     </Box>

@@ -3,19 +3,23 @@ import {
   IconButton,
   InputBase,
   Typography,
+  useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { tokens } from "../../../theme";
-import { CloseOutlined, Edit } from "@mui/icons-material";
-import { Dice } from "../../../utils/diceUtils";
-import loading from "../../../assets/discordLoadingDotsDiscordLoading.gif";
+import { tokens } from "../../theme";
+import { ArrowForwardOutlined, CloseOutlined, Edit } from "@mui/icons-material";
+import { Dice } from "../../utils/diceUtils";
+import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 
 interface Props {
   currentName: string;
   currentUid: string;
+  healths?: number[];
+  inProgress?: boolean;
   isOwner: boolean;
+  isGameOver?: boolean;
   playerNames: string[];
   playerUids: string[];
   socket: Socket;
@@ -24,13 +28,18 @@ interface Props {
 const PlayerDisplay = ({
   currentName,
   currentUid,
+  healths,
+  inProgress,
   isOwner,
+  isGameOver,
   playerNames,
   playerUids,
   socket,
 }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const queryMatches = useMediaQuery("only screen and (min-width: 790px)");
 
   const [toggleEditName, setToggleEditName] = useState(false);
   const [nameChanger, setNameChanger] = useState(currentName);
@@ -68,8 +77,8 @@ const PlayerDisplay = ({
         style={{
           position: "relative",
           transform: "translate(0%,-5%)",
-          width: "30px",
-          height: "30px",
+          width: "20px",
+          height: "20px",
         }}
       >
         <Edit sx={{ width: "18px", height: "18px" }} />
@@ -87,8 +96,8 @@ const PlayerDisplay = ({
         onClick={onKick(uid)}
         style={{
           position: "relative",
-          width: "30px",
-          height: "30px",
+          width: "20px",
+          height: "20px",
         }}
       >
         <CloseOutlined sx={{ width: "18px", height: "18px" }} />
@@ -176,9 +185,25 @@ const PlayerDisplay = ({
       {playerNames.map((name, index) => (
         <Box display="flex" flexDirection="column" key={index}>
           <Box display="flex">
+            {/* ARROW - (if wanted) */}
+            {isGameOver !== undefined &&
+              playerUids[index] === currentUid &&
+              !isGameOver && (
+                <Box display="flex" bgcolor={colors.primary[500]}>
+                  <ArrowForwardOutlined />
+                </Box>
+              )}
+            {isGameOver !== undefined &&
+              !(playerUids[index] === currentUid && !isGameOver) && (
+                <Box paddingLeft="calc(20.5px + 5px)" />
+              )}
             {/* DICE ICON */}
             <Box display="flex" flexDirection="column" justifyContent="center">
-              <Dice eyes={6} color={colors.blueAccent[100]} sideLength={25} />
+              <Dice
+                eyes={healths ? healths[index] : 6}
+                color={colors.blueAccent[100]}
+                sideLength={25}
+              />
             </Box>
             <Box marginRight="3px" />
 
@@ -189,12 +214,12 @@ const PlayerDisplay = ({
               justifyContent="center"
               height="24px"
               onDoubleClick={() => {
-                if (playerUids[index] === currentUid) onEdit();
+                if (playerUids[index] === currentUid && !inProgress) onEdit();
               }}
             >
               {name !== "" && (
                 <Typography
-                  fontSize="16px"
+                  fontSize={!queryMatches && inProgress ? "10px" : "14px"}
                   style={{
                     wordBreak: "break-all",
                     textAlign: "center",
@@ -207,10 +232,13 @@ const PlayerDisplay = ({
                         <>
                           {name}
                           {numberAfterName(name, index)}
-                          {playerUids[index] === currentUid && EditNameButton()}
+                          {playerUids[index] === currentUid &&
+                            !inProgress &&
+                            EditNameButton()}
                         </>
                       )}
                       {toggleEditName &&
+                        !inProgress &&
                         playerUids[index] === currentUid &&
                         InputNameElement(index)}
                       {isOwner &&

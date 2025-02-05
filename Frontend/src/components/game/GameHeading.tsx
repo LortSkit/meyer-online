@@ -1,13 +1,14 @@
 import { Box, Typography } from "@mui/material";
 import {
-  translateCurrentPlayerTurn,
+  translateCurrentPlayerNameTurn,
+  translateCurrentPlayerValueTurn,
   translateRound,
   translateTurn,
-} from "../../../../../utils/lang/Create/CreateLocal/InGame/Game/langeGameHeading";
+} from "../../utils/lang/components/game/langeGameHeading";
 
 interface Props {
   isDanish: boolean;
-  currentPlayer: number;
+  currentPlayer: number | string;
   round: number;
   turn: number;
 }
@@ -32,7 +33,25 @@ const GameHeading = ({ isDanish, currentPlayer, round, turn }: Props) => {
           fontSize="20px"
           display="flex"
           justifyContent="center"
-          children={translateCurrentPlayerTurn(isDanish, currentPlayer)}
+          style={{
+            wordBreak: "break-all",
+            textAlign: "center",
+          }}
+          children={
+            typeof currentPlayer === "number" ? (
+              translateCurrentPlayerValueTurn(isDanish, currentPlayer)
+            ) : (
+              <span
+                style={{
+                  wordBreak: "break-word",
+                  textAlign: "center",
+                }}
+              >
+                <strong>{currentPlayer}</strong>
+                {translateCurrentPlayerNameTurn(isDanish, currentPlayer)}
+              </span>
+            )
+          }
         />
       </Typography>
     </Box>

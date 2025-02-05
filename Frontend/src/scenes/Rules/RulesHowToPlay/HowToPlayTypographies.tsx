@@ -10,7 +10,11 @@ export const HowToPlayHeading = ({ children }: PropsFixedFontSize) => {
       variant="h2"
       fontStyle="normal"
       textTransform="none"
-      style={{ display: "flex", justifyContent: "center" }}
+      style={{
+        wordBreak: "break-word",
+        textAlign: "center",
+      }}
+      sx={{ display: "flex", justifyContent: "center" }}
       children={children}
     />
   );
@@ -22,7 +26,11 @@ export const HowToPlayHook = ({ children }: PropsFixedFontSize) => {
       variant="h3"
       fontStyle="normal"
       textTransform="none"
-      style={{ display: "flex", justifyContent: "center" }}
+      style={{
+        wordBreak: "break-word",
+        textAlign: "center",
+      }}
+      sx={{ display: "flex", justifyContent: "center" }}
       children={children}
     />
   );
@@ -34,7 +42,11 @@ export const HowToPlaySmallText = ({ children }: PropsFixedFontSize) => {
       fontSize="12px"
       fontStyle="normal"
       textTransform="none"
-      style={{ display: "flex", justifyContent: "center" }}
+      style={{
+        wordBreak: "break-word",
+        textAlign: "center",
+      }}
+      sx={{ display: "flex", justifyContent: "center" }}
       children={children}
     />
   );
@@ -65,6 +77,10 @@ export const HowToPlayRoll = ({ children, fontSize }: PropsText) => {
       display="flex"
       flexDirection="column"
       children={children}
+      style={{
+        wordBreak: "break-word",
+        textAlign: "center",
+      }}
       component="span"
     />
   );

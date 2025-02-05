@@ -1,5 +1,5 @@
 import { Box, Typography, useTheme } from "@mui/material";
-import GameHeading from "./GameHeading";
+import GameHeading from "../../../../../components/game/GameHeading";
 import ActionChoices from "./ActionChoices";
 import BluffChoices from "./BluffChoices";
 import { RollWithName } from "../../../../../utils/diceUtils";

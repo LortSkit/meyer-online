@@ -16,6 +16,7 @@ import SetPlayerName from "./GameLobby/SetPlayerName";
 import LeaveGameButton from "./LeaveGameButton";
 import GameLobby from "./GameLobby/GameLobby";
 import { Socket } from "socket.io-client";
+import GameMeyer from "./GameMeyer";
 
 function baseMessage(message: string) {
   return (
@@ -52,7 +53,7 @@ const Game = ({ isDanish }: Props) => {
   }
   const StandardErrorMessage = () => {
     return (
-      <MiddleChild widthPercentage={90}>
+      <MiddleChild widthPercentage={100}>
         <Box p={4} />
         {baseMessage(translateGameDoesNotExist(isDanish))}
         <LeaveGameButton isDanish={isDanish} />
@@ -62,7 +63,7 @@ const Game = ({ isDanish }: Props) => {
 
   const NotEnoughSpaceMessage = () => {
     return (
-      <MiddleChild widthPercentage={90}>
+      <MiddleChild widthPercentage={100}>
         <Box p={4} />
         {baseMessage(translateNotEnoughSpace(isDanish))}
         <LeaveGameButton isDanish={isDanish} />
@@ -72,7 +73,7 @@ const Game = ({ isDanish }: Props) => {
 
   const GameInProgressMessage = () => {
     return (
-      <MiddleChild widthPercentage={90}>
+      <MiddleChild widthPercentage={100}>
         <Box p={4} />
         {baseMessage(translateGameInProgress(isDanish))}
         <LeaveGameButton isDanish={isDanish} />
@@ -130,11 +131,19 @@ const Game = ({ isDanish }: Props) => {
     );
   } else {
     middleChild = (
-      <MiddleChild widthPercentage={90}>
+      <MiddleChild widthPercentage={100}>
         {!SocketState.thisGame.isInProgress && (
           <GameLobby isDanish={isDanish} SocketState={SocketState} />
         )}
-        {SocketState.thisGame.isInProgress && <div>Make the game here!</div>}
+        {SocketState.thisGame.isInProgress && (
+          <GameMeyer
+            isDanish={isDanish}
+            gameInfo={SocketState.thisGame}
+            meyerInfo={SocketState.meyerInfo}
+            socket={SocketState.socket as Socket}
+            uid={SocketState.uid}
+          />
+        )}
       </MiddleChild>
     );
   }
@@ -142,8 +151,8 @@ const Game = ({ isDanish }: Props) => {
   return (
     <CenteredPage
       middleChild={middleChild}
-      leftWidthPercentage={5}
-      rightWidthPercentage={5}
+      leftWidthPercentage={0}
+      rightWidthPercentage={0}
     />
   );
 };
