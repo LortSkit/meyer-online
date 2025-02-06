@@ -17,7 +17,6 @@ import {
 } from "../../utils/lang/langSocketComponents";
 import { base } from "../../utils/hostSubDirectory";
 import { Box } from "@mui/material";
-import { debounce } from "lodash";
 export interface ISocketContextComponentProps extends PropsWithChildren {
   isDanish: boolean;
 }
@@ -83,6 +82,7 @@ const SocketContextComponent: React.FunctionComponent<
     if (loading) {
       SendHandshake();
 
+      //import { debounce } from "lodash";
       // var debouncedReconnect = debounce(
       //   () => {
       //     socket.connect();
