@@ -228,8 +228,9 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
         </Box>
       )}
       <TurnInformation
-        isDanish={false}
+        isDanish={isDanish}
         round={meyerInfo.round}
+        playerNames={gameInfo.gamePlayersNames}
         turnInformation={meyerInfo.turnInformation}
         setTurnInformation={function (update: TurnInfo[]) {}}
       />

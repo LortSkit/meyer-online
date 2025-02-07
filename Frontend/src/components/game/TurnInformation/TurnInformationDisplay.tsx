@@ -16,6 +16,7 @@ interface Props {
   hasClicked: boolean[];
   isClicked: boolean[];
   isTimed?: boolean;
+  playerNames?: string[];
   turnInfoList: TurnInfo[];
   onClick?:
     | React.MouseEventHandler<HTMLButtonElement>
@@ -29,6 +30,7 @@ const TurnInformationDisplay = ({
   hasClicked,
   isClicked,
   isTimed,
+  playerNames,
   turnInfoList,
   onClick,
 }: Props) => {
@@ -81,7 +83,11 @@ const TurnInformationDisplay = ({
                   fontSize={isTimed ? "20px" : "16px"}
                   fontStyle="normal"
                   textTransform="none"
-                  children={translateTurnInfo(isDanish, value)}
+                  children={translateTurnInfo(
+                    isDanish,
+                    value,
+                    playerNames ? playerNames : undefined
+                  )}
                 />
               </Box>
             </Button>

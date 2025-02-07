@@ -1,35 +1,46 @@
 import { isAction, TurnInfo } from "../../../../gameTypes";
 import { translateRollName } from "../../../langDiceUtils";
+import { danishGenitiveEnding } from "../langeGameHeading";
 
 export function translateTurnInfo(
   isDanish: boolean,
-  turnInfo: TurnInfo
+  turnInfo: TurnInfo,
+  playerNames?: string[]
 ): string {
-  let currentPlayer = -1;
+  let currentPlayer: number | string = -1;
   let bluff = -1;
   let healthRoll = -1;
   let healthToLose = -1;
   let previousDeclaredRoll = -1;
-  let previousPlayer = -1;
+  let previousPlayer: number | string = -1;
   let previousRoll = -1;
   let roll = -1;
 
   if (isAction(turnInfo[0])) {
-    currentPlayer = turnInfo[1][0];
+    currentPlayer = playerNames
+      ? playerNames[turnInfo[1][0] - 1]
+      : turnInfo[1][0];
   } else {
-    previousPlayer = turnInfo[1][0];
+    previousPlayer = playerNames
+      ? playerNames[turnInfo[1][0] - 1]
+      : turnInfo[1][0];
     previousDeclaredRoll = turnInfo[1][1];
     previousRoll = turnInfo[1][2];
   }
 
   switch (turnInfo[0]) {
     case "Error":
-      throw new Error("This could SHOULD be unreachable");
+      throw new Error("This SHOULD be unreachable");
 
     case "Check":
       previousPlayer = turnInfo[1][1];
       return isDanish
-        ? `Spiller ${currentPlayer} valgte at tjekke Spiller ${previousPlayer}'s slag...`
+        ? `Spiller ${currentPlayer} valgte at tjekke Spiller ${
+            previousPlayer +
+            (typeof previousPlayer === "string"
+              ? danishGenitiveEnding(previousPlayer)
+              : "'s")
+          } slag...`
         : `Player ${currentPlayer} chose to check Player ${previousPlayer}'s roll...`;
 
     case "CheckTT":
@@ -99,7 +110,9 @@ export function translateTurnInfo(
           )}`;
 
     case "CheckLoseHealth":
-      let losingPlayer = turnInfo[1][0];
+      let losingPlayer = playerNames
+        ? playerNames[turnInfo[1][0] - 1]
+        : turnInfo[1][0];
       healthToLose = turnInfo[1][1];
       return isDanish
         ? `Spiller ${losingPlayer} mistede ${healthToLose} liv`

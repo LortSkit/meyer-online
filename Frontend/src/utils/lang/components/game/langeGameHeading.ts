@@ -15,7 +15,7 @@ export function translateCurrentPlayerValueTurn(
     : `Player ${currentPlayer}'s turn`;
 }
 
-function danishGenitiveEnding(word: string): string {
+export function danishGenitiveEnding(word: string): string {
   if (
     word &&
     (word.endsWith("s") || word.endsWith("x") || word.endsWith("z"))

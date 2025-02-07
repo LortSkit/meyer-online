@@ -13,6 +13,7 @@ import {
 
 interface Props {
   isDanish: boolean;
+  playerNames?: string[];
   round: number;
   turnInformation: TurnInfo[];
 
@@ -24,6 +25,7 @@ interface Props {
 const TurnInformation = ({
   isDanish,
   round,
+  playerNames,
   turnInformation,
   setTurnInformation,
 }: Props) => {
@@ -69,6 +71,7 @@ const TurnInformation = ({
         isDanish={isDanish}
         hasClicked={hasClicked}
         isClicked={isClicked}
+        playerNames={playerNames ? playerNames : undefined}
         turnInfoList={chosenElements}
         onClick={onClickChosenTurnInfo({ setChosenElements })}
       />
@@ -79,6 +82,7 @@ const TurnInformation = ({
         hasClicked={hasClicked}
         isClicked={isClicked}
         isTimed
+        playerNames={playerNames ? playerNames : undefined}
         turnInfoList={turnInformation}
         onClick={onClickCurrentTurnInfo({
           chosenElementsBuffer,

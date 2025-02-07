@@ -1,5 +1,11 @@
 import { getDiceRoll, getMeyerRoll } from "./diceUtils";
-import { Action, MeyerInfo, MeyerInfoDefault } from "./gameTypes";
+import {
+  Action,
+  MeyerInfo,
+  MeyerInfoDefault,
+  TurnInfo,
+  TurnInfoType,
+} from "./gameTypes";
 
 //For the static functions below
 const allPossibleRollsOrdered: number[] = [
@@ -90,6 +96,8 @@ export class Meyer {
   private turn: number = 1;
   private turnTotal: number = 1;
   private round: number = 1;
+
+  private turnInformation: TurnInfo[] = [];
   //##############################################################################//
 
   constructor(playerUids: string[]) {
@@ -212,6 +220,101 @@ export class Meyer {
     }
   }
 
+  private getOnlinePlayerIndex(player: number): number {
+    if (this.playerLeft.length === 0 || player === 1) {
+      return player;
+    }
+
+    const toBeReducted = this.playersLeft.filter(
+      (value) => value < player
+    ).length;
+    return player - toBeReducted;
+  }
+
+  private setTurnInformation(): void {
+    let numbersList: number[] = [this.getOnlinePlayerIndex(this.currentPlayer)];
+    let toBeTurnInfo: TurnInfo[] = [[this.currentAction, numbersList]];
+
+    switch (this.currentAction) {
+      case "Error":
+        break;
+
+      case "Check":
+        toBeTurnInfo = [
+          [
+            "Check",
+            [
+              this.getOnlinePlayerIndex(this.currentPlayer),
+              this.getOnlinePlayerIndex(this.previousPlayer),
+            ],
+          ],
+        ];
+        let turnInfoType: string = "Check";
+        this.previousAction === "SameRollOrHigher"
+          ? (turnInfoType += "T")
+          : (turnInfoType += "F");
+
+        let currentPlayerLost =
+          this.previousDeclaredRoll === this.previousRoll ||
+          (this.previousAction == "SameRollOrHigher" &&
+            isGreaterThanEqualTo(this.previousRoll, this.previousDeclaredRoll));
+
+        currentPlayerLost ? (turnInfoType += "T") : (turnInfoType += "F");
+
+        toBeTurnInfo.push([
+          turnInfoType as TurnInfoType,
+          [
+            this.getOnlinePlayerIndex(this.previousPlayer),
+            this.previousDeclaredRoll,
+            this.previousRoll,
+          ],
+        ]);
+
+        if (this.previousRoll != 32) {
+          let losingPlayer = currentPlayerLost
+            ? this.getOnlinePlayerIndex(this.currentPlayer)
+            : this.getOnlinePlayerIndex(this.previousPlayer);
+          let healthToLose =
+            this.previousRoll == 21 || this.previousDeclaredRoll == 21 ? 2 : 1;
+
+          toBeTurnInfo.push(["CheckLoseHealth", [losingPlayer, healthToLose]]);
+        }
+
+        this.turnInformation = toBeTurnInfo;
+        break;
+
+      case "HealthRoll":
+        numbersList.push(this.healths[this.currentPlayer - 1]);
+        toBeTurnInfo = [[this.currentAction, numbersList]];
+        this.turnInformation = toBeTurnInfo;
+        break;
+
+      case "Roll":
+        this.turnInformation = toBeTurnInfo;
+        break;
+
+      case "Cheers":
+        this.turnInformation = toBeTurnInfo;
+        break;
+
+      case "SameRollOrHigher":
+        this.turnInformation = toBeTurnInfo;
+
+        break;
+
+      case "Truth":
+        numbersList.push(this.roll);
+        toBeTurnInfo = [[this.currentAction, numbersList]];
+        this.turnInformation = toBeTurnInfo;
+        break;
+
+      case "Bluff":
+        numbersList.push(this.declaredRoll);
+        toBeTurnInfo = [["Truth", numbersList]];
+        this.turnInformation = toBeTurnInfo;
+        break;
+    }
+  }
   //////////////////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////PUBLIC FUNCTIONS//////////////////////////////////
@@ -309,6 +412,7 @@ export class Meyer {
       const playerIndex = this.playerUids.findIndex((value) => value === uid);
       const playerValue = playerIndex + 1;
       this.healths[playerIndex] = 0;
+      //this.turnInformation = [];
       this.playersLeft.push(playerValue);
 
       const roundHasToEnd =
@@ -352,7 +456,7 @@ export class Meyer {
         roll: this.getRoll(),
         actionChoices: this.getActionChoices(),
         bluffChoices: this.getBluffChoices(),
-        turnInformation: [], //TODO: Give correct turn information!
+        turnInformation: this.turnInformation,
       };
     } else {
       return {
@@ -363,7 +467,7 @@ export class Meyer {
         isGameOver: this.isGameOver(),
         healths: this.getCurrentHealths(),
         currentPlayer: this.playerUids[this.currentPlayer - 1],
-        turnInformation: [], //TODO: Give correct turn information!
+        turnInformation: this.turnInformation,
       };
     }
   }
@@ -376,6 +480,8 @@ export class Meyer {
     } else if (this.currentAction === "Error") {
       throw new Error("Cannot advance state when no action has been taken!");
     }
+
+    this.setTurnInformation();
 
     switch (this.currentAction as Action) {
       case "Check":
@@ -523,6 +629,7 @@ export class Meyer {
     this.turn = 1;
     this.turnTotal = 1;
     this.round = 1;
+    this.turnInformation = [];
   }
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
   /////////////////////////////////////////////////////////////////////////////////
