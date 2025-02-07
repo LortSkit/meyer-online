@@ -1,7 +1,7 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import { GameInfo, MeyerInfo } from "../../contexts/Socket/SocketContext";
 import GameHeading from "../../components/game/GameHeading";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import {
   MiddleChild,
   RightChild,
@@ -13,6 +13,15 @@ import { RollWithName } from "../../utils/diceUtils";
 import { tokens } from "../../theme";
 import ActionButton from "../../components/game/ActionButton";
 import BluffButton from "../../components/game/BluffButton";
+import GameOverHeading from "../../components/game/GameOverHeading";
+import {
+  translatePlayAgain,
+  translateReopen,
+  translateWaiting,
+} from "../../utils/lang/Game/langGameMeyer";
+import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
+import TurnInformation from "../../components/game/TurnInformation/TurnInformation";
+import { TurnInfo } from "../../utils/gameTypes";
 
 interface Props {
   isDanish: boolean;
@@ -36,7 +45,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
         .slice(1, gameInfo.gamePlayersNames.length)
         .includes(name)
         ? name + " (1)"
-        : "哈哈哈哈哈好哈哈哈哈哈哈 (10)";
+        : name;
     } else {
       const previousNames = gameInfo.gamePlayersNames.slice(0, index);
       if (previousNames.includes(name)) {
@@ -56,7 +65,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
         return name + " (1)";
       }
 
-      return name + " (20)";
+      return name;
     }
   }
 
@@ -75,77 +84,158 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
     setTruePlayerNames(gameInfo.gamePlayersNames.map(numberAfterName));
   }, [gameInfo.gamePlayersNames]);
 
-  const mainWidth = 67;
+  const mainWidth = 62;
 
   const middleChild = (
     <MiddleChild widthPercentage={mainWidth}>
-      <Box display="flex" justifyContent="center">
-        <GameHeading
-          isDanish={isDanish}
-          currentPlayer={playernameFromUid(meyerInfo.currentPlayer)}
-          round={meyerInfo.round}
-          turn={meyerInfo.round}
-        />
-      </Box>
-      {meyerInfo.currentPlayer === uid && (
-        <Box display="flex" justifyContent="center">
-          {meyerInfo.roll !== -1 && (
+      {/* IN GAME */}
+      {!meyerInfo.isGameOver && (
+        <Box display="flex" flexDirection="column">
+          <Box display="flex" justifyContent="center">
+            <GameHeading
+              isDanish={isDanish}
+              currentPlayer={playernameFromUid(meyerInfo.currentPlayer)}
+              round={meyerInfo.round}
+              turn={meyerInfo.round}
+            />
+          </Box>
+          {meyerInfo.currentPlayer === uid && (
+            <Box display="flex" justifyContent="center">
+              {meyerInfo.roll !== -1 && (
+                <Typography
+                  fontSize="25px"
+                  fontStyle="normal"
+                  textTransform="none"
+                  component="span"
+                >
+                  <RollWithName
+                    isDanish={isDanish}
+                    roll={meyerInfo.roll}
+                    color={colors.blueAccent[100]}
+                    sideLength={30}
+                  />
+                </Typography>
+              )}
+              {meyerInfo.bluffChoices.length === 0 && (
+                <Box display="flex" justifyContent="center">
+                  {meyerInfo.actionChoices.map((action) => (
+                    <Box display="flex" justifyContent="center" key={action}>
+                      <ActionButton
+                        isDanish={isDanish}
+                        action={action}
+                        onClick={() => {}}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+              )}
+              {meyerInfo.bluffChoices.length !== 0 && (
+                <Box display="flex" justifyContent="center">
+                  {meyerInfo.bluffChoices.map((bluff) => (
+                    <Box display="flex" justifyContent="center" key={bluff}>
+                      <BluffButton
+                        isDanish={isDanish}
+                        bluff={bluff}
+                        onClick={() => {}}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </Box>
+          )}
+          {meyerInfo.currentPlayer !== uid && (
             <Typography
-              fontSize="25px"
+              fontSize="12px"
               fontStyle="normal"
               textTransform="none"
               component="span"
-            >
-              <RollWithName
-                isDanish={isDanish}
-                roll={meyerInfo.roll}
-                color={colors.blueAccent[100]}
-                sideLength={30}
-              />
-            </Typography>
+              style={{
+                wordBreak: "break-word",
+                textAlign: "center",
+              }}
+              sx={{ display: "flex", justifyContent: "center" }}
+              children={
+                <Box>
+                  {translateWaiting(
+                    isDanish,
+                    playernameFromUid(meyerInfo.currentPlayer)
+                  )}
+                  <img
+                    src={loading}
+                    width="35px"
+                    style={{ paddingLeft: "5px" }}
+                  />
+                </Box>
+              }
+            />
           )}
-          {meyerInfo.bluffChoices.length === 0 && (
+        </Box>
+      )}
+      {meyerInfo.isGameOver && (
+        <Box display="flex" flexDirection="column">
+          <GameOverHeading
+            isDanish={isDanish}
+            currentPlayer={playernameFromUid(meyerInfo.currentPlayer)}
+            round={meyerInfo.round + 1}
+            turnsTotal={meyerInfo.turnTotal + 1}
+          />
+          {isOwner() && (
             <Box display="flex" justifyContent="center">
-              {meyerInfo.actionChoices.map((action) => (
-                <ActionButton
-                  isDanish={isDanish}
-                  action={action}
-                  onClick={() => {}}
-                />
-              ))}
-            </Box>
-          )}
-          {meyerInfo.bluffChoices.length !== 0 && (
-            <Box display="flex" justifyContent="center">
-              {meyerInfo.bluffChoices.map((bluff) => (
-                <BluffButton
-                  isDanish={isDanish}
-                  bluff={bluff}
-                  onClick={() => {}}
-                />
-              ))}
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => {
+                  socket.emit("restart_game");
+                }}
+                disabled={gameInfo.gamePlayers.length < 2}
+              >
+                {translatePlayAgain(isDanish)}
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => {
+                  socket.emit("reopen_lobby");
+                }}
+              >
+                {translateReopen(isDanish)}
+              </Button>
             </Box>
           )}
         </Box>
       )}
+      <TurnInformation
+        isDanish={false}
+        round={meyerInfo.round}
+        turnInformation={meyerInfo.turnInformation}
+        setTurnInformation={function (update: TurnInfo[]) {}}
+      />
     </MiddleChild>
   );
 
   const rightChild = (
     <RightChild widthPercentage={100 - mainWidth}>
-      <Box paddingTop="5px" />
-      <Box display="flex" justifyContent="center">
-        <PlayerDisplay
-          currentName={playernameFromUid(meyerInfo.currentPlayer)}
-          currentUid={meyerInfo.currentPlayer}
-          healths={meyerInfo.healths}
-          inProgress={gameInfo.isInProgress}
-          isOwner={isOwner()}
-          isGameOver={meyerInfo.isGameOver}
-          playerNames={truePlayerNames}
-          playerUids={gameInfo.gamePlayers}
-          socket={socket}
-        />
+      <Box
+        display="flex"
+        flexDirection="column"
+        sx={{ outline: "4px solid", outlineColor: colors.primary[600] }}
+      >
+        <Box paddingTop="5px" />
+        <Box display="flex" justifyContent="left">
+          <PlayerDisplay
+            currentName={playernameFromUid(meyerInfo.currentPlayer)}
+            currentUid={meyerInfo.currentPlayer}
+            healths={meyerInfo.healths}
+            inProgress={gameInfo.isInProgress}
+            isOwner={isOwner()}
+            isGameOver={meyerInfo.isGameOver}
+            playerNames={truePlayerNames}
+            playersTimedOut={gameInfo.gamePlayersTimeout}
+            playerUids={gameInfo.gamePlayers}
+            socket={socket}
+          />
+        </Box>
       </Box>
     </RightChild>
   );

@@ -105,7 +105,9 @@ export function onTurnInformationUpdate({
 interface CounterUpdateProps {
   counter: number;
   turnInformation: TurnInfo[];
-  setTurnInformation: React.Dispatch<React.SetStateAction<TurnInfo[]>>;
+  setTurnInformation:
+    | React.Dispatch<React.SetStateAction<TurnInfo[]>>
+    | ((update: TurnInfo[]) => void);
 }
 
 export function onCounterUpdate({

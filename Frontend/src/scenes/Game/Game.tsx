@@ -56,7 +56,7 @@ const Game = ({ isDanish }: Props) => {
       <MiddleChild widthPercentage={100}>
         <Box p={4} />
         {baseMessage(translateGameDoesNotExist(isDanish))}
-        <LeaveGameButton isDanish={isDanish} />
+        <LeaveGameButton isDanish={isDanish} socket={SocketState.socket} />
       </MiddleChild>
     );
   };
@@ -66,7 +66,7 @@ const Game = ({ isDanish }: Props) => {
       <MiddleChild widthPercentage={100}>
         <Box p={4} />
         {baseMessage(translateNotEnoughSpace(isDanish))}
-        <LeaveGameButton isDanish={isDanish} />
+        <LeaveGameButton isDanish={isDanish} socket={SocketState.socket} />
       </MiddleChild>
     );
   };
@@ -76,7 +76,7 @@ const Game = ({ isDanish }: Props) => {
       <MiddleChild widthPercentage={100}>
         <Box p={4} />
         {baseMessage(translateGameInProgress(isDanish))}
-        <LeaveGameButton isDanish={isDanish} />
+        <LeaveGameButton isDanish={isDanish} socket={SocketState.socket} />
       </MiddleChild>
     );
   };
@@ -113,6 +113,8 @@ const Game = ({ isDanish }: Props) => {
     return <GameInProgressMessage />;
   } else if (!hasEnoughSpace) {
     middleChild = <NotEnoughSpaceMessage />;
+  } else if (SocketState.thisGame === null) {
+    middleChild = <StandardErrorMessage />;
   } else if (thisPlayerName() === "") {
     middleChild = (
       <MiddleChild widthPercentage={90}>

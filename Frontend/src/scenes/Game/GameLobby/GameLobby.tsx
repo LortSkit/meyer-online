@@ -100,7 +100,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
 
         {/* YOU ARE GAME OWNER - (if you are) */}
         {isOwner() && (
-          <Box display="flex" justifyContent="center" onMouseEnter={undefined}>
+          <Box display="flex" justifyContent="center">
             {translateGameOwner(isDanish)}
             <Box paddingLeft="5px" />
             <StarOutlined
@@ -112,7 +112,10 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
         )}
 
         {/* LEAVE GAME BUTTON */}
-        <LeaveGameButton isDanish={isDanish} />
+        <LeaveGameButton
+          isDanish={isDanish}
+          socket={SocketState.socket as Socket}
+        />
         <Box p={2} />
 
         {/* NUMBER OF PLAYERS */}
@@ -143,6 +146,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
               currentUid={SocketState.uid}
               isOwner={isOwner()}
               playerNames={SocketState.thisGame.gamePlayersNames}
+              playersTimedOut={SocketState.thisGame.gamePlayersTimeout}
               playerUids={SocketState.thisGame.gamePlayers}
               socket={SocketState.socket as Socket}
             />

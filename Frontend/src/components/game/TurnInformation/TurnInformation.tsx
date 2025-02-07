@@ -16,7 +16,9 @@ interface Props {
   round: number;
   turnInformation: TurnInfo[];
 
-  setTurnInformation: React.Dispatch<React.SetStateAction<TurnInfo[]>>;
+  setTurnInformation:
+    | React.Dispatch<React.SetStateAction<TurnInfo[]>>
+    | ((update: TurnInfo[]) => void);
 }
 
 const TurnInformation = ({

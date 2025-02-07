@@ -14,6 +14,7 @@ export type GameInfo = {
   name: string;
   gamePlayers: string[];
   gamePlayersNames: string[];
+  gamePlayersTimeout: string[];
   maxNumberOfPlayers: number;
   isPublic: boolean;
   isInProgress: boolean;
@@ -27,6 +28,7 @@ export type GameRequest = {
 export type MeyerInfo = {
   round: number;
   turn: number;
+  turnTotal: number;
   isGameOver: boolean;
   healths: number[];
   currentPlayer: string;
@@ -55,27 +57,35 @@ export const defaultSocketContextState: ISocketContextState = {
 };
 
 export type TSocketContextActions =
-  //BUILT-IN//
+  ////BUILT-IN///
   | "update_socket"
   | "update_uid"
   | "update_usersTotal"
-  //FIND//
+  | "reset_state"
+  /////FIND//////
   | "update_games"
   | "add_game"
   | "remove_game"
   | "update_game_name"
   | "update_max_players"
   | "update_game_num_players"
-  | "game_in_progress"
-  //GAME//
+  /////GAME//////
+  /* %%LOBBY%% */
   | "set_this_game"
   | "add_game_player"
-  | "remove_game_player"
   | "update_player_name"
   | "update_lobby_name"
   | "update_this_max_players"
   | "change_game_public"
-  | "change_game_private";
+  | "change_game_private"
+  /* %IN GAME% */
+  | "game_in_progress"
+  | "update_meyer_info"
+  | "reopened_lobby"
+  /* %%MIXED%% */
+  | "remove_game_player"
+  | "add_user_timeout"
+  | "remove_user_timeout";
 
 export type TSocketContextPayload =
   | null
@@ -110,6 +120,9 @@ export const SocketReducer = (
 
     case "update_usersTotal":
       return { ...state, usersTotal: action.payload as number };
+
+    case "reset_state":
+      return { ...defaultSocketContextState, socket: state.socket };
     ////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////FIND//////////////////////////////////////////
@@ -159,31 +172,14 @@ export const SocketReducer = (
       )[1];
       return { ...state, games: state.games };
 
-    case "game_in_progress":
-      return {
-        ...state,
-        thisGame: { ...state.thisGame, isInProgress: true },
-        meyerInfo: action.payload as MeyerInfo,
-      };
     ////////////////////////////////////////////////////////////////////////////////////////
 
     //////////////////////////////////////////GAME//////////////////////////////////////////
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%LOBBY%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
     case "set_this_game":
-      const newThisGame = (action.payload as [GameInfo, string[], string[]])[0];
-      const newGamePlayers = (
-        action.payload as [GameInfo, string[], string[]]
-      )[1];
-      const newGamePlayersNames = (
-        action.payload as [GameInfo, string[], string[]]
-      )[2];
-
       return {
         ...state,
-        thisGame: {
-          ...newThisGame,
-          gamePlayers: newGamePlayers,
-          gamePlayersNames: newGamePlayersNames,
-        },
+        thisGame: action.payload as GameInfo,
       };
 
     case "add_game_player": {
@@ -199,24 +195,6 @@ export const SocketReducer = (
           gamePlayersNames: state.thisGame.gamePlayers.includes(uid)
             ? state.thisGame.gamePlayersNames
             : state.thisGame.gamePlayersNames.concat([playerName]),
-        },
-      };
-    }
-
-    case "remove_game_player": {
-      let playerIndex = state.thisGame.gamePlayers.findIndex(
-        (value) => value === (action.payload as string)
-      );
-      return {
-        ...state,
-        thisGame: {
-          ...state.thisGame,
-          gamePlayers: state.thisGame.gamePlayers.filter(
-            (value, index) => index !== playerIndex
-          ),
-          gamePlayersNames: state.thisGame.gamePlayersNames.filter(
-            (value, index) => index !== playerIndex
-          ),
         },
       };
     }
@@ -263,6 +241,70 @@ export const SocketReducer = (
         ...state,
         thisGame: { ...state.thisGame, isPublic: false },
       };
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%IN GAME%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    case "game_in_progress":
+      return {
+        ...state,
+        thisGame: { ...state.thisGame, isInProgress: true },
+        meyerInfo: action.payload as MeyerInfo,
+      };
+
+    case "update_meyer_info":
+      return { ...state, meyerInfo: action.payload as MeyerInfo };
+
+    case "reopened_lobby":
+      return {
+        ...state,
+        thisGame: { ...state.thisGame, isInProgress: false, isPublic: false },
+        meyerInfo: null as unknown as MeyerInfo,
+      };
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MIXED%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    case "remove_game_player": {
+      let playerIndex = state.thisGame.gamePlayers.findIndex(
+        (value) => value === (action.payload as string)
+      );
+      return {
+        ...state,
+        thisGame: {
+          ...state.thisGame,
+          gamePlayers: state.thisGame.gamePlayers.filter(
+            (value, index) => index !== playerIndex
+          ),
+          gamePlayersNames: state.thisGame.gamePlayersNames.filter(
+            (value, index) => index !== playerIndex
+          ),
+        },
+      };
+    }
+    case "add_user_timeout":
+      return {
+        ...state,
+        thisGame: {
+          ...state.thisGame,
+          gamePlayersTimeout: state.thisGame.gamePlayersTimeout.concat([
+            action.payload as string,
+          ]),
+        },
+      };
+
+    case "remove_user_timeout":
+      if (state.thisGame?.gamePlayersTimeout) {
+        return {
+          ...state,
+          thisGame: {
+            ...state.thisGame,
+            gamePlayersTimeout: state.thisGame.gamePlayersTimeout.filter(
+              (value) => value !== (action.payload as string)
+            ),
+          },
+        };
+      }
+      return state;
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
     ////////////////////////////////////////////////////////////////////////////////////////
   }
 };

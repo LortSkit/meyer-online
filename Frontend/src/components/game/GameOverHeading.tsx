@@ -1,12 +1,13 @@
 import { Box, Typography } from "@mui/material";
 import {
-  translateCurrentPlayerWon,
+  translateCurrentPlayerNameWon,
+  translateCurrentPlayerValueWon,
   translateRoundTurnsTotal,
-} from "../../../../../utils/lang/Create/CreateLocal/InGame/GameOver/langGameOverHeading";
+} from "../../utils/lang/components/game/langGameOverHeading";
 
 interface Props {
   isDanish: boolean;
-  currentPlayer: number;
+  currentPlayer: number | string;
   round: number;
   turnsTotal: number;
 }
@@ -23,13 +24,17 @@ const GameOverHeading = ({
         fontSize="30px"
         display="flex"
         justifyContent="center"
-        children={translateCurrentPlayerWon(isDanish, currentPlayer)}
+        children={
+          typeof currentPlayer === "number"
+            ? translateCurrentPlayerValueWon(isDanish, currentPlayer)
+            : translateCurrentPlayerNameWon(isDanish, currentPlayer)
+        }
       />
       <Typography
         fontSize="20px"
         display="flex"
         justifyContent="center"
-        children={translateRoundTurnsTotal(isDanish, round, turnsTotal)}
+        children={translateRoundTurnsTotal(isDanish, round - 1, turnsTotal - 1)}
       />
     </Box>
   );

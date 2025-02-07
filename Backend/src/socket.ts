@@ -5,14 +5,6 @@ import { Socket, Server } from "socket.io";
 import { v4 } from "uuid";
 import { frontendURL } from "./environmentUtils";
 import { Meyer } from "./Meyer/gameLogic";
-import { Action, TurnInfo } from "./Meyer/gameTypes";
-
-type Game = {
-  id: string;
-  name: string;
-  players: string[];
-  maxNumberOfPlayers: number;
-};
 
 type GameBase = {
   id: string;
@@ -32,6 +24,7 @@ type GameInfo = {
   name: string;
   gamePlayers: string[];
   gamePlayersNames: string[];
+  gamePlayersTimeout: string[];
   maxNumberOfPlayers: number;
   isPublic: boolean;
   isInProgress: boolean;
@@ -42,30 +35,6 @@ type GameRequest = {
   maxNumberOfPlayers: number;
 };
 
-type MeyerInfo = {
-  round: number;
-  turn: number;
-  isGameOver: boolean;
-  healths: number[];
-  currentPlayer: string;
-  roll: number;
-  actionChoices: Action[];
-  bluffChoices: number[];
-  turnInformation: TurnInfo[];
-};
-
-const MeyerInfoDefault: MeyerInfo = {
-  round: 1,
-  turn: 1,
-  isGameOver: false,
-  healths: [],
-  currentPlayer: "",
-  roll: -1,
-  actionChoices: [],
-  bluffChoices: [],
-  turnInformation: [],
-};
-
 type Room = "Find" | "Create" | "Game";
 
 function gameRequestToGameBase(gameRequest: GameRequest): GameBase {
@@ -73,15 +42,6 @@ function gameRequestToGameBase(gameRequest: GameRequest): GameBase {
     id: v4(),
     name: gameRequest.name,
     maxNumberOfPlayers: gameRequest.maxNumberOfPlayers,
-  };
-}
-
-function gameBaseToGame(gameBase: GameBase): Game {
-  return {
-    id: gameBase.id,
-    name: gameBase.name,
-    players: [],
-    maxNumberOfPlayers: gameBase.maxNumberOfPlayers,
   };
 }
 
@@ -100,6 +60,7 @@ function gameBaseToGameInfo(gameBase: GameBase): GameInfo {
     name: gameBase.name,
     gamePlayers: [],
     gamePlayersNames: [],
+    gamePlayersTimeout: [],
     maxNumberOfPlayers: gameBase.maxNumberOfPlayers,
     isPublic: false,
     isInProgress: false,
@@ -111,6 +72,7 @@ export class ServerSocket {
   public io: Server;
 
   public users: { [uid: string]: string }; // uid -> socket.id
+  public userTimeout: { [uid: string]: NodeJS.Timeout }; // uid -> timer
 
   public gameBases: { [uid: string]: GameBase }; // uid -> GameBase
   public gamesIdIndex: { [gameId: string]: string }; // gameId -> uid
@@ -125,6 +87,7 @@ export class ServerSocket {
   constructor(server: HttpServer) {
     ServerSocket.instance = this;
     this.users = {};
+    this.userTimeout = {};
     this.gameBases = {};
     this.gamesIdIndex = {};
     this.gamePlayers = {};
@@ -191,27 +154,56 @@ export class ServerSocket {
       );
 
       if (inGameOwnerUid === uid) {
-        /* Game */
-        this.SendMessage("game_owner_left", [inGameId]);
+        const restPlayers = this.gamePlayers[inGameId].filter(
+          (value) => value !== inGameOwnerUid
+        );
+        /* (User) */
+        this.SendMessage("game_owner_left", restPlayers);
+        /* (User) */
+        this.SendMessage("you_left", [inGameOwnerUid]);
         if (this.gameIsPublic(inGameId)) {
           /* Find */
           this.SendMessage("remove_game", ["Find"], inGameId);
         }
-      } else if (this.gameIsPublic(inGameId)) {
-        /* Find */
-        this.SendMessage(
-          "update_game_num_players",
-          ["Find"],
-          [inGameId, this.gamePlayers[inGameId].length]
-        );
+      } else {
+        /* Game */
+        this.SendMessage("player_left", [inGameId], uid);
+        if (this.gameIsInProgress(inGameId)) {
+          this.gameMeyer[inGameId].playerLeft(uid);
+          this.updateMeyerInfo(inGameId);
+        }
+        if (this.gameIsPublic(inGameId)) {
+          /* Find */
+          this.SendMessage(
+            "update_game_num_players",
+            ["Find"],
+            [inGameId, this.gamePlayers[inGameId].length]
+          );
+        }
       }
     }
 
     delete this.gameBases[uid];
     delete this.gamesIdIndex[game?.id];
+    delete this.gameMeyer[game?.id];
+    delete this.playerInGame[game?.id];
     delete this.publicGames[uid];
     delete this.playerInGame[uid];
     delete this.inRoom[uid];
+  }
+
+  public leavePreviousRoom(socket: Socket, uid: string): void {
+    const previousRoom = this.inRoom[uid];
+
+    if (previousRoom) {
+      if (previousRoom === "Game") {
+        const gameToLeave = this.playerInGame[uid];
+        socket.leave(gameToLeave);
+        this.removeUserFromGamesAndRoom(uid);
+      } else {
+        socket.leave(previousRoom);
+      }
+    }
   }
 
   public getPublicGameDisplays(): GameDisplay[] {
@@ -267,25 +259,40 @@ export class ServerSocket {
     return false;
   }
 
-  public leavePreviousRoom(socket: Socket, uid: string): void {
-    const previousRoom = this.inRoom[uid];
+  public getTimedOutUsers(uids: string[]): string[] {
+    return uids.filter((value) =>
+      Object.keys(this.userTimeout).includes(value)
+    );
+  }
 
-    if (previousRoom) {
-      if (previousRoom === "Game") {
-        const gameToLeave = this.playerInGame[uid];
-        socket.leave(gameToLeave);
-        this.removeUserFromGamesAndRoom(uid);
-        if (this.gamesIdIndex[gameToLeave] === uid) {
-          /* Game */
-          this.SendMessage("game_owner_left", [gameToLeave]);
-        } else {
-          /* Game */
-          this.SendMessage("player_left", [gameToLeave], uid);
-        }
-      } else {
-        socket.leave(previousRoom);
-      }
-    }
+  public disconnectUser(uid: string, gameToLeave?: string): void {
+    this.removeUserFromGamesAndRoom(uid);
+    delete this.users[uid];
+
+    const users = Object.values(this.users);
+
+    /* (All) */
+    this.SendMessage("user_disconnected", users, users.length);
+  }
+
+  public updateMeyerInfo(gameId: string, gameStarted?: boolean): void {
+    const currentPlayer = this.gameMeyer[gameId].getCurrentPlayerUid();
+    const restPlayers = this.gamePlayers[gameId].filter(
+      (value) => value !== currentPlayer
+    );
+    /* (User) */
+    this.SendMessage(
+      gameStarted ? "game_started" : "update_meyer_info",
+      [currentPlayer],
+      this.gameMeyer[gameId].getMeyerInfo(currentPlayer)
+    );
+
+    /* (User) */
+    this.SendMessage(
+      gameStarted ? "game_started" : "update_meyer_info",
+      restPlayers,
+      this.gameMeyer[gameId].getMeyerInfo()
+    );
   }
   ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -295,30 +302,54 @@ export class ServerSocket {
     ////////////////////////////////////////BUILT-IN////////////////////////////////////////
     /* HANDSHAKE - Happens on socket contact */
     /* From Room: (All) */
-    /* Sends to: (All) */
+    /* Sends to: (All), Game */
     socket.on(
       "handshake",
       (
+        storedUid: string,
+        storedSocketId: string,
         callback: (reconnect: boolean, uid: string, userstotal: number) => void
       ) => {
         console.info("Handshake received from: " + socket.id);
 
         /* Check if this is a reconnection */
-        const reconnected = Object.values(this.users).includes(socket.id);
+        const reconnected =
+          Object.values(this.users).includes(socket.id) ||
+          (this.users[storedUid] && this.users[storedUid] === storedSocketId);
 
         if (reconnected) {
           console.info("This user has reconnected.");
 
-          const uid = this.GetUidFromSocketID(socket.id);
+          let uid: string;
+          if (
+            !(this.users[storedUid] && this.users[storedUid] === storedSocketId)
+          ) {
+            uid = this.GetUidFromSocketID(socket.id);
+            if (storedUid !== uid) {
+              this.disconnectUser(storedUid);
+            }
+          } else {
+            uid = storedUid;
+            this.users[uid] = socket.id;
+          }
           socket.join(uid);
 
           if (uid) {
             console.info("Sending callback for reconnect ...");
-            const gameBase = this.gameBases[uid];
-            let gameId = "";
-            if (gameBase) {
-              gameId = gameBase.id;
+
+            if (this.userTimeout[uid]) {
+              clearTimeout(this.userTimeout[uid]);
+              delete this.userTimeout[uid];
+              socket.join(this.playerInGame[uid]);
+
+              /* Game */
+              this.SendMessage(
+                "remove_user_timeout",
+                [this.playerInGame[uid]],
+                uid
+              );
             }
+
             const users = Object.values(this.users);
             callback(reconnected, uid, users.length);
           }
@@ -333,6 +364,7 @@ export class ServerSocket {
 
         const users = Object.values(this.users);
         console.info("Sending callback for handshake ...");
+
         callback(reconnected, uid, users.length);
 
         /* Send new user to all connected users */
@@ -347,7 +379,9 @@ export class ServerSocket {
 
     /* DISCONNECT - Happens on socket disconnect*/
     /* From Room: (All) */
-    /* Sends to: Game, (All) */
+    /* Sends to: Game 
+       Through disconnectUser call: Game, (All), (User)
+    */
     socket.on("disconnect", () => {
       console.info("Disconnect received from: " + socket.id);
 
@@ -355,18 +389,17 @@ export class ServerSocket {
 
       if (uid) {
         const gameToLeave = this.playerInGame[uid];
-        this.removeUserFromGamesAndRoom(uid);
-        delete this.users[uid];
-
-        const users = Object.values(this.users);
 
         if (gameToLeave) {
           /* Game */
-          this.SendMessage("player_left", [gameToLeave], uid);
+          this.SendMessage("add_user_timeout", [gameToLeave], uid);
+          this.userTimeout[uid] = setTimeout(() => {
+            this.disconnectUser(uid, gameToLeave);
+            delete this.userTimeout[uid];
+          }, 120000);
+        } else {
+          this.disconnectUser(uid);
         }
-
-        /* (All) */
-        this.SendMessage("user_disconnected", users, users.length);
       }
     });
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -375,7 +408,7 @@ export class ServerSocket {
     /* FIND - Happens when user goes to /find */
     /* From Room: Find */
     /* Sends to: (User)
-       Through leavePreviousRoom call: Game, Find
+       Through leavePreviousRoom call: (User), Game, Find
     */
     socket.on("join_find", () => {
       console.info("Received event: join_find from " + socket.id);
@@ -401,7 +434,7 @@ export class ServerSocket {
     /* CREATE - Happens when user goes to /create/online */
     /* From Room: Create */
     /* Sends to: (None)
-       Through leavePreviousRoom call: Game, Find
+       Through leavePreviousRoom call: (User), Game, Find
     */
     socket.on("join_create", () => {
       console.info("Received event: join_create from " + socket.id);
@@ -429,7 +462,6 @@ export class ServerSocket {
         const uid = this.GetUidFromSocketID(socket.id);
         if (uid) {
           const gameBase = gameRequestToGameBase(gameRequest);
-          const game = gameBaseToGame(gameBase);
           const existingGame = this.gameBases[uid];
           const existingGameIsPublic = this.gameIsPublic(existingGame?.id);
 
@@ -440,10 +472,10 @@ export class ServerSocket {
             0 < gameRequest.name.length &&
             gameRequest.name.length <= 25
           ) {
-            this.gameBases[uid] = game;
-            this.gamesIdIndex[game.id] = uid;
-            this.gamePlayers[game.id] = [];
-            this.gamePlayersNames[game.id] = [];
+            this.gameBases[uid] = gameBase;
+            this.gamesIdIndex[gameBase.id] = uid;
+            this.gamePlayers[gameBase.id] = [];
+            this.gamePlayersNames[gameBase.id] = [];
           }
 
           if (existingGameIsPublic) {
@@ -454,7 +486,7 @@ export class ServerSocket {
 
           if (isPublic) {
             const gameDisplay = gameBaseToGameDisplay(gameBase);
-            this.publicGames[uid] = game.id;
+            this.publicGames[uid] = gameBase.id;
 
             if (currentRoom === "Create") {
               /* Find */
@@ -467,7 +499,7 @@ export class ServerSocket {
             0 < gameRequest.name.length &&
             gameRequest.name.length <= 25
           ) {
-            callback(game.id);
+            callback(gameBase.id);
           } else {
             callback("");
           }
@@ -481,7 +513,7 @@ export class ServerSocket {
     /* JOIN GAME - Happens when user joins game link */
     /* From Room: Game */
     /* Sends to: Game, (User), Find
-       Through leavePreviousRoom call: Game, Find
+       Through leavePreviousRoom call: (User), Game, Find
     */
     socket.on(
       "join_game",
@@ -540,19 +572,19 @@ export class ServerSocket {
               this.SendMessage(
                 "joined_game",
                 [joiningUid],
-                [
-                  {
-                    ...gameBaseToGameInfo(
-                      this.gameBases[this.gamesIdIndex[gameId]]
-                    ),
-                    gamePlayers: this.gamePlayers[gameId],
-                    gamePlayersNames: this.gamePlayersNames[gameId],
-                    isPublic: this.gameIsPublic(gameId),
-                    isInProgress: this.gameIsInProgress(gameId),
-                  } as GameInfo,
-                  this.gamePlayers[gameId],
-                  this.gamePlayersNames[gameId],
-                ]
+
+                {
+                  ...gameBaseToGameInfo(
+                    this.gameBases[this.gamesIdIndex[gameId]]
+                  ),
+                  gamePlayers: this.gamePlayers[gameId],
+                  gamePlayersNames: this.gamePlayersNames[gameId],
+                  gamePlayersTimeout: this.getTimedOutUsers(
+                    this.gamePlayers[gameId]
+                  ),
+                  isPublic: this.gameIsPublic(gameId),
+                  isInProgress: this.gameIsInProgress(gameId),
+                } as GameInfo
               );
 
               if (this.gameIsPublic(gameId)) {
@@ -561,6 +593,39 @@ export class ServerSocket {
                   "update_game_num_players",
                   ["Find"],
                   [gameId, this.gamePlayers[gameId].length]
+                );
+              }
+            } else {
+              //User rejoined game
+              callback(true, false, true);
+
+              socket.join(gameId);
+
+              /* (User) */
+              this.SendMessage(
+                "joined_game",
+                [joiningUid],
+
+                {
+                  ...gameBaseToGameInfo(
+                    this.gameBases[this.gamesIdIndex[gameId]]
+                  ),
+                  gamePlayers: this.gamePlayers[gameId],
+                  gamePlayersNames: this.gamePlayersNames[gameId],
+                  gamePlayersTimeout: this.getTimedOutUsers(
+                    this.gamePlayers[gameId]
+                  ),
+                  isPublic: this.gameIsPublic(gameId),
+                  isInProgress: this.gameIsInProgress(gameId),
+                } as GameInfo
+              );
+
+              if (this.gameIsInProgress(gameId)) {
+                /* (User) */
+                this.SendMessage(
+                  "update_meyer_info",
+                  [joiningUid],
+                  this.gameMeyer[gameId].getMeyerInfo(joiningUid)
                 );
               }
             }
@@ -641,7 +706,7 @@ export class ServerSocket {
     /* CHANGE MAX NUMBER OF PLAYERS - Happens when the lobby owner edits the number of max players */
     /* From Room: Game */
     /* Sends to: (User), Game, Find 
-       Through leavePreviousRoom call: Game, Find
+       Through leavePreviousRoom call: (User), Game, Find
     */
     socket.on("change_max_players", (newMaxNumberOfPlayers) => {
       console.info("Received event: change_max_players from " + socket.id);
@@ -734,7 +799,9 @@ export class ServerSocket {
 
     /* START GAME */
     /* From Room: Game */
-    /* Sends to: (User), Find */
+    /* Sends to: Find 
+       Through updateMeyerInfo call: (User)
+    */
     socket.on("start_game", () => {
       console.info("Received event: start_game from " + socket.id);
 
@@ -749,25 +816,7 @@ export class ServerSocket {
           this.gameMeyer[owningGame.id] = new Meyer(
             this.gamePlayers[owningGame.id]
           );
-          const currentPlayer =
-            this.gameMeyer[owningGame.id].getCurrentPlayerUid();
-          const restPlayers = this.gamePlayers[owningGame.id].filter(
-            (value) => value !== currentPlayer
-          );
-          /* (User) */
-          this.SendMessage("game_started", [currentPlayer], {
-            ...MeyerInfoDefault,
-            healths: this.gameMeyer[owningGame.id].getCurrentHealths(),
-            currentPlayer: currentPlayer,
-            actionChoices: this.gameMeyer[owningGame.id].getActionChoices(),
-          });
-
-          /* (User) */
-          this.SendMessage("game_started", restPlayers, {
-            ...MeyerInfoDefault,
-            healths: this.gameMeyer[owningGame.id].getCurrentHealths(),
-            currentPlayer: currentPlayer,
-          });
+          this.updateMeyerInfo(owningGame.id, true);
 
           if (this.gameIsPublic(owningGame.id)) {
             delete this.publicGames[uid];
@@ -781,13 +830,60 @@ export class ServerSocket {
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%IN GAME%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    /* START GAME */
+    /* From Room: Game */
+    /* Sends to: Game */
+    socket.on("reopen_lobby", () => {
+      console.info("Received event: reopen_lobby from " + socket.id);
+
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid) {
+        const owningGame = this.gameBases[uid];
+        if (
+          owningGame &&
+          this.gameIsInProgress(owningGame.id) &&
+          this.gameMeyer[owningGame.id].isGameOver()
+        ) {
+          delete this.gameMeyer[owningGame.id];
+          /* Game */
+          this.SendMessage("reopened_lobby", [owningGame.id]);
+        }
+      }
+    });
+
+    /* RESTART GAME */
+    /* From Room: Game */
+    /* Sends to:  */
+    socket.on("restart_game", () => {
+      console.info("Received event: restart_game from " + socket.id);
+
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid) {
+        const owningGame = this.gameBases[uid];
+        if (
+          owningGame &&
+          this.gameIsInProgress(owningGame.id) &&
+          this.gameMeyer[owningGame.id].isGameOver() &&
+          2 < this.gamePlayers[owningGame.id].length &&
+          this.gamePlayers[owningGame.id].length <= 20
+        ) {
+          this.gameMeyer[owningGame.id].resetGame(
+            this.gamePlayers[owningGame.id]
+          );
+          this.updateMeyerInfo(owningGame.id, true);
+        }
+      }
+    });
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MIXED%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
     /* KICK PLAYER - Happens when lobby owner presses the x-button next to a player's name */
     /* From Room: Game */
-    /* Sends to: (User), Game */
+    /* Sends to: (User), Game
+       Through leavePreviousRoom call: (User), Game, Find
+       Through disconnectUser call: (User), Find, Game, (All)
+    */
     socket.on("kick_player", (kickingUid: string) => {
       console.info("Received event: kick_player from " + socket.id);
 
@@ -795,17 +891,30 @@ export class ServerSocket {
       if (uid) {
         const owningGame = this.gameBases[uid];
         if (owningGame) {
-          this.removeUserFromGamesAndRoom(kickingUid);
-
-          if (this.gameIsInProgress(owningGame.id)) {
-            this.gameMeyer[owningGame.id].playerLeft(kickingUid);
-          }
-
           /* (User) */
           this.SendMessage("been_kicked", [kickingUid]); //Informs them they've been kicked
 
-          /* Game */
-          this.SendMessage("player_left", [owningGame.id], kickingUid);
+          this.disconnectUser(kickingUid, owningGame.id);
+          this.leavePreviousRoom(socket, kickingUid);
+        }
+      }
+    });
+
+    /* LEAVE GAME */
+    /* From Room: Game */
+    /* Sends to: Game
+       Through leavePreviousRoom call: (User), Game, Find
+       Through disconnectUser call: (User), Find, Game, (All)
+    */
+    socket.on("leave_game", () => {
+      console.info("Received event: leave_game from " + socket.id);
+
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid) {
+        const inGameId = this.playerInGame[uid];
+        if (inGameId) {
+          this.disconnectUser(uid, inGameId);
+          this.leavePreviousRoom(socket, uid);
         }
       }
     });

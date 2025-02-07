@@ -53,19 +53,30 @@ const SocketContextComponent: React.FunctionComponent<
     },
   });
 
-  const SendHandshake = () => {
+  function SendHandshake(): void {
     socket.emit(
       "handshake",
+      localStorage.getItem("storedUid"),
+      localStorage.getItem("storedSocketId"),
       (reconnect: boolean, uid: string, usersTotal: number) => {
         //console.info("User handshake callback message received");
         if (!reconnect) {
-          SocketDispatch({ type: "update_uid", payload: uid });
-          SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
+          SocketDispatch({ type: "reset_state", payload: null });
         }
+        SocketDispatch({ type: "update_uid", payload: uid });
+        SocketDispatch({ type: "update_usersTotal", payload: usersTotal });
+
         setLoading(false);
+        localStorage.setItem("storedUid", uid);
+        localStorage.setItem("storedSocketId", socket.id as string);
       }
     );
-  };
+  }
+
+  function windowEventListener(): void {
+    socket.connect();
+    SendHandshake();
+  }
 
   useEffect(() => {
     /* Connect to the Web Socket */
@@ -82,17 +93,8 @@ const SocketContextComponent: React.FunctionComponent<
     if (loading) {
       SendHandshake();
 
-      //import { debounce } from "lodash";
-      // var debouncedReconnect = debounce(
-      //   () => {
-      //     socket.connect();
-      //     SendHandshake();
-      //   },
-      //   250,
-      //   { leading: true, trailing: false }
-      // );
-
-      // window.addEventListener("focus", debouncedReconnect);
+      window.removeEventListener("focus", windowEventListener); //make sure we don't keep adding the same listener
+      window.addEventListener("focus", windowEventListener);
     }
   }, []);
 
@@ -196,7 +198,7 @@ const SocketContextComponent: React.FunctionComponent<
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%LOBBY%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
     /* Join game */
     /* For Room: (User) */
-    socket.on("joined_game", (payload: [GameInfo, string[], string[]]) => {
+    socket.on("joined_game", (payload: GameInfo) => {
       SocketDispatch({ type: "set_this_game", payload: payload });
     });
 
@@ -204,12 +206,6 @@ const SocketContextComponent: React.FunctionComponent<
     /* For Room: Game */
     socket.on("player_joined", (payload: string[]) => {
       SocketDispatch({ type: "add_game_player", payload: payload });
-    });
-
-    /* Player left */
-    /* For Room: Game */
-    socket.on("player_left", (playerUid: string) => {
-      SocketDispatch({ type: "remove_game_player", payload: playerUid });
     });
 
     /* Player name changed */
@@ -253,22 +249,59 @@ const SocketContextComponent: React.FunctionComponent<
     socket.on("game_started", (meyerInfo: MeyerInfo) => {
       SocketDispatch({ type: "game_in_progress", payload: meyerInfo });
     });
+
+    /* Update all meyer info */
+    socket.on("update_meyer_info", (meyerInfo: MeyerInfo) => {
+      SocketDispatch({ type: "update_meyer_info", payload: meyerInfo });
+    });
+
+    /* Reopening lobby */
+    /* For Room: Game */
+    socket.on("reopened_lobby", () => {
+      SocketDispatch({ type: "reopened_lobby", payload: null });
+    });
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MIXED%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
     /* Owner left */
-    /* For Room: Game */
+    /* For Room: (User) */
     socket.on("game_owner_left", () => {
-      focus();
       confirm(translateRedirecting(isDanish));
       navigate(base + "/find");
+      window.location.reload();
     });
+
+    /* You left -  */
+    /* For Room: (User) */
+    // socket.on("you_left", () => {
+    //   navigate(base + "/find");
+    //   window.location.reload();
+    // });
 
     /* When getting kicked */
     /* For Room: Game */
     socket.on("been_kicked", () => {
       confirm(translateKicked(isDanish));
       navigate(base + "/find");
+      window.location.reload();
+    });
+
+    /* Player left */
+    /* For Room: Game */
+    socket.on("player_left", (playerUid: string) => {
+      SocketDispatch({ type: "remove_game_player", payload: playerUid });
+    });
+
+    /* When user disconnected - though is given a 2 min grace period */
+    /* For Room: Game */
+    socket.on("add_user_timeout", (uid: string) => {
+      SocketDispatch({ type: "add_user_timeout", payload: uid });
+    });
+
+    /* When user came back from grace period */
+    /* For Room: Game */
+    socket.on("remove_user_timeout", (uid: string) => {
+      SocketDispatch({ type: "remove_user_timeout", payload: uid });
     });
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
     ////////////////////////////////////////////////////////////////////////////////////////

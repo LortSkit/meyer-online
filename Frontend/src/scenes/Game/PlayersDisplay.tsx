@@ -7,7 +7,12 @@ import {
   useTheme,
 } from "@mui/material";
 import { tokens } from "../../theme";
-import { ArrowForwardOutlined, CloseOutlined, Edit } from "@mui/icons-material";
+import {
+  ArrowForwardOutlined,
+  CloseOutlined,
+  Edit,
+  StarOutlined,
+} from "@mui/icons-material";
 import { Dice } from "../../utils/diceUtils";
 import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
 import { useEffect, useState } from "react";
@@ -21,6 +26,7 @@ interface Props {
   isOwner: boolean;
   isGameOver?: boolean;
   playerNames: string[];
+  playersTimedOut: string[];
   playerUids: string[];
   socket: Socket;
 }
@@ -33,6 +39,7 @@ const PlayerDisplay = ({
   isOwner,
   isGameOver,
   playerNames,
+  playersTimedOut,
   playerUids,
   socket,
 }: Props) => {
@@ -102,6 +109,19 @@ const PlayerDisplay = ({
       >
         <CloseOutlined sx={{ width: "18px", height: "18px" }} />
       </IconButton>
+    );
+  };
+
+  const Star = () => {
+    return (
+      <StarOutlined
+        style={{
+          position: "relative",
+          transform: "translate(0%,-5%)",
+          width: "20px",
+          height: "20px",
+        }}
+      />
     );
   };
 
@@ -224,6 +244,11 @@ const PlayerDisplay = ({
                     wordBreak: "break-all",
                     textAlign: "center",
                   }}
+                  color={
+                    playersTimedOut.includes(playerUids[index])
+                      ? colors.grey[500]
+                      : undefined
+                  }
                   component="span"
                   children={
                     <Box>
@@ -244,6 +269,7 @@ const PlayerDisplay = ({
                       {isOwner &&
                         playerUids[index] !== currentUid &&
                         KickPlayerButton(playerUids[index])}
+                      {!isOwner && index === 0 && Star()}
                     </Box>
                   }
                 />

@@ -1,5 +1,5 @@
 import { getDiceRoll, getMeyerRoll } from "./diceUtils";
-import { Action } from "./gameTypes";
+import { Action, MeyerInfo, MeyerInfoDefault } from "./gameTypes";
 
 //For the static functions below
 const allPossibleRollsOrdered: number[] = [
@@ -37,6 +37,9 @@ export function bluffChoices(
   previousDeclaredRoll: number,
   turn: number
 ) {
+  if (currentRoll === -1) {
+    return [];
+  }
   let bluffchoices = allPossibleRollsOrdered.slice(
     0,
     allPossibleRollsOrdered.length
@@ -76,7 +79,7 @@ export class Meyer {
 
   //####################################GLOBAL####################################//
   private numberOfPlayers: number = -1; //In online play, can change
-  private readonly playerUids: string[] = [];
+  private playerUids: string[] = [];
   private playersLeft: number[] = [];
 
   private winner: number = -1;
@@ -86,6 +89,7 @@ export class Meyer {
 
   private canAdvanceTurn: boolean = false;
   private turn: number = 1;
+  private turnTotal: number = 1;
   private round: number = 1;
   //##############################################################################//
 
@@ -156,6 +160,7 @@ export class Meyer {
     this.currentPlayer = this.getNextPlayer(this.currentPlayer);
     this.canAdvanceTurn = false;
     this.turn++;
+    this.turnTotal++;
   }
 
   private endTurnCheersOnCheck(): void {
@@ -181,6 +186,7 @@ export class Meyer {
     this.round++;
     this.canAdvanceTurn = false;
     this.turn = 1;
+    this.turnTotal++;
   }
 
   private endRoundCurrentPlayerLost(): void {
@@ -190,6 +196,8 @@ export class Meyer {
       : (this.currentPlayer = this.getNextPlayer(this.currentPlayer));
     if (this.isCurrentPlayerWinner()) {
       this.winner = this.currentPlayer;
+      this.round--; //keep total correct
+      this.turnTotal--; //keep total correct
     }
   }
 
@@ -200,6 +208,8 @@ export class Meyer {
       : undefined; //current player = current player
     if (this.isCurrentPlayerWinner()) {
       this.winner = this.currentPlayer;
+      this.round--; //keep total correct
+      this.turnTotal--; //keep total correct
     }
   }
 
@@ -221,11 +231,12 @@ export class Meyer {
 
   public getCurrentHealths(): number[] {
     if (this.playerLeft.length === 0) {
-
       return this.healths;
     }
 
-    return this.healths.filter((value,index) => !this.playersLeft.includes(index+1))
+    return this.healths.filter(
+      (value, index) => !this.playersLeft.includes(index + 1)
+    );
   }
   public getRoll(): number {
     if (this.currentAction == "SameRollOrHigher") {
@@ -287,32 +298,67 @@ export class Meyer {
   }
 
   public playerLeft(uid: string): void {
-    if (!this.isGameOver()) {
+    if (!this.isGameOver() && this.playerUids.includes(uid)) {
       const playerIndex = this.playerUids.findIndex((value) => value === uid);
       const playerValue = playerIndex + 1;
       this.healths[playerIndex] = 0;
       this.playersLeft.push(playerValue);
 
-      if (
+      const roundHasToEnd =
         playerValue === this.currentPlayer ||
         (playerValue === this.previousPlayer &&
-          this.getActionChoices().includes("Check"))
-      ) {
+          this.getActionChoices().includes("Check"));
+
+      if (roundHasToEnd) {
         this.endRoundBase();
-        this.currentPlayer = this.getNextPlayer(this.currentPlayer);
+        this.currentPlayer =
+          playerValue === this.currentPlayer
+            ? this.getNextPlayer(this.currentPlayer)
+            : this.currentPlayer;
         this.previousPlayer = -1;
       } else if (playerValue === this.previousPlayer) {
         this.previousPlayer = this.currentPlayer;
       }
-
       if (this.isCurrentPlayerWinner()) {
         this.winner = this.currentPlayer;
+        if (roundHasToEnd) {
+          this.round--; //keep total correct
+          this.turnTotal--; //keep total correct
+        }
       }
     }
   }
 
   public isGameOver(): boolean {
     return this.winner != -1;
+  }
+
+  public getMeyerInfo(uid?: string): MeyerInfo {
+    if (uid && uid === this.playerUids[this.currentPlayer - 1]) {
+      return {
+        round: this.getRound(),
+        turn: this.getTurn(),
+        turnTotal: this.turnTotal,
+        isGameOver: this.isGameOver(),
+        healths: this.getCurrentHealths(),
+        currentPlayer: uid,
+        roll: this.getRoll(),
+        actionChoices: this.getActionChoices(),
+        bluffChoices: this.getBluffChoices(),
+        turnInformation: [], //TODO: Give correct turn information!
+      };
+    } else {
+      return {
+        ...MeyerInfoDefault,
+        round: this.getRound(),
+        turn: this.getTurn(),
+        turnTotal: this.turnTotal,
+        isGameOver: this.isGameOver(),
+        healths: this.getCurrentHealths(),
+        currentPlayer: this.playerUids[this.currentPlayer - 1],
+        turnInformation: [], //TODO: Give correct turn information!
+      };
+    }
   }
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
 
@@ -450,7 +496,11 @@ export class Meyer {
     this.canAdvanceTurn = true;
   }
 
-  public resetGame(): void {
+  public resetGame(playerUids?: string[]): void {
+    if (playerUids) {
+      this.playerUids = playerUids;
+      this.numberOfPlayers = playerUids.length;
+    }
     this.resetRoll();
     //this.currentPlayer = this.currentPlayer; //winner gets to start next game
     this.previousPlayer = -1;
@@ -464,6 +514,7 @@ export class Meyer {
 
     this.canAdvanceTurn = false;
     this.turn = 1;
+    this.turnTotal = 1;
     this.round = 1;
   }
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
