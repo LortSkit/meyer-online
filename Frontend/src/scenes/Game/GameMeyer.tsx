@@ -89,25 +89,25 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
 
   const middleChild = (
     <MiddleChild widthPercentage={mainWidth}>
+      <Box display="flex" justifyContent="center">
+        <Typography
+          variant="h1"
+          fontStyle="normal"
+          textTransform="none"
+          paddingTop="9.5px"
+          style={{
+            wordBreak: "break-all",
+            textAlign: "center",
+          }}
+          children={<strong>{gameInfo.name}</strong>}
+        />
+      </Box>
+      <Box display="flex" justifyContent="center" paddingBottom="10.8px">
+        <LeaveGameButton isDanish={isDanish} socket={socket} />
+      </Box>
       {/* IN GAME */}
       {!meyerInfo.isGameOver && (
         <Box display="flex" flexDirection="column">
-          <Box display="flex" justifyContent="center">
-            <Typography
-              variant="h1"
-              fontStyle="normal"
-              textTransform="none"
-              paddingTop="9.5px"
-              style={{
-                wordBreak: "break-all",
-                textAlign: "center",
-              }}
-              children={<strong>{gameInfo.name}</strong>}
-            />
-          </Box>
-          <Box display="flex" justifyContent="center" paddingBottom="10.8px">
-            <LeaveGameButton isDanish={isDanish} socket={socket} />
-          </Box>
           <Box display="flex" justifyContent="center">
             <GameHeading
               isDanish={isDanish}

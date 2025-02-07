@@ -109,7 +109,7 @@ IMPORTANT: Remember to change the .env file to suit your needs before booting se
 To deploy the Backend, simply run the following:
 
 ```
-cd Frontend
+cd Backend
 npm ci
 npm start
 ```

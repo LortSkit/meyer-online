@@ -1,4 +1,4 @@
-import { Action } from "../../gameTypes";
+import { Action } from "../../../gameTypes";
 
 export function translateAction(isDanish: boolean, action: Action): string {
   const translateActionsMap: { [action: string]: string } = {
