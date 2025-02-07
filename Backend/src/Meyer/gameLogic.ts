@@ -62,7 +62,6 @@ export function bluffChoices(
   return bluffchoices;
 }
 export class Meyer {
-  //TODO: Remake this class to fit online play better.
   //###############################CURRENT+PREVIOUS###############################//
   private roll: number = -1;
   private previousRoll: number = -1;
@@ -191,7 +190,7 @@ export class Meyer {
 
   private endRoundCurrentPlayerLost(): void {
     this.endRoundBase();
-    this.healths[this.currentPlayer - 1] != 0
+    this.healths[this.currentPlayer - 1] > 0
       ? undefined //current player = current player
       : (this.currentPlayer = this.getNextPlayer(this.currentPlayer));
     if (this.isCurrentPlayerWinner()) {
@@ -203,7 +202,7 @@ export class Meyer {
 
   private endRoundPreviousPlayerLost(): void {
     this.endRoundBase();
-    this.healths[this.previousPlayer - 1] != 0
+    this.healths[this.previousPlayer - 1] > 0
       ? (this.currentPlayer = this.previousPlayer)
       : undefined; //current player = current player
     if (this.isCurrentPlayerWinner()) {
@@ -227,6 +226,10 @@ export class Meyer {
 
   public getCurrentAction(): Action {
     return this.currentAction;
+  }
+
+  public getCanAdvanceTurn(): boolean {
+    return this.canAdvanceTurn;
   }
 
   public getCurrentHealths(): number[] {
@@ -286,7 +289,11 @@ export class Meyer {
   }
 
   public getBluffChoices(): number[] {
-    if (this.isGameOver() || this.getRoll() == -1) {
+    if (
+      this.isGameOver() ||
+      this.getRoll() == -1 ||
+      this.currentAction != "Bluff"
+    ) {
       return [];
     }
 
@@ -366,7 +373,7 @@ export class Meyer {
   public advanceTurn(): void {
     if (!this.canAdvanceTurn) {
       throw new Error(`Cannot advance right now!`);
-    } else if (this.currentAction == "Error") {
+    } else if (this.currentAction === "Error") {
       throw new Error("Cannot advance state when no action has been taken!");
     }
 

@@ -16,7 +16,10 @@ export function translateCurrentPlayerValueTurn(
 }
 
 function danishGenitiveEnding(word: string): string {
-  if (word.endsWith("s") || word.endsWith("x") || word.endsWith("z")) {
+  if (
+    word &&
+    (word.endsWith("s") || word.endsWith("x") || word.endsWith("z"))
+  ) {
     return "'";
   }
   return "s";

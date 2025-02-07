@@ -149,6 +149,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
               playersTimedOut={SocketState.thisGame.gamePlayersTimeout}
               playerUids={SocketState.thisGame.gamePlayers}
               socket={SocketState.socket as Socket}
+              thisUid={SocketState.uid}
             />
           </Box>
         </Box>
@@ -165,11 +166,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
         {isMissingNames() && (
           <Box display="flex" justifyContent="center">
             {translateNeedName(isDanish)}
-            <Box
-              display="flex"
-              justifyContent="flex-end"
-              flexDirection="column"
-            >
+            <Box display="flex" justifyContent="center" flexDirection="column">
               <img src={loading} width="35px" style={{ paddingLeft: "5px" }} />
             </Box>
           </Box>

@@ -1,7 +1,7 @@
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { GameInfo, MeyerInfo } from "../../contexts/Socket/SocketContext";
 import GameHeading from "../../components/game/GameHeading";
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MiddleChild,
   RightChild,
@@ -22,6 +22,7 @@ import {
 import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
 import TurnInformation from "../../components/game/TurnInformation/TurnInformation";
 import { TurnInfo } from "../../utils/gameTypes";
+import LeaveGameButton from "./LeaveGameButton";
 
 interface Props {
   isDanish: boolean;
@@ -92,21 +93,38 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
       {!meyerInfo.isGameOver && (
         <Box display="flex" flexDirection="column">
           <Box display="flex" justifyContent="center">
+            <Typography
+              variant="h1"
+              fontStyle="normal"
+              textTransform="none"
+              paddingTop="9.5px"
+              style={{
+                wordBreak: "break-all",
+                textAlign: "center",
+              }}
+              children={<strong>{gameInfo.name}</strong>}
+            />
+          </Box>
+          <Box display="flex" justifyContent="center" paddingBottom="10.8px">
+            <LeaveGameButton isDanish={isDanish} socket={socket} />
+          </Box>
+          <Box display="flex" justifyContent="center">
             <GameHeading
               isDanish={isDanish}
               currentPlayer={playernameFromUid(meyerInfo.currentPlayer)}
               round={meyerInfo.round}
-              turn={meyerInfo.round}
+              turn={meyerInfo.turn}
             />
           </Box>
           {meyerInfo.currentPlayer === uid && (
-            <Box display="flex" justifyContent="center">
+            <Box display="flex" flexDirection="column">
               {meyerInfo.roll !== -1 && (
                 <Typography
                   fontSize="25px"
                   fontStyle="normal"
                   textTransform="none"
                   component="span"
+                  sx={{ display: "flex", justifyContent: "center" }}
                 >
                   <RollWithName
                     isDanish={isDanish}
@@ -117,26 +135,30 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                 </Typography>
               )}
               {meyerInfo.bluffChoices.length === 0 && (
-                <Box display="flex" justifyContent="center">
+                <Box display="flex" justifyContent="center" flexWrap="wrap">
                   {meyerInfo.actionChoices.map((action) => (
                     <Box display="flex" justifyContent="center" key={action}>
                       <ActionButton
                         isDanish={isDanish}
                         action={action}
-                        onClick={() => {}}
+                        onClick={() => {
+                          socket.emit("take_action_bluff", action, -1);
+                        }}
                       />
                     </Box>
                   ))}
                 </Box>
               )}
               {meyerInfo.bluffChoices.length !== 0 && (
-                <Box display="flex" justifyContent="center">
+                <Box display="flex" justifyContent="center" flexWrap="wrap">
                   {meyerInfo.bluffChoices.map((bluff) => (
                     <Box display="flex" justifyContent="center" key={bluff}>
                       <BluffButton
                         isDanish={isDanish}
                         bluff={bluff}
-                        onClick={() => {}}
+                        onClick={() => {
+                          socket.emit("take_action_bluff", "Error", bluff);
+                        }}
                       />
                     </Box>
                   ))}
@@ -234,6 +256,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
             playersTimedOut={gameInfo.gamePlayersTimeout}
             playerUids={gameInfo.gamePlayers}
             socket={socket}
+            thisUid={uid}
           />
         </Box>
       </Box>

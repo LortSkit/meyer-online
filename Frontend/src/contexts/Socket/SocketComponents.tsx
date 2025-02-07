@@ -17,6 +17,7 @@ import {
 } from "../../utils/lang/langSocketComponents";
 import { base } from "../../utils/hostSubDirectory";
 import { Box } from "@mui/material";
+import { Socket } from "socket.io-client";
 export interface ISocketContextComponentProps extends PropsWithChildren {
   isDanish: boolean;
 }
@@ -53,7 +54,7 @@ const SocketContextComponent: React.FunctionComponent<
     },
   });
 
-  function SendHandshake(): void {
+  function emitHandshake(socket: Socket) {
     socket.emit(
       "handshake",
       localStorage.getItem("storedUid"),
@@ -73,28 +74,37 @@ const SocketContextComponent: React.FunctionComponent<
     );
   }
 
-  function windowEventListener(): void {
-    socket.connect();
-    SendHandshake();
+  function SendHandshake(s?: Socket): void {
+    emitHandshake(s ? s : socket);
+  }
+
+  function windowEventListener(s?: Socket): () => void {
+    return () => {
+      /* Save the socket in context */
+      SocketDispatch({ type: "update_socket", payload: s });
+      SendHandshake(s);
+    };
   }
 
   useEffect(() => {
     /* Connect to the Web Socket */
+    let s = undefined as unknown as Socket;
     if (loading) {
-      socket.connect();
+      s = socket.connect();
+      /* Save the socket in context */
+      SocketDispatch({ type: "update_socket", payload: s });
     }
-    /* Save the socket in context */
-    SocketDispatch({ type: "update_socket", payload: socket });
 
     /* Start the event listeners */
     StartListeners();
 
     /* Send the handshake */
     if (loading) {
-      SendHandshake();
-
-      window.removeEventListener("focus", windowEventListener); //make sure we don't keep adding the same listener
-      window.addEventListener("focus", windowEventListener);
+      if (s) {
+        SendHandshake(s);
+        window.removeEventListener("focus", windowEventListener(s)); //make sure we don't keep adding the same listener
+        window.addEventListener("focus", windowEventListener(s));
+      }
     }
   }, []);
 
@@ -138,6 +148,12 @@ const SocketContextComponent: React.FunctionComponent<
     socket.io.on("reconnect_failed", () => {
       //console.info("Reconnection failure");
       alert(translateReconnectFailure(isDanish));
+    });
+
+    /* Reset socket - Another browser joined with your info */
+    /* For Room: (User) */
+    socket.on("reset_socket", () => {
+      SocketDispatch({ type: "reset_state", payload: null });
     });
     ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -266,23 +282,16 @@ const SocketContextComponent: React.FunctionComponent<
     /* Owner left */
     /* For Room: (User) */
     socket.on("game_owner_left", () => {
-      confirm(translateRedirecting(isDanish));
       navigate(base + "/find");
+      confirm(translateRedirecting(isDanish));
       window.location.reload();
     });
-
-    /* You left -  */
-    /* For Room: (User) */
-    // socket.on("you_left", () => {
-    //   navigate(base + "/find");
-    //   window.location.reload();
-    // });
 
     /* When getting kicked */
     /* For Room: Game */
     socket.on("been_kicked", () => {
-      confirm(translateKicked(isDanish));
       navigate(base + "/find");
+      confirm(translateKicked(isDanish));
       window.location.reload();
     });
 

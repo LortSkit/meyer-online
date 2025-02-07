@@ -10,8 +10,8 @@ export function translateReconnectFailure(isDanish: boolean): string {
 export function translateRedirecting(isDanish: boolean): string {
   return (
     (isDanish
-      ? "Ejeren har forladt spillet, omdirigerer dig til "
-      : "Game owner has left, redirecting you to the ") +
+      ? "Ejeren har forladt spillet. Vi har omdirigeret dig til "
+      : "Game owner has left. We have redirected you to ") +
     translateFind(isDanish) +
     translatePage(isDanish)
   );
@@ -20,8 +20,8 @@ export function translateRedirecting(isDanish: boolean): string {
 export function translateKicked(isDanish: boolean): string {
   return (
     (isDanish
-      ? "Ejeren har smidt dig ud af spillet... Omdirigerer dig til "
-      : "Owner kicked you from the game... Redirecting you to the ") +
+      ? "Ejeren har smidt dig ud af spillet... Vi har omdirigeret dig til "
+      : "Owner kicked you from the game... We have redirected you to ") +
     translateFind(isDanish) +
     translatePage(isDanish)
   );

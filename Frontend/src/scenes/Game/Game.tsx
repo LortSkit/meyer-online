@@ -117,7 +117,7 @@ const Game = ({ isDanish }: Props) => {
     middleChild = <StandardErrorMessage />;
   } else if (thisPlayerName() === "") {
     middleChild = (
-      <MiddleChild widthPercentage={90}>
+      <MiddleChild widthPercentage={100}>
         <Box p={4} />
         <Box display="flex" justifyContent="center">
           {translateChooseName(isDanish)}

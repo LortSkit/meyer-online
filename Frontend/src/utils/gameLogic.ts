@@ -182,7 +182,7 @@ export class Meyer {
 
   private endRoundCurrentPlayerLost(): void {
     this.endRoundBase();
-    this.healths[this.currentPlayer - 1] != 0
+    this.healths[this.currentPlayer - 1] > 0
       ? undefined //current player = current player
       : (this.currentPlayer = this.getNextPlayer(this.currentPlayer));
     if (this.isCurrentPlayerWinner()) {
@@ -192,7 +192,7 @@ export class Meyer {
 
   private endRoundPreviousPlayerLost(): void {
     this.endRoundBase();
-    this.healths[this.previousPlayer - 1] != 0
+    this.healths[this.previousPlayer - 1] > 0
       ? (this.currentPlayer = this.previousPlayer)
       : undefined; //current player = current player
     if (this.isCurrentPlayerWinner()) {

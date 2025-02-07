@@ -29,6 +29,7 @@ interface Props {
   playersTimedOut: string[];
   playerUids: string[];
   socket: Socket;
+  thisUid: string;
 }
 
 const PlayerDisplay = ({
@@ -42,6 +43,7 @@ const PlayerDisplay = ({
   playersTimedOut,
   playerUids,
   socket,
+  thisUid,
 }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -158,7 +160,7 @@ const PlayerDisplay = ({
   useEffect(() => {
     if (toggleEditName) {
       const input = document.getElementById(
-        "player-name-bar" + playerUids.findIndex((uid) => uid === currentUid)
+        "player-name-bar" + playerUids.findIndex((uid) => uid === thisUid)
       ) as HTMLInputElement;
       input?.focus();
       input?.setSelectionRange(input?.value.length, input?.value.length);
@@ -218,26 +220,34 @@ const PlayerDisplay = ({
                 <Box paddingLeft="calc(20.5px + 5px)" />
               )}
             {/* DICE ICON */}
-            <Box display="flex" flexDirection="column" justifyContent="center">
-              <Dice
-                eyes={healths ? healths[index] : 6}
-                color={colors.blueAccent[100]}
-                sideLength={25}
-              />
-            </Box>
-            <Box marginRight="3px" />
+            {((healths && (healths[index] > 0 || isOwner)) || !healths) && (
+              <Box display="flex">
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="center"
+                >
+                  <Dice
+                    eyes={healths ? healths[index] : 6}
+                    color={colors.blueAccent[100]}
+                    sideLength={25}
+                  />
+                </Box>
+                <Box marginRight="3px" />
+              </Box>
+            )}
 
             {/* NAME */}
-            <Box
-              display="flex"
-              flexDirection="column"
-              justifyContent="center"
-              height="24px"
-              onDoubleClick={() => {
-                if (playerUids[index] === currentUid && !inProgress) onEdit();
-              }}
-            >
-              {name !== "" && (
+            {((healths && (healths[index] > 0 || isOwner)) || !healths) && (
+              <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                height="24px"
+                onDoubleClick={() => {
+                  if (playerUids[index] === thisUid && !inProgress) onEdit();
+                }}
+              >
                 <Typography
                   fontSize={!queryMatches && inProgress ? "10px" : "14px"}
                   style={{
@@ -252,36 +262,35 @@ const PlayerDisplay = ({
                   component="span"
                   children={
                     <Box>
-                      {(!toggleEditName ||
-                        playerUids[index] !== currentUid) && (
+                      {(!toggleEditName || playerUids[index] !== thisUid) && (
                         <>
-                          {name}
+                          {name !== "" && name}
+                          {name === "" && (
+                            <img
+                              src={loading}
+                              width="35px"
+                              style={{ paddingLeft: "5px" }}
+                            />
+                          )}
                           {numberAfterName(name, index)}
-                          {playerUids[index] === currentUid &&
+                          {playerUids[index] === thisUid &&
                             !inProgress &&
                             EditNameButton()}
                         </>
                       )}
                       {toggleEditName &&
                         !inProgress &&
-                        playerUids[index] === currentUid &&
+                        playerUids[index] === thisUid &&
                         InputNameElement(index)}
                       {isOwner &&
-                        playerUids[index] !== currentUid &&
+                        playerUids[index] !== thisUid &&
                         KickPlayerButton(playerUids[index])}
                       {!isOwner && index === 0 && Star()}
                     </Box>
                   }
                 />
-              )}
-              {name === "" && (
-                <img
-                  src={loading}
-                  width="35px"
-                  style={{ paddingLeft: "5px" }}
-                />
-              )}
-            </Box>
+              </Box>
+            )}
           </Box>
           <Box paddingTop="5px" />
         </Box>

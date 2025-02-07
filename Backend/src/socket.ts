@@ -5,6 +5,7 @@ import { Socket, Server } from "socket.io";
 import { v4 } from "uuid";
 import { frontendURL } from "./environmentUtils";
 import { Meyer } from "./Meyer/gameLogic";
+import { Action } from "./Meyer/gameTypes";
 
 type GameBase = {
   id: string;
@@ -136,6 +137,16 @@ export class ServerSocket {
     );
   };
 
+  public deleteErroneousSocketUser(socketId: string): void {
+    const erroneousEntry = Object.entries(this.users).find(
+      (value) => value[1] === socketId
+    );
+
+    if (erroneousEntry) {
+      delete this.users[erroneousEntry[0]];
+    }
+  }
+
   public removeUserFromGamesAndRoom(uid: string): void {
     const game = this.gameBases[uid];
     const inGameId = this.playerInGame[uid];
@@ -159,18 +170,22 @@ export class ServerSocket {
         );
         /* (User) */
         this.SendMessage("game_owner_left", restPlayers);
-        /* (User) */
-        this.SendMessage("you_left", [inGameOwnerUid]);
+
         if (this.gameIsPublic(inGameId)) {
           /* Find */
           this.SendMessage("remove_game", ["Find"], inGameId);
         }
       } else {
         /* Game */
+        const playerIndex = this.gamePlayers[inGameId].findIndex(
+          (value) => value === uid
+        );
+        delete this.gamePlayers[inGameId][playerIndex];
+        delete this.gamePlayersNames[inGameId][playerIndex];
         this.SendMessage("player_left", [inGameId], uid);
         if (this.gameIsInProgress(inGameId)) {
           this.gameMeyer[inGameId].playerLeft(uid);
-          this.updateMeyerInfo(inGameId);
+          this.updateMeyerInfo(inGameId, true, false);
         }
         if (this.gameIsPublic(inGameId)) {
           /* Find */
@@ -265,17 +280,23 @@ export class ServerSocket {
     );
   }
 
-  public disconnectUser(uid: string, gameToLeave?: string): void {
-    this.removeUserFromGamesAndRoom(uid);
-    delete this.users[uid];
+  public disconnectUser(uid: string): void {
+    if (this.users[uid]) {
+      this.removeUserFromGamesAndRoom(uid);
+      delete this.users[uid];
 
-    const users = Object.values(this.users);
+      const users = Object.values(this.users);
 
-    /* (All) */
-    this.SendMessage("user_disconnected", users, users.length);
+      /* (All) */
+      this.SendMessage("user_disconnected", users, users.length);
+    }
   }
 
-  public updateMeyerInfo(gameId: string, gameStarted?: boolean): void {
+  public updateMeyerInfo(
+    gameId: string,
+    updateEveryone: boolean,
+    gameStarted: boolean
+  ): void {
     const currentPlayer = this.gameMeyer[gameId].getCurrentPlayerUid();
     const restPlayers = this.gamePlayers[gameId].filter(
       (value) => value !== currentPlayer
@@ -287,12 +308,14 @@ export class ServerSocket {
       this.gameMeyer[gameId].getMeyerInfo(currentPlayer)
     );
 
-    /* (User) */
-    this.SendMessage(
-      gameStarted ? "game_started" : "update_meyer_info",
-      restPlayers,
-      this.gameMeyer[gameId].getMeyerInfo()
-    );
+    if (updateEveryone) {
+      /* (User) */
+      this.SendMessage(
+        gameStarted ? "game_started" : "update_meyer_info",
+        restPlayers,
+        this.gameMeyer[gameId].getMeyerInfo()
+      );
+    }
   }
   ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -315,15 +338,35 @@ export class ServerSocket {
         /* Check if this is a reconnection */
         const reconnected =
           Object.values(this.users).includes(socket.id) ||
-          (this.users[storedUid] && this.users[storedUid] === storedSocketId);
+          (this.users[storedUid] && this.users[storedUid] === storedSocketId) ||
+          socket.id === storedSocketId;
 
         if (reconnected) {
           console.info("This user has reconnected.");
 
           let uid: string;
           if (
-            !(this.users[storedUid] && this.users[storedUid] === storedSocketId)
+            !(
+              (this.users[storedUid] &&
+                this.users[storedUid] === storedSocketId) ||
+              socket.id === storedSocketId
+            )
           ) {
+            if (
+              !(
+                this.users[storedUid] &&
+                this.users[storedUid] === storedSocketId
+              ) &&
+              socket.id === storedSocketId
+            ) {
+              this.deleteErroneousSocketUser(storedSocketId);
+              /* (User) */
+              this.SendMessage("reset_socket", [storedUid]);
+            } else {
+              /* (User) */
+              this.SendMessage("reset_socket", [storedSocketId]);
+            }
+
             uid = this.GetUidFromSocketID(socket.id);
             if (storedUid !== uid) {
               this.disconnectUser(storedUid);
@@ -394,7 +437,7 @@ export class ServerSocket {
           /* Game */
           this.SendMessage("add_user_timeout", [gameToLeave], uid);
           this.userTimeout[uid] = setTimeout(() => {
-            this.disconnectUser(uid, gameToLeave);
+            this.disconnectUser(uid);
             delete this.userTimeout[uid];
           }, 120000);
         } else {
@@ -542,6 +585,7 @@ export class ServerSocket {
 
               if (this.gameIsInProgress(gameId)) {
                 callback(exists, true, false);
+                return;
               } else if (!hasEnoughSpace) {
                 callback(exists, false, false);
                 return;
@@ -595,7 +639,7 @@ export class ServerSocket {
                   [gameId, this.gamePlayers[gameId].length]
                 );
               }
-            } else {
+            } else if (this.userTimeout[joiningUid]) {
               //User rejoined game
               callback(true, false, true);
 
@@ -816,7 +860,7 @@ export class ServerSocket {
           this.gameMeyer[owningGame.id] = new Meyer(
             this.gamePlayers[owningGame.id]
           );
-          this.updateMeyerInfo(owningGame.id, true);
+          this.updateMeyerInfo(owningGame.id, true, true);
 
           if (this.gameIsPublic(owningGame.id)) {
             delete this.publicGames[uid];
@@ -851,6 +895,87 @@ export class ServerSocket {
       }
     });
 
+    /* Take action or bluff */
+    /* From Room: Game  */
+    /* Sends to: (User) */
+    socket.on("take_action_bluff", (action: Action, bluff: number) => {
+      console.info("Received event: take_action_bluff from " + socket.id);
+
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid) {
+        const inGameId = this.playerInGame[uid];
+        if (
+          inGameId &&
+          this.gameIsInProgress(inGameId) &&
+          this.gameMeyer[inGameId].getCurrentPlayerUid() === uid
+        ) {
+          if (this.gameMeyer[inGameId].getCurrentAction() !== "Bluff") {
+            //Take action
+            try {
+              this.gameMeyer[inGameId].takeAction(action);
+            } catch (e) {
+              console.info(
+                "Failed on taking action",
+                action,
+                "got error:",
+                e.message
+              );
+              return;
+            }
+
+            if (this.gameMeyer[inGameId].getCanAdvanceTurn()) {
+              //Advance turn
+              try {
+                this.gameMeyer[inGameId].advanceTurn();
+              } catch (e) {
+                console.info(
+                  "Failed on advancing turn",
+                  action,
+                  "got error:",
+                  e.message
+                );
+                return;
+              }
+              //Update everyone
+              this.updateMeyerInfo(inGameId, true, false);
+            } else {
+              //Update only player to show him bluff choices
+              this.updateMeyerInfo(inGameId, false, false);
+            }
+          } else {
+            //Choose bluff
+            try {
+              this.gameMeyer[inGameId].chooseBluff(bluff);
+            } catch (e) {
+              console.info(
+                "Failed on choosing bluff",
+                action,
+                "got error:",
+                e.message
+              );
+              return;
+            }
+
+            //Advance turn
+            try {
+              this.gameMeyer[inGameId].advanceTurn();
+            } catch (e) {
+              console.info(
+                "Failed on advancing turn",
+                action,
+                "got error:",
+                e.message
+              );
+              return;
+            }
+
+            //Update everyone
+            this.updateMeyerInfo(inGameId, true, false);
+          }
+        }
+      }
+    });
+
     /* RESTART GAME */
     /* From Room: Game */
     /* Sends to:  */
@@ -864,13 +989,13 @@ export class ServerSocket {
           owningGame &&
           this.gameIsInProgress(owningGame.id) &&
           this.gameMeyer[owningGame.id].isGameOver() &&
-          2 < this.gamePlayers[owningGame.id].length &&
+          1 < this.gamePlayers[owningGame.id].length &&
           this.gamePlayers[owningGame.id].length <= 20
         ) {
           this.gameMeyer[owningGame.id].resetGame(
             this.gamePlayers[owningGame.id]
           );
-          this.updateMeyerInfo(owningGame.id, true);
+          this.updateMeyerInfo(owningGame.id, true, true);
         }
       }
     });
@@ -894,8 +1019,7 @@ export class ServerSocket {
           /* (User) */
           this.SendMessage("been_kicked", [kickingUid]); //Informs them they've been kicked
 
-          this.disconnectUser(kickingUid, owningGame.id);
-          this.leavePreviousRoom(socket, kickingUid);
+          this.disconnectUser(kickingUid);
         }
       }
     });
@@ -913,7 +1037,7 @@ export class ServerSocket {
       if (uid) {
         const inGameId = this.playerInGame[uid];
         if (inGameId) {
-          this.disconnectUser(uid, inGameId);
+          this.disconnectUser(uid);
           this.leavePreviousRoom(socket, uid);
         }
       }

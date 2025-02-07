@@ -24,6 +24,10 @@ const GameOverHeading = ({
         fontSize="30px"
         display="flex"
         justifyContent="center"
+        style={{
+          wordBreak: "break-word",
+          textAlign: "center",
+        }}
         children={
           typeof currentPlayer === "number"
             ? translateCurrentPlayerValueWon(isDanish, currentPlayer)
@@ -34,6 +38,10 @@ const GameOverHeading = ({
         fontSize="20px"
         display="flex"
         justifyContent="center"
+        style={{
+          wordBreak: "break-word",
+          textAlign: "center",
+        }}
         children={translateRoundTurnsTotal(isDanish, round - 1, turnsTotal - 1)}
       />
     </Box>
