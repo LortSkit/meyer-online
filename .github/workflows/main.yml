@@ -91,29 +91,12 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Backend - Setup .env file
-        run: |
-          cd Backend
-          rm .env
-          touch .env
-          echo MODE=${{ secrets.MODE }} >> .env
-          echo KEYFILENAME=${{ secrets.KEYFILENAME }} >> .env
-          echo CERTFILENAME=${{ secrets.CERTFILENAME }} >> .env
-          echo PROTOCOL=${{ secrets.PROTOCOL }} >> .env
-          echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
-          echo SOCKETPORT=${{ secrets.SOCKETPORT }} >> .env
-
-      - name: Backend - Install dependencies
-        run: | 
-          cd Backend
-          npm ci
-
-      - name: copy file via ssh password
+      - name: Backend - copy file via ssh password
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.ADDRESS }}
           username: ${{ secrets.SSHUSER }}
-          password: ${{ secrets.SSHKEY }}
+          key: ${{ secrets.SSHKEY }}
           source: "${{ secrets.KEYFILENAME }},${{ secrets.CERTFILENAME }}"
           target: ~/meyer-online/Backend/certs
           
@@ -123,7 +106,7 @@ jobs:
         with:
           host: ${{ secrets.ADDRESS }}
           username: ${{ secrets.SSHUSER }}
-          password: ${{ secrets.SSHKEY }}
+          key: ${{ secrets.SSHKEY }}
           script: |
             cd ~/meyer-online/Backend
             git pull
