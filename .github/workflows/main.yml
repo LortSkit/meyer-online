@@ -111,13 +111,11 @@ jobs:
           npm ci
 
       - name: Backend - SSH transfer and startup
-        env:
-          SSHKEY: |
-            ${{ secrets.SSHKEY }}
         run: |
           touch sshkey.pem
-          echo "$SSHKEY" >> sshkey.pem
+          echo "${{ secrets.SSHKEY }}" > sshkey.pem
           chmod 400 sshkey.pem
+          ssh-keyscan -H ${{ secrets.ADDRESS }} > ~/.ssh/known_hosts
           scp -i sshkey.pem -r ./Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
           ssh -i sshkey.pem ${{ secrets.SSHUSERATADDRESS }}
           cd ${{ secrets.SERVERLOCATION }}/Backend
