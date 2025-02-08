@@ -102,13 +102,6 @@ jobs:
           echo PROTOCOL=${{ secrets.PROTOCOL }} >> .env
           echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
           echo SOCKETPORT=${{ secrets.SOCKETPORT }} >> .env
-          
-      - name: Backend - Setup ssh key
-        run: | 
-          cd Backend
-          touch ${{ secrets.SSHKEYFILENAME }}
-          echo ${{ secrets.SSHKEY }} >> ${{ secrets.SSHKEYFILENAME }}
-          git update-index --chmod=+x 400 ${{ secrets.SSHKEYFILENAME }}
 
       - name: Backend - Install dependencies
         run: | 
@@ -116,9 +109,15 @@ jobs:
           npm ci
 
       - name: Backend - SSH transfer and startup
+        env:
+          SSHKEY: |
+            ${{ secrets.SSHKEY }}
         run: |
-          scp -i ${{ secrets.SSHKEYFILENAME }} -r /Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
-          ssh -i ${{ secrets.SSHKEYFILENAME }} ${{ secrets.SSHUSERATADDRESS }}
+          touch sshkey.pem
+          echo $SSHKEY >> sshkey.pem
+          chmod 400 sshkey.pem
+          scp -i sshkey.pem -r /Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
+          ssh -i sshkey.pem ${{ secrets.SSHUSERATADDRESS }}
           cd ${{ secrets.SERVERLOCATION }}/Backend
           nohup npm start
       
