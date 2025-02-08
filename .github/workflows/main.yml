@@ -56,6 +56,8 @@ jobs:
           mkcert -key-file ${{ secrets.KEYFILENAME }} -cert-file ${{ secrets.CERTFILENAME }} ${{ secrets.HOSTNAME }}
           cp ${{ secrets.KEYFILENAME }} ./Frontend/certs
           cp ${{ secrets.CERTFILENAME }} ./Frontend/certs
+          cp ${{ secrets.KEYFILENAME }} ./Backend/certs
+          cp ${{ secrets.CERTFILENAME }} ./Backend/certs
 
       - name: Frontend - Setup .env file
         run: |
@@ -116,7 +118,7 @@ jobs:
           touch sshkey.pem
           echo $SSHKEY >> sshkey.pem
           chmod 400 sshkey.pem
-          scp -i sshkey.pem -r /Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
+          scp -i sshkey.pem -r ./Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
           ssh -i sshkey.pem ${{ secrets.SSHUSERATADDRESS }}
           cd ${{ secrets.SERVERLOCATION }}/Backend
           nohup npm start
