@@ -57,7 +57,7 @@ jobs:
           cp ${{ secrets.KEYFILENAME }} ./Frontend/certs
           cp ${{ secrets.CERTFILENAME }} ./Frontend/certs
 
-      - name: Setup .env file
+      - name: Frontend - Setup .env file
         run: |
           cd Frontend
           rm .env
@@ -69,24 +69,56 @@ jobs:
           echo VITE_BASE=${{ secrets.BASE }} >> .env
           echo VITE_SOCKETPORT=${{ secrets.SOCKETPORT }} >> .env
           
-      - name: Install dependencies
+      - name: Frontend - Install dependencies
         run: | 
           cd Frontend
           npm ci
    
-      - name: Build
+      - name: Frontend - Build
         run: |
           cd Frontend
           npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Upload artifact
+      - name: Frontend - Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload dist folder
           path: './Frontend/dist'
 
-      - name: Deploy to GitHub Pages
+      - name: Frontend - Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Backend - Setup .env file
+        run: |
+          cd Backend
+          rm .env
+          touch .env
+          echo MODE=${{ secrets.MODE }} >> .env
+          echo KEYFILENAME=${{ secrets.KEYFILENAME }} >> .env
+          echo CERTFILENAME=${{ secrets.CERTFILENAME }} >> .env
+          echo PROTOCOL=${{ secrets.PROTOCOL }} >> .env
+          echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
+          echo SOCKETPORT=${{ secrets.SOCKETPORT }} >> .env
+          
+      - name: Backend - Setup ssh key
+        run: | 
+          cd Backend
+          touch ${{ secrets.SSHKEYFILENAME }}
+          echo ${{ secrets.SSHKEY }} >> ${{ secrets.SSHKEYFILENAME }}
+          chmod 400 ${{ secrets.SSHKEYFILENAME }}
+
+      - name: Backend - Install dependencies
+        run: | 
+          cd Backend
+          npm ci
+
+      - name: Backend - SSH transfer and startup
+        run: |
+          scp -i ${{ secrets.SSHKEYFILENAME }} -r /Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
+          ssh -i ${{ secrets.SSHKEYFILENAME }} ${{ secrets.SSHUSERATADDRESS }}
+          cd ${{ secrets.SERVERLOCATION }}/Backend
+          nohup npm start
+      
