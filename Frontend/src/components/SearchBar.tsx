@@ -1,6 +1,9 @@
-import { Box, IconButton, InputBase, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import useTheme from "@mui/material/styles/useTheme";
+import IconButton from "@mui/material/IconButton";
+import InputBase from "@mui/material/InputBase";
+import Search from "@mui/icons-material/Search";
 import { tokens } from "../theme";
-import { Search } from "@mui/icons-material";
 import { translateSearchForLobby } from "../utils/lang/components/langSearchBar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { base } from "../utils/hostSubDirectory";

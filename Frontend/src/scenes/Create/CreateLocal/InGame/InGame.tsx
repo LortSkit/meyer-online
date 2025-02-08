@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 import Game from "./Game/Game";
 import GameOver from "./GameOver/GameOver";
 import TurnInformation from "../../../../components/game/TurnInformation/TurnInformation";

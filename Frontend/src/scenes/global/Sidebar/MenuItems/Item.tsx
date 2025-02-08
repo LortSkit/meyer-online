@@ -1,5 +1,6 @@
+import Typography from "@mui/material/Typography";
+import useTheme from "@mui/material/styles/useTheme";
 import { tokens } from "../../../../theme";
-import { Typography, useTheme } from "@mui/material";
 import { ReactNode } from "react";
 import { MenuItem } from "react-pro-sidebar";
 import { Link } from "react-router-dom";

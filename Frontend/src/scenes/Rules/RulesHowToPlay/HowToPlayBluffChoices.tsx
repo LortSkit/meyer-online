@@ -1,4 +1,8 @@
-import { Box, Button, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import useTheme from "@mui/material/styles/useTheme";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+import ArrowForward from "@mui/icons-material/ArrowForward";
 import { HowToPlayRoll, HowToPlayText } from "./HowToPlayTypographies";
 import { getMeyerRoll, RollWithName } from "../../../utils/diceUtils";
 import { tokens } from "../../../theme";
@@ -16,7 +20,6 @@ import {
   translateHowToPlayPreviousMissing,
   translateClickMePlease,
 } from "../../../utils/lang/Rules/RulesHowToPlay/langHowToPlayBluffChoices";
-import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import { useMediaQuery } from "usehooks-ts";
 
 interface Props {

@@ -1,7 +1,9 @@
 //Stolen from https://github.com/ed-roh/react-admin-dashboard
 
+import { PaletteMode } from "@mui/material/styles/createPalette";
+import createTheme from "@mui/material/styles/createTheme";
+
 import { createContext, useState, useMemo } from "react";
-import { createTheme, PaletteMode } from "@mui/material/styles";
 
 // color design tokens
 export const tokens = (mode: PaletteMode) => ({

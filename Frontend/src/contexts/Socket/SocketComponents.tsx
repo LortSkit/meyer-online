@@ -1,3 +1,4 @@
+import Box from "@mui/material/Box";
 import { PropsWithChildren, useEffect, useReducer, useState } from "react";
 import {
   defaultSocketContextState,
@@ -16,7 +17,6 @@ import {
   translateRedirecting,
 } from "../../utils/lang/langSocketComponents";
 import { base } from "../../utils/hostSubDirectory";
-import { Box } from "@mui/material";
 import { Socket } from "socket.io-client";
 export interface ISocketContextComponentProps extends PropsWithChildren {
   isDanish: boolean;

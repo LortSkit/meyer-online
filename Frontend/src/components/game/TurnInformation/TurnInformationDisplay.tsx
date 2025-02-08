@@ -1,4 +1,7 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import useTheme from "@mui/material/styles/useTheme";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 import { tokens } from "../../../theme";
 import { TurnInfo } from "../../../utils/gameTypes";
 import CircularWithValueLabel from "./CircularProgressWithLabel";

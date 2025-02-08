@@ -1,4 +1,6 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import useTheme from "@mui/material/styles/useTheme";
+import Typography from "@mui/material/Typography";
 import GameHeading from "../../../../../components/game/GameHeading";
 import ActionChoices from "./ActionChoices";
 import BluffChoices from "./BluffChoices";

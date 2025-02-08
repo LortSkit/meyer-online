@@ -1,4 +1,6 @@
-import { useTheme, Box, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import useTheme from "@mui/material/styles/useTheme";
 import { tokens } from "../../theme";
 import { translateHomeWelcome } from "../../utils/lang/Home/langHomeHeading";
 

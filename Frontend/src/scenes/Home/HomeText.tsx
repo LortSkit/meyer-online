@@ -1,4 +1,9 @@
-import { Box, Typography, IconButton } from "@mui/material";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import CasinoOutlined from "@mui/icons-material/CasinoOutlined";
+import PeopleOutlined from "@mui/icons-material/PeopleOutlined";
+import HelpOutlined from "@mui/icons-material/HelpOutlined";
 import {
   translateCreate,
   translateFind,
@@ -8,11 +13,6 @@ import {
   translateRules,
 } from "../../utils/lang/Home/langHomeText";
 import { useMediaQuery } from "usehooks-ts";
-import {
-  CasinoOutlined,
-  PeopleOutlined,
-  HelpOutlined,
-} from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { base } from "../../utils/hostSubDirectory";
 

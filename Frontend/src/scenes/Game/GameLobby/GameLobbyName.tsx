@@ -1,14 +1,14 @@
-import {
-  Box,
-  IconButton,
-  InputBase,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import InputBase from "@mui/material/InputBase";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import useTheme from "@mui/material/styles/useTheme";
+import Edit from "@mui/icons-material/Edit";
+import LockOpenOutlined from "@mui/icons-material/LockOpenOutlined";
+import LockOutlined from "@mui/icons-material/LockOutlined";
 import { useEffect, useState } from "react";
 import { tokens } from "../../../theme";
 import { Socket } from "socket.io-client";
-import { Edit, LockOpenOutlined, LockOutlined } from "@mui/icons-material";
 import {
   translateEditLobbyName,
   translatePrivate,

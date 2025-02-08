@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 import { useState } from "react";
 import CreateNewGame from "./CreateNewGame/CreateNewGame";
 import { Meyer } from "../../../utils/gameLogic";

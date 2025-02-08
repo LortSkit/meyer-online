@@ -1,4 +1,10 @@
-import { Box, Button, IconButton, Typography, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import useTheme from "@mui/material/styles/useTheme";
+import StarOutlined from "@mui/icons-material/StarOutlined";
+import IosShareOutlined from "@mui/icons-material/IosShareOutlined";
 import GameLobbyName from "./GameLobbyName";
 import { ISocketContextState } from "../../../contexts/Socket/SocketContext";
 import { Socket } from "socket.io-client";
@@ -11,7 +17,6 @@ import {
   translateStartGame,
   translateWaiting,
 } from "../../../utils/lang/Game/GameLobby/langGameLobby";
-import { IosShareOutlined, StarOutlined } from "@mui/icons-material";
 import { tokens } from "../../../theme";
 import GameLobbyPlayers from "./GameLobbyPlayers";
 import PlayerDisplay from "../PlayersDisplay";

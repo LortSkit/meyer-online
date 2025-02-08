@@ -1,6 +1,8 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import useTheme from "@mui/material/styles/useTheme";
+import Typography from "@mui/material/Typography";
+import ArrowForwardOutlined from "@mui/icons-material/ArrowForwardOutlined";
 import { tokens } from "../../theme";
-import { ArrowForwardOutlined } from "@mui/icons-material";
 import { Dice } from "../../utils/diceUtils";
 import { translatePlayerIndex } from "../../utils/lang/components/game/langPlayersHealthsDisplay";
 import { useMediaQuery } from "usehooks-ts";

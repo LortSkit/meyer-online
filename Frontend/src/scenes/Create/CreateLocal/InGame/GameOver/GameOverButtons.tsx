@@ -1,4 +1,6 @@
-import { Box, Button, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 import { Meyer } from "../../../../../utils/gameLogic";
 import { Action, TurnInfo } from "../../../../../utils/gameTypes";
 import {

@@ -1,4 +1,6 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 import FindHeading from "./FindHeading";
 import { Game, useGlobalContext } from "../../contexts/Socket/SocketContext";
 import { ReactElement, useEffect, useState } from "react";

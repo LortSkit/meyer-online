@@ -1,6 +1,7 @@
+import ThemeProvider from "@mui/material/styles/ThemeProvider";
+import CssBaseline from "@mui/material/CssBaseline";
 import { createContext, useRef, useState } from "react";
 import { ColorModeContext, useMode } from "./theme";
-import { CssBaseline, ThemeProvider } from "@mui/material";
 import Topbar from "./scenes/global/Topbar";
 import SidebarDesktop from "./scenes/global/Sidebar/SidebarDesktop";
 import SidebarMobile from "./scenes/global/Sidebar/SidebarMobile";

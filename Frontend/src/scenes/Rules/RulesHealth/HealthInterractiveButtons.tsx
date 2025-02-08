@@ -1,15 +1,15 @@
-import { Box, Button, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import ArrowBackIosNew from "@mui/icons-material/ArrowBackIosNew";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import ArrowForwardIos from "@mui/icons-material/ArrowForwardIos";
 import {
   translateAction,
   translateClickMePlease,
   translateRemoveHealth,
   translateReset,
 } from "../../../utils/lang/Rules/RulesHealth/langHealthInterractiveButtons";
-import {
-  ArrowBackIosNew,
-  ArrowDownward,
-  ArrowForwardIos,
-} from "@mui/icons-material";
 import { getDiceRoll } from "../../../utils/diceUtils";
 
 interface Props {

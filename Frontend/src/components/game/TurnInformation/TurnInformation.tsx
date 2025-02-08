@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 import { TurnInfo } from "../../../utils/gameTypes";
 import { useEffect } from "react";
 import TurnInformationDisplay from "./TurnInformationDisplay";

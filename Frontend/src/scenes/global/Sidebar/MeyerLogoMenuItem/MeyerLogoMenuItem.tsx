@@ -1,5 +1,6 @@
-import { MenuOutlined } from "@mui/icons-material";
-import { Box, IconButton } from "@mui/material";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import MenuOutlined from "@mui/icons-material/MenuOutlined";
 import { MenuItem } from "react-pro-sidebar";
 import MeyerLogo from "./MeyerLogo";
 

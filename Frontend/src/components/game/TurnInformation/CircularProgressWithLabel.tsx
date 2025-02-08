@@ -1,10 +1,10 @@
 //Stolen from https://mui.com/material-ui/react-progress/?srsltid=AfmBOop-aYsBwk9RJ6Qfs-9WiPhaCpEEeKwfrQD7FW7k_J3btPbKeJ7i#circular-with-label
 
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import CircularProgress, {
   CircularProgressProps,
 } from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
-import { Typography } from "@mui/material";
 
 function CircularProgressWithLabel(
   props: CircularProgressProps & {

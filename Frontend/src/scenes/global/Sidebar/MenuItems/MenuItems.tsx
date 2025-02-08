@@ -1,10 +1,8 @@
-import { Box } from "@mui/material";
-import {
-  CasinoOutlined,
-  HelpOutlined,
-  HomeOutlined,
-  PeopleOutlined,
-} from "@mui/icons-material";
+import Box from "@mui/material/Box";
+import CasinoOutlined from "@mui/icons-material/CasinoOutlined";
+import HelpOutlined from "@mui/icons-material/HelpOutlined";
+import HomeOutlined from "@mui/icons-material/HomeOutlined";
+import PeopleOutlined from "@mui/icons-material/PeopleOutlined";
 import Item from "./Item";
 import {
   translateCreate,

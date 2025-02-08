@@ -1,22 +1,18 @@
-import {
-  Box,
-  IconButton,
-  InputBase,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import useTheme from "@mui/material/styles/useTheme";
+import InputBase from "@mui/material/InputBase";
+import ArrowForwardOutlined from "@mui/icons-material/ArrowForwardOutlined";
+import CloseOutlined from "@mui/icons-material/CloseOutlined";
+import Edit from "@mui/icons-material/Edit";
+import StarOutlined from "@mui/icons-material/StarOutlined";
 import { tokens } from "../../theme";
-import {
-  ArrowForwardOutlined,
-  CloseOutlined,
-  Edit,
-  StarOutlined,
-} from "@mui/icons-material";
 import { Dice } from "../../utils/diceUtils";
 import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
+import { useMediaQuery } from "usehooks-ts";
 
 interface Props {
   currentName: string;

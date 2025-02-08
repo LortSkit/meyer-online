@@ -1,14 +1,12 @@
-import {
-  Box,
-  IconButton,
-  InputBase,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import InputBase from "@mui/material/InputBase";
+import useTheme from "@mui/material/styles/useTheme";
+import Edit from "@mui/icons-material/Edit";
 import { useEffect, useState } from "react";
 import { tokens } from "../../../theme";
 import { translatePlayers } from "../../../utils/lang/Game/GameLobby/langGameLobbyPlayers";
-import { Edit } from "@mui/icons-material";
 import { Socket } from "socket.io-client";
 
 interface Props {

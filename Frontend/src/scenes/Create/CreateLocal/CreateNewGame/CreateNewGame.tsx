@@ -1,4 +1,5 @@
-import { Box, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import SetNumberOfPlayers from "../../../../components/SetNumberOfPlayers";
 import CreateNewGameButton from "./CreateNewGameButton";
 import { Meyer } from "../../../../utils/gameLogic";

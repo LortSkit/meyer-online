@@ -1,9 +1,9 @@
+import Box from "@mui/material/Box";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { validate as isValidUUID } from "uuid";
 import { useGlobalContext } from "../../contexts/Socket/SocketContext";
 import { base } from "../../utils/hostSubDirectory";
-import { Box } from "@mui/material";
 import { MiddleChild } from "../../components/CenteredPage/PageChildren";
 import CenteredPage from "../../components/CenteredPage/CenteredPage";
 import {

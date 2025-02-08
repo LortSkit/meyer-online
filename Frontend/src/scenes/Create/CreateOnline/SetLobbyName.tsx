@@ -1,4 +1,6 @@
-import { useTheme, Box, InputBase } from "@mui/material";
+import Box from "@mui/material/Box";
+import useTheme from "@mui/material/styles/useTheme";
+import InputBase from "@mui/material/InputBase";
 import { tokens } from "../../../theme";
 
 interface Props {

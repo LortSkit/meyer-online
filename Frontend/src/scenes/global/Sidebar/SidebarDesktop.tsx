@@ -1,15 +1,14 @@
 //Stolen from https://github.com/ed-roh/react-admin-dashboard
 
+import Box from "@mui/material/Box";
+import useTheme from "@mui/material/styles/useTheme";
 import { useState } from "react";
-import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Box, IconButton, useTheme } from "@mui/material";
-import { MenuOutlined } from "@mui/icons-material";
-import { tokens } from "../../../theme";
+import { Sidebar, Menu } from "react-pro-sidebar";
 import creator from "../../../assets/alek.jpg";
 import MenuItems from "./MenuItems/MenuItems";
 import User from "./User";
-import MeyerLogo from "./MeyerLogoMenuItem/MeyerLogo";
 import MeyerLogoMenuItem from "./MeyerLogoMenuItem/MeyerLogoMenuItem";
+import { tokens } from "../../../theme";
 
 interface Props {
   isCollapsed: boolean;

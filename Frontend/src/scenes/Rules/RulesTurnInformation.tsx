@@ -1,4 +1,6 @@
-import { Box, Button, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 import {
   translateShow,
   translateTurnInformation,
@@ -6,7 +8,7 @@ import {
   translateTurnInformationText2,
 } from "../../utils/lang/Rules/langRulesTurnInformation";
 import { isAction, TurnInfo, TurnInfoType } from "../../utils/gameTypes";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import TurnInformation from "../../components/game/TurnInformation/TurnInformation";
 import { getDiceRoll, getMeyerRoll } from "../../utils/diceUtils";
 

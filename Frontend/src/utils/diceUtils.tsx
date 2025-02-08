@@ -1,3 +1,5 @@
+import { SxProps, Theme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
 import { Int32 } from "react-native/Libraries/Types/CodegenTypes";
 import {
   Dice0,
@@ -8,7 +10,6 @@ import {
   Dice5,
   Dice6,
 } from "../components/icons/DiceIcons";
-import { Box, SxProps, Theme } from "@mui/material";
 import { translateRollName } from "./lang/langDiceUtils";
 
 //From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random

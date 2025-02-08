@@ -1,4 +1,6 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import useTheme from "@mui/material/styles/useTheme";
 import { Dice } from "../../../../utils/diceUtils";
 import { tokens } from "../../../../theme";
 

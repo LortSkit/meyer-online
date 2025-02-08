@@ -1,4 +1,6 @@
-import { useTheme, Box, InputBase } from "@mui/material";
+import Box from "@mui/material/Box";
+import InputBase from "@mui/material/InputBase";
+import useTheme from "@mui/material/styles/useTheme";
 import { tokens } from "../../../theme";
 import { Socket } from "socket.io-client";
 

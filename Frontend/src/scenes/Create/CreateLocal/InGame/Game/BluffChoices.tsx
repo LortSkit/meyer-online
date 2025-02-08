@@ -1,7 +1,6 @@
-import { Box, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
 import { Meyer } from "../../../../../utils/gameLogic";
 import { Action, TurnInfo } from "../../../../../utils/gameTypes";
-import { tokens } from "../../../../../theme";
 import BluffButton from "../../../../../components/game/BluffButton";
 
 interface Props {

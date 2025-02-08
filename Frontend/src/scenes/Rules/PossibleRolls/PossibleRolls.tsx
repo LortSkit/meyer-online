@@ -1,4 +1,5 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import useTheme from "@mui/material/styles/useTheme";
 import { tokens } from "../../../theme";
 import { RollWithName } from "../../../utils/diceUtils";
 import {

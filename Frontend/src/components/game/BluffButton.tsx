@@ -1,4 +1,6 @@
-import { Button, Typography, useTheme } from "@mui/material";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import useTheme from "@mui/material/styles/useTheme";
 import React from "react";
 import { useMediaQuery } from "usehooks-ts";
 import { tokens } from "../../theme";

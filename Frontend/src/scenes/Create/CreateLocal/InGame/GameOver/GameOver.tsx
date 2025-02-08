@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 import GameOverHeading from "../../../../../components/game/GameOverHeading";
 import GameOverButtons from "./GameOverButtons";
 import { Meyer } from "../../../../../utils/gameLogic";

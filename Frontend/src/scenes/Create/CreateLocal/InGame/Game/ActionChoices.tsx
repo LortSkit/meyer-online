@@ -1,4 +1,5 @@
-import { Box, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import useTheme from "@mui/material/styles/useTheme";
 import { isGreaterThanEqualTo, Meyer } from "../../../../../utils/gameLogic";
 import { tokens } from "../../../../../theme";
 import { Action, TurnInfo, TurnInfoType } from "../../../../../utils/gameTypes";

@@ -1,9 +1,11 @@
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 import { useEffect, useState } from "react";
 import {
   GameRequest,
   useGlobalContext,
 } from "../../../contexts/Socket/SocketContext";
-import { Box, Button, Typography } from "@mui/material";
 import SetNumberOfPlayers from "../../../components/SetNumberOfPlayers";
 import { MiddleChild } from "../../../components/CenteredPage/PageChildren";
 import CenteredPage from "../../../components/CenteredPage/CenteredPage";

@@ -1,4 +1,7 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import useTheme from "@mui/material/styles/useTheme";
 import { GameInfo, MeyerInfo } from "../../contexts/Socket/SocketContext";
 import GameHeading from "../../components/game/GameHeading";
 import { useEffect, useState } from "react";

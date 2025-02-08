@@ -1,13 +1,13 @@
 //Stolen from https://github.com/ed-roh/react-admin-dashboard
 
-import { Box, IconButton, useTheme } from "@mui/material";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import useTheme from "@mui/material/styles/useTheme";
+import MenuOutlined from "@mui/icons-material/MenuOutlined";
+import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
+import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
 import { useContext, useState } from "react";
 import { ColorModeContext, tokens } from "../../theme";
-import {
-  MenuOutlined,
-  LightModeOutlined,
-  DarkModeOutlined,
-} from "@mui/icons-material";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
 import { isInFind, isInLobby } from "../../utils/appUtils";
 import SearchBar from "../../components/SearchBar";
