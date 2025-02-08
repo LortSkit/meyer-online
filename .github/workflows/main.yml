@@ -116,7 +116,7 @@ jobs:
             ${{ secrets.SSHKEY }}
         run: |
           touch sshkey.pem
-          echo $SSHKEY >> sshkey.pem
+          echo "$SSHKEY" >> sshkey.pem
           chmod 400 sshkey.pem
           scp -i sshkey.pem -r ./Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
           ssh -i sshkey.pem ${{ secrets.SSHUSERATADDRESS }}
