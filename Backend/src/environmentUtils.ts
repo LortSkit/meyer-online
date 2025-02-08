@@ -24,6 +24,10 @@ export const hostName = process.env.HOSTNAME
   ? process.env.HOSTNAME
   : "localhost";
 
+export const socketHost = process.env.SOCKETHOST
+  ? process.env.SOCKETHOST
+  : hostName;
+
 export const mode = process.env.MODE ? process.env.MODE : "development";
 
 export const hostPort =
@@ -39,6 +43,6 @@ export const frontendURL = `${protocol}://${hostName}${
   mode == "production" ? "" : ":" + hostPort
 }`;
 
-const socketURL = `${protocol}://${hostName}:${socketPort}`;
+export const socketURL = `${protocol}://${socketHost}:${socketPort}`;
 
 export const serverStartupMessage = `Server is running.\nExpecting Frontend at ${frontendURL}\nListening for socket messages at ${socketURL}`;

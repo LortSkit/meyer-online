@@ -38,7 +38,9 @@ const SocketContextComponent: React.FunctionComponent<
   const protocol = import.meta.env.VITE_PROTOCOL
     ? import.meta.env.VITE_PROTOCOL
     : "http";
-  const hostName = import.meta.env.VITE_HOSTNAME
+  const socketHost = import.meta.env.VITE_SOCKETHOST
+    ? import.meta.env.VITE_SOCKETHOST
+    : import.meta.env.VITE_HOSTNAME
     ? import.meta.env.VITE_HOSTNAME
     : "localhost";
   const socketPort = import.meta.env.VITE_SOCKETPORT
@@ -46,7 +48,7 @@ const SocketContextComponent: React.FunctionComponent<
     : 1337;
 
   const socket = useSocket({
-    uri: `${protocol}://${hostName}:${socketPort}`,
+    uri: `${protocol}://${socketHost}:${socketPort}`,
     opts: {
       reconnectionAttempts: 5,
       reconnectionDelay: 5000,

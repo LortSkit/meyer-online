@@ -8,10 +8,10 @@ import { ServerSocket } from "./socket.ts";
 import {
   certFileName,
   certsLocation,
-  hostName,
   keyFileName,
   protocol,
   serverStartupMessage,
+  socketHost,
   socketPort,
 } from "./environmentUtils.ts";
 
@@ -33,6 +33,6 @@ const server =
 new ServerSocket(server);
 
 /** Listen */
-server.listen(socketPort, hostName, () => {
+server.listen(socketPort, socketHost, () => {
   console.info(serverStartupMessage);
 });

@@ -6,9 +6,9 @@ name: Deploy static content
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -21,7 +21,7 @@ permissions:
 
 # Allow one concurrent deployment
 concurrency:
-  group: 'pages'
+  group: "pages"
   cancel-in-progress: true
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -43,7 +43,7 @@ jobs:
         with:
           cache-dependency-path: Frontend/package-lock.json
           node-version: 22.13.0
-          cache: 'npm'
+          cache: "npm"
 
       - name: install mkcert
         run: |
@@ -52,7 +52,7 @@ jobs:
           sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 
       - name: make certificates
-        run: | 
+        run: |
           mkcert -key-file ${{ secrets.KEYFILENAME }} -cert-file ${{ secrets.CERTFILENAME }} ${{ secrets.HOSTNAME }}
           chmod 664 ${{ secrets.KEYFILENAME }}
           chmod 664 ${{ secrets.CERTFILENAME }}
@@ -69,13 +69,14 @@ jobs:
           echo VITE_PROTOCOL=${{ secrets.PROTOCOL }} >> .env
           echo VITE_HOSTNAME=${{ secrets.HOSTNAME }} >> .env
           echo VITE_BASE=${{ secrets.BASE }} >> .env
+          echo VITE_SOCKETHOST=${{ secrets.ADDRESS }} >> .env
           echo VITE_SOCKETPORT=${{ secrets.SOCKETPORT }} >> .env
-          
+
       - name: Frontend - Install dependencies
-        run: | 
+        run: |
           cd Frontend
           npm ci
-   
+
       - name: Frontend - Build
         run: |
           cd Frontend
@@ -87,7 +88,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload dist folder
-          path: './Frontend/dist'
+          path: "./Frontend/dist"
 
       - name: Frontend - Deploy to GitHub Pages
         id: deployment
@@ -101,7 +102,6 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           source: "${{ secrets.KEYFILENAME }},${{ secrets.CERTFILENAME }}"
           target: ~/meyer-online/Backend/certs
-          
 
       - name: Connect SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -119,7 +119,7 @@ jobs:
             echo CERTFILENAME=${{ secrets.CERTFILENAME }} >> .env
             echo PROTOCOL=${{ secrets.PROTOCOL }} >> .env
             echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
+            echo SOCKETHOST=${{ secrets.ADDRESS }} >> .env
             echo SOCKETPORT=${{ secrets.SOCKETPORT }} >> .env
             npm ci
             nohup npm start
-      
