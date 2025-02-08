@@ -54,6 +54,8 @@ jobs:
       - name: make certificates
         run: | 
           mkcert -key-file ${{ secrets.KEYFILENAME }} -cert-file ${{ secrets.CERTFILENAME }} ${{ secrets.HOSTNAME }}
+          chmod 664 ${{ secrets.KEYFILENAME }}
+          chmod 664 ${{ secrets.CERTFILENAME }}
           cp ${{ secrets.KEYFILENAME }} ./Frontend/certs
           cp ${{ secrets.CERTFILENAME }} ./Frontend/certs
 
