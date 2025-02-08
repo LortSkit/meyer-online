@@ -115,11 +115,8 @@ jobs:
           touch sshkey.pem
           echo "${{ secrets.SSHKEY }}" > sshkey.pem
           chmod 400 sshkey.pem
-          mkdir -p -m 0700 ~/.ssh
-          touch ~/.ssh/known_hosts
-          echo ${{ secrets.FINGERPRINT }} >> ~/.ssh/known_hosts
-          scp -i sshkey.pem -r ./Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
-          ssh -i sshkey.pem ${{ secrets.SSHUSERATADDRESS }}
+          scp -o StrictHostKeyChecking=no -i sshkey.pem -r ./Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
+          ssh -o StrictHostKeyChecking=no -i sshkey.pem ${{ secrets.SSHUSERATADDRESS }}
           cd ${{ secrets.SERVERLOCATION }}/Backend
           nohup npm start
       
