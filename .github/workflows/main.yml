@@ -115,8 +115,8 @@ jobs:
           touch sshkey.pem
           echo "${{ secrets.SSHKEY }}" > sshkey.pem
           chmod 400 sshkey.pem
-          ls -a ~/.ssh
-          ssh-keyscan -t rsa ${{ secrets.ADDRESS }} >> ~/.ssh/hahaha
+          touch ~/.ssh/known_hosts
+          ssh-keyscan -t rsa ${{ secrets.ADDRESS }} >> ~/.ssh/known_hosts
           scp -i sshkey.pem -r ./Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
           ssh -i sshkey.pem ${{ secrets.SSHUSERATADDRESS }}
           cd ${{ secrets.SERVERLOCATION }}/Backend
