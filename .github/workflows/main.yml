@@ -122,4 +122,4 @@ jobs:
             echo SOCKETHOST=${{ secrets.ADDRESS }} >> .env
             echo SOCKETPORT=${{ secrets.SOCKETPORT }} >> .env
             npm ci
-            nohup npm start & disown
+            nohup npm start > nohup.out 2> nohup.err < /dev/null &
