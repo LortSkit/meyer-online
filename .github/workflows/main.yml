@@ -106,9 +106,9 @@ jobs:
       - name: Backend - Setup ssh key
         run: | 
           cd Backend
-          touch ${{ secrets.SSHKEYFILENAME }}
-          echo ${{ secrets.SSHKEY }} >> ${{ secrets.SSHKEYFILENAME }}
-          chmod 400 ${{ secrets.SSHKEYFILENAME }}
+          sudo touch ${{ secrets.SSHKEYFILENAME }}
+          sudo echo ${{ secrets.SSHKEY }} >> ${{ secrets.SSHKEYFILENAME }}
+          sudo chmod 400 ${{ secrets.SSHKEYFILENAME }}
 
       - name: Backend - Install dependencies
         run: | 
@@ -117,8 +117,8 @@ jobs:
 
       - name: Backend - SSH transfer and startup
         run: |
-          scp -i ${{ secrets.SSHKEYFILENAME }} -r /Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
-          ssh -i ${{ secrets.SSHKEYFILENAME }} ${{ secrets.SSHUSERATADDRESS }}
+          sudo scp -i ${{ secrets.SSHKEYFILENAME }} -r /Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
+          sudo ssh -i ${{ secrets.SSHKEYFILENAME }} ${{ secrets.SSHUSERATADDRESS }}
           cd ${{ secrets.SERVERLOCATION }}/Backend
-          nohup npm start
+          sudo nohup npm start
       
