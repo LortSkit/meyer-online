@@ -56,8 +56,6 @@ jobs:
           mkcert -key-file ${{ secrets.KEYFILENAME }} -cert-file ${{ secrets.CERTFILENAME }} ${{ secrets.HOSTNAME }}
           cp ${{ secrets.KEYFILENAME }} ./Frontend/certs
           cp ${{ secrets.CERTFILENAME }} ./Frontend/certs
-          cp ${{ secrets.KEYFILENAME }} ./Backend/certs
-          cp ${{ secrets.CERTFILENAME }} ./Backend/certs
 
       - name: Frontend - Setup .env file
         run: |
@@ -110,13 +108,33 @@ jobs:
           cd Backend
           npm ci
 
-      - name: Backend - SSH transfer and startup
-        run: |
-          touch sshkey.pem
-          echo "${{ secrets.SSHKEY }}" > sshkey.pem
-          chmod 400 sshkey.pem
-          scp -o StrictHostKeyChecking=no -i sshkey.pem -r ./Backend ${{ secrets.SSHUSERATADDRESS }}:${{ secrets.SERVERLOCATION }}
-          ssh -o StrictHostKeyChecking=no -i sshkey.pem ${{ secrets.SSHUSERATADDRESS }}
-          cd ${{ secrets.SERVERLOCATION }}/Backend
-          nohup npm start
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ADDRESS }}
+          username: ${{ secrets.SSHUSER }}
+          password: ${{ secrets.SSHKEY }}
+          source: "${{ secrets.KEYFILENAME }},${{ secrets.CERTFILENAME }}"
+          target: ~/meyer-online/Backend/certs
+          
+
+      - name: Connect SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ADDRESS }}
+          username: ${{ secrets.SSHUSER }}
+          password: ${{ secrets.SSHKEY }}
+          script: |
+            cd ~/meyer-online/Backend
+            git pull
+            rm .env
+            touch .env
+            echo MODE=${{ secrets.MODE }} >> .env
+            echo KEYFILENAME=${{ secrets.KEYFILENAME }} >> .env
+            echo CERTFILENAME=${{ secrets.CERTFILENAME }} >> .env
+            echo PROTOCOL=${{ secrets.PROTOCOL }} >> .env
+            echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
+            echo SOCKETPORT=${{ secrets.SOCKETPORT }} >> .env
+            npm ci
+            nohup npm start
       
