@@ -39,9 +39,9 @@ export const hostPort =
     ? process.env.HOSTPORT
     : 3000;
 
-export const frontendURL = `${protocol}://${hostName}${
-  mode == "production" ? "" : ":" + hostPort
-}`;
+export const frontendURL = process.env.OVERRIDE
+  ? process.env.OVERRIDE
+  : `${protocol}://${hostName}${mode == "production" ? "" : ":" + hostPort}`;
 
 export const socketURL = `${protocol}://${socketHost}:${socketPort}`;
 

@@ -28,80 +28,12 @@ concurrency:
 jobs:
   # Single deploy job since we're just deploying
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
-
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          cache-dependency-path: Frontend/package-lock.json
-          node-version: 22.13.0
-          cache: "npm"
-
-      - name: install mkcert
-        run: |
-          curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
-          chmod +x mkcert-v*-linux-amd64
-          sudo cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
-
-      - name: make certificates
-        run: |
-          mkcert -key-file ${{ secrets.KEYFILENAME }} -cert-file ${{ secrets.CERTFILENAME }} ${{ secrets.HOSTNAME }} ${{ secrets.ADDRESS }}
-          chmod 664 ${{ secrets.KEYFILENAME }}
-          chmod 664 ${{ secrets.CERTFILENAME }}
-          cp ${{ secrets.KEYFILENAME }} ./Frontend/certs
-          cp ${{ secrets.CERTFILENAME }} ./Frontend/certs
-
-      - name: Frontend - Setup .env file
-        run: |
-          cd Frontend
-          rm .env
-          touch .env
-          echo VITE_KEYFILENAME=${{ secrets.KEYFILENAME }} >> .env
-          echo VITE_CERTFILENAME=${{ secrets.CERTFILENAME }} >> .env
-          echo VITE_PROTOCOL=${{ secrets.PROTOCOL }} >> .env
-          echo VITE_HOSTNAME=${{ secrets.HOSTNAME }} >> .env
-          echo VITE_BASE=${{ secrets.BASE }} >> .env
-          echo VITE_SOCKETHOST=${{ secrets.ADDRESS }} >> .env
-          echo VITE_SOCKETPORT=${{ secrets.SOCKETPORT }} >> .env
-
-      - name: Frontend - Install dependencies
-        run: |
-          cd Frontend
-          npm ci
-
-      - name: Frontend - Build
-        run: |
-          cd Frontend
-          npm run build
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Frontend - Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          # Upload dist folder
-          path: "./Frontend/dist"
-
-      - name: Frontend - Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Backend - copy file via ssh password
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.ADDRESS }}
-          username: ${{ secrets.SSHUSER }}
-          key: ${{ secrets.SSHKEY }}
-          source: "${{ secrets.KEYFILENAME }},${{ secrets.CERTFILENAME }}"
-          target: ~/meyer-online/Backend/certs
 
       - name: Connect SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -111,15 +43,3 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd ~/meyer-online/Backend
-            git pull
-            rm .env
-            touch .env
-            echo MODE=${{ secrets.MODE }} >> .env
-            echo KEYFILENAME=${{ secrets.KEYFILENAME }} >> .env
-            echo CERTFILENAME=${{ secrets.CERTFILENAME }} >> .env
-            echo PROTOCOL=${{ secrets.PROTOCOL }} >> .env
-            echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
-            echo SOCKETHOST=${{ secrets.ADDRESS }} >> .env
-            echo SOCKETPORT=${{ secrets.SOCKETPORT }} >> .env
-            npm ci
-            nohup npm start > nohup.out 2> nohup.err < /dev/null &

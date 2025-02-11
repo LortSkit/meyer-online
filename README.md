@@ -1,6 +1,6 @@
 # Meyer Online
 
-A web-based multiplayer version of the dice game 'Meyer' with the Danish ruleset. This is a work in progress, but the aim is to eventually have it hosted on a website once a more finished product has been made.
+A web-based multiplayer version of the dice game 'Meyer' with the Danish ruleset. This is a work in progress, but the aim is to eventually have it hosted on a website once a more finished product has been made. Right now, the game is hosted at https://meyeronline.dk, so please go there if you wish to play the game :)
 
 ## Deployment
 
