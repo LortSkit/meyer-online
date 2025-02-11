@@ -42,4 +42,14 @@ jobs:
           username: ${{ secrets.SSHUSER }}
           key: ${{ secrets.SSHKEY }}
           script: |
-            cd ~/meyer-online/Backend
+            cd ${{ secrets.REPO }}
+            git pull
+            cd ${{ secrets.REPO }}/Backend
+            npm ci
+            cd ${{ secrets.REPO }}/Frontend
+            npm ci
+            pm2 kill
+            npm run build
+            cd ${{ secrets.REPO }}/Backend
+            pm2 start npm -- start
+            sudo cp -r ${{ secrets.REPO }}/Frontend/dist/* ${{ secrets.STATIC }}
