@@ -115,7 +115,7 @@ export function onCounterUpdate({
   turnInformation,
   setTurnInformation,
 }: CounterUpdateProps): void {
-  if (counter - 5 > turnInformation.length - 2) {
+  if (counter - 10 > turnInformation.length - 2) {
     setTurnInformation([]);
   }
   // Anti cheat on keep turn information displayed isn't possible:

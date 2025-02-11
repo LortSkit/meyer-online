@@ -40,7 +40,7 @@ const TurnInformationDisplay = ({
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const timeLength = 5;
+  const timeLength = 10;
   const ringFontSize = 20;
 
   if (isTimed && counter === undefined) {
