@@ -44,20 +44,28 @@ jobs:
           script: |
             cd ${{ secrets.REPO }}
             echo Pulling from git
+            sleep 2
             git pull
             cd ${{ secrets.REPO }}/Backend
             echo Running "npm ci" in Backend
+            sleep 2
             npm ci
             cd ${{ secrets.REPO }}/Frontend
             echo Running "npm ci" in Frontend
+            sleep 2
             npm ci
             echo Killing Backend
+            sleep 2
             pm2 kill
             echo Building Frontend
+            sleep 2
             npm run build
             cd ${{ secrets.REPO }}/Backend
             echo Restarting backend
+            sleep 2
             pm2 start npm -- start
             echo Moving Frontend to production
+            sleep 2
             sudo cp -r ${{ secrets.REPO }}/Frontend/dist/* ${{ secrets.STATIC }}
+            sleep 2
             exit
