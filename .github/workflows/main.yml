@@ -36,20 +36,27 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Connect SSH
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.ADDRESS }}
           username: ${{ secrets.SSHUSER }}
           key: ${{ secrets.SSHKEY }}
           script: |
             cd ${{ secrets.REPO }}
+            echo Pulling from git
             git pull
             cd ${{ secrets.REPO }}/Backend
+            echo Running "npm ci" in Backend
             npm ci
             cd ${{ secrets.REPO }}/Frontend
+            echo Running "npm ci" in Frontend
             npm ci
+            echo Killing Backend
             pm2 kill
+            echo Building Frontend
             npm run build
             cd ${{ secrets.REPO }}/Backend
+            echo Restarting backend
             pm2 start npm -- start
+            echo Moving Frontend to production
             sudo cp -r ${{ secrets.REPO }}/Frontend/dist/* ${{ secrets.STATIC }}
