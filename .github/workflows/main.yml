@@ -45,27 +45,47 @@ jobs:
             cd ${{ secrets.REPO }}
             echo Pulling from git
             sleep 2
-            git pull
+            git fetch --prune
+            git reset --hard origin/main
+
+            echo Kill npm processes if any
+            pkill -f "npm" || true
+
             cd ${{ secrets.REPO }}/Backend
             echo Running "npm ci" in Backend
             sleep 2
-            npm ci
+            if [ -n "$(git diff --name-only HEAD@{1} package-lock.json)" ]; then
+              npm ci
+            fi
+
             cd ${{ secrets.REPO }}/Frontend
             echo Running "npm ci" in Frontend
             sleep 2
-            npm ci
+            if [ -n "$(git diff --name-only HEAD@{1} package-lock.json)" ]; then
+              npm ci
+            fi
+
             echo Killing Backend
             sleep 2
             pm2 kill
+
             echo Building Frontend
             sleep 2
             npm run build
+
             cd ${{ secrets.REPO }}/Backend
             echo Restarting backend
             sleep 2
             pm2 start npm -- start
+
             echo Moving Frontend to production
             sleep 2
-            sudo cp -r ${{ secrets.REPO }}/Frontend/dist/* ${{ secrets.STATIC }}
+            sudo rsync -av --delete ${{ secrets.REPO }}/Frontend/dist/ ${{ secrets.STATIC }}
+
+            echo Killing orphaned processes
+            kill $(pgrep -f "node|npm") 2>/dev/null || true
+            pkill -f "npm" || true   
+
+            echo Exiting ssh
             sleep 2
-            exit
+            pkill -f "sshd: ${{ secrets.SSHUSER }}"
