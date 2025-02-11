@@ -639,7 +639,7 @@ export class ServerSocket {
                   [gameId, this.gamePlayers[gameId].length]
                 );
               }
-            } else if (this.userTimeout[joiningUid]) {
+            } else {
               //User rejoined game
               callback(true, false, true);
 

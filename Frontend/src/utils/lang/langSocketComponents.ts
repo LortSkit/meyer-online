@@ -7,7 +7,17 @@ export function translateReconnectFailure(isDanish: boolean): string {
     : "We are unable to connect you to the web socket. You have no internet connection or our server is down. Refresh to try again.";
 }
 
-export function translateRedirecting(isDanish: boolean): string {
+export function translateOtherTabOpened(isDanish: boolean): string {
+  return (
+    (isDanish
+      ? "Du åbnede spillet i en anden fane. Lad venligst være med det :) "
+      : "You opened the game in another tab. Please don't do that :) ") +
+    translateFind(isDanish) +
+    translatePage(isDanish)
+  );
+}
+
+export function translateOwnerLeft(isDanish: boolean): string {
   return (
     (isDanish
       ? "Ejeren har forladt spillet. Vi har omdirigeret dig til "

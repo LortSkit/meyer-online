@@ -14,7 +14,7 @@ import {
   translateKicked,
   translateLoading,
   translateReconnectFailure,
-  translateRedirecting,
+  translateOwnerLeft,
 } from "../../utils/lang/langSocketComponents";
 import { base } from "../../utils/hostSubDirectory";
 import { Socket } from "socket.io-client";
@@ -155,6 +155,8 @@ const SocketContextComponent: React.FunctionComponent<
     /* Reset socket - Another browser joined with your info */
     /* For Room: (User) */
     socket.on("reset_socket", () => {
+      navigate(base + "/");
+      confirm(translateOwnerLeft(isDanish));
       SocketDispatch({ type: "reset_state", payload: null });
     });
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -285,7 +287,7 @@ const SocketContextComponent: React.FunctionComponent<
     /* For Room: (User) */
     socket.on("game_owner_left", () => {
       navigate(base + "/find");
-      confirm(translateRedirecting(isDanish));
+      confirm(translateOwnerLeft(isDanish));
       window.location.reload();
     });
 
