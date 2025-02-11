@@ -60,3 +60,4 @@ jobs:
             pm2 start npm -- start
             echo Moving Frontend to production
             sudo cp -r ${{ secrets.REPO }}/Frontend/dist/* ${{ secrets.STATIC }}
+            exit
