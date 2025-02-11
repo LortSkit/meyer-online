@@ -8,7 +8,7 @@ Both the Frontend and Backend require `npm` to be installed (see [`npm` docs](ht
 
 ### Environment files (.env)
 
-Both the Frontend and the Backend have a .env file at their root. The variables have to overlap, meaning they have to be equal (further explanation within the files).
+Both the Frontend and the Backend have a .env.example file at their root, which should be renamed to ".env" to be used. The variables have to overlap, meaning they have to be equal (further explanation within the files).
 
 IMPORTANT: The .env files have been mostly prepared for DEVELOPMENT usage, please change them accordingly to suit your needs.
 
