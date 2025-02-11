@@ -29,8 +29,8 @@ import LeaveGameButton from "./LeaveGameButton";
 
 interface Props {
   isDanish: boolean;
-  gameInfo: GameInfo;
-  meyerInfo: MeyerInfo;
+  gameInfo: GameInfo | null;
+  meyerInfo: MeyerInfo | null;
   socket: Socket;
   uid: string;
 }
@@ -40,10 +40,13 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
   const colors = tokens(theme.palette.mode);
 
   const [truePlayerNames, setTruePlayerNames] = useState(
-    gameInfo.gamePlayersNames.map(numberAfterName)
+    gameInfo !== null ? gameInfo.gamePlayersNames.map(numberAfterName) : []
   );
 
   function numberAfterName(name: string, index: number): string {
+    if (gameInfo === null || meyerInfo === null) {
+      return "";
+    }
     if (index === 0) {
       return gameInfo.gamePlayersNames
         .slice(1, gameInfo.gamePlayersNames.length)
@@ -74,6 +77,9 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
   }
 
   function playernameFromUid(uid: string): string {
+    if (gameInfo === null || meyerInfo === null) {
+      return "";
+    }
     const playerIndex = gameInfo.gamePlayers.findIndex(
       (value) => value === uid
     );
@@ -81,12 +87,17 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
   }
 
   function isOwner(): boolean {
+    if (gameInfo === null || meyerInfo === null) {
+      return false;
+    }
     return uid === gameInfo.gamePlayers[0];
   }
 
   useEffect(() => {
-    setTruePlayerNames(gameInfo.gamePlayersNames.map(numberAfterName));
-  }, [gameInfo.gamePlayersNames]);
+    setTruePlayerNames(
+      gameInfo !== null ? gameInfo.gamePlayersNames.map(numberAfterName) : []
+    );
+  }, [gameInfo?.gamePlayersNames]);
 
   const mainWidth = 62;
 
@@ -102,24 +113,26 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
             wordBreak: "break-all",
             textAlign: "center",
           }}
-          children={<strong>{gameInfo.name}</strong>}
+          children={<strong>{gameInfo !== null ? gameInfo.name : ""}</strong>}
         />
       </Box>
       <Box display="flex" justifyContent="center" paddingBottom="10.8px">
         <LeaveGameButton isDanish={isDanish} socket={socket} />
       </Box>
       {/* IN GAME */}
-      {!meyerInfo.isGameOver && (
+      {!meyerInfo?.isGameOver && (
         <Box display="flex" flexDirection="column">
           <Box display="flex" justifyContent="center">
             <GameHeading
               isDanish={isDanish}
-              currentPlayer={playernameFromUid(meyerInfo.currentPlayer)}
-              round={meyerInfo.round}
-              turn={meyerInfo.turn}
+              currentPlayer={playernameFromUid(
+                meyerInfo !== null ? meyerInfo.currentPlayer : ""
+              )}
+              round={meyerInfo !== null ? meyerInfo.round : 0}
+              turn={meyerInfo !== null ? meyerInfo.turn : 0}
             />
           </Box>
-          {meyerInfo.currentPlayer === uid && (
+          {meyerInfo?.currentPlayer === uid && (
             <Box display="flex" flexDirection="column">
               {meyerInfo.roll !== -1 && (
                 <Typography
@@ -169,7 +182,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
               )}
             </Box>
           )}
-          {meyerInfo.currentPlayer !== uid && (
+          {meyerInfo?.currentPlayer !== uid && (
             <Typography
               fontSize="12px"
               fontStyle="normal"
@@ -184,7 +197,9 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                 <Box>
                   {translateWaiting(
                     isDanish,
-                    playernameFromUid(meyerInfo.currentPlayer)
+                    playernameFromUid(
+                      meyerInfo !== null ? meyerInfo.currentPlayer : ""
+                    )
                   )}
                   <img
                     src={loading}
@@ -197,7 +212,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
           )}
         </Box>
       )}
-      {meyerInfo.isGameOver && (
+      {meyerInfo?.isGameOver && (
         <Box display="flex" flexDirection="column">
           <GameOverHeading
             isDanish={isDanish}
@@ -213,7 +228,9 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                 onClick={() => {
                   socket.emit("restart_game");
                 }}
-                disabled={gameInfo.gamePlayers.length < 2}
+                disabled={
+                  gameInfo !== null ? gameInfo.gamePlayers.length < 2 : false
+                }
               >
                 {translatePlayAgain(isDanish)}
               </Button>
@@ -232,9 +249,9 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
       )}
       <TurnInformation
         isDanish={isDanish}
-        round={meyerInfo.round}
-        playerNames={gameInfo.gamePlayersNames}
-        turnInformation={meyerInfo.turnInformation}
+        round={meyerInfo !== null ? meyerInfo.round : 0}
+        playerNames={gameInfo !== null ? gameInfo.gamePlayersNames : []}
+        turnInformation={meyerInfo !== null ? meyerInfo.turnInformation : []}
         setTurnInformation={function (update: TurnInfo[]) {}}
       />
     </MiddleChild>
@@ -250,15 +267,19 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
         <Box paddingTop="5px" />
         <Box display="flex" justifyContent="left">
           <PlayerDisplay
-            currentName={playernameFromUid(meyerInfo.currentPlayer)}
-            currentUid={meyerInfo.currentPlayer}
-            healths={meyerInfo.healths}
-            inProgress={gameInfo.isInProgress}
+            currentName={playernameFromUid(
+              meyerInfo !== null ? meyerInfo.currentPlayer : ""
+            )}
+            currentUid={meyerInfo !== null ? meyerInfo.currentPlayer : ""}
+            healths={meyerInfo !== null ? meyerInfo.healths : []}
+            inProgress={gameInfo !== null ? gameInfo.isInProgress : false}
             isOwner={isOwner()}
-            isGameOver={meyerInfo.isGameOver}
+            isGameOver={meyerInfo !== null ? meyerInfo.isGameOver : false}
             playerNames={truePlayerNames}
-            playersTimedOut={gameInfo.gamePlayersTimeout}
-            playerUids={gameInfo.gamePlayers}
+            playersTimedOut={
+              gameInfo !== null ? gameInfo.gamePlayersTimeout : []
+            }
+            playerUids={gameInfo !== null ? gameInfo.gamePlayers : []}
             socket={socket}
             thisUid={uid}
           />

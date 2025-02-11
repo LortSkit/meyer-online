@@ -48,6 +48,7 @@ VITE_SOCKETPORT    =                # Change to reflect which port the socket is
 MODE         =                # Use "development" when using "npm run dev" to boot frontend and "production" when using "npm run preview"
                               # Defaults to development
 
+OVERRIDE     =                # Overrides frontend url if specified (needed, since hostname might resolve to another unspecified public url)
 
 CERTS_FOLDER =                # Only used if PROTOCOL = https, defaults to "./certs/"
 KEYFILENAME  =                # Only used if PROTOCOL = https, defaults to "key.pem"
@@ -61,6 +62,7 @@ HOSTPORT     =                # Frontend port, defaults to 3000 when MODE = deve
                               # MODE = production -> PROTOCOL = http -> port will be 80
                               # MODE = production -> PROTOCOL = https -> port will be 443
 
+SOCKETHOST   =                # Socket communication host, defaults to HOSTNAME
 
 SOCKETPORT   =                # Socket communication port, defaults to 1337
 ```
