@@ -318,6 +318,11 @@ const SocketContextComponent: React.FunctionComponent<
     /* When user came back from grace period */
     /* For Room: Game */
     socket.on("remove_user_timeout", (uid: string) => {
+      if (uid === SocketState.uid) {
+        setTimeout(function () {
+          window.location.reload();
+        });
+      }
       SocketDispatch({ type: "remove_user_timeout", payload: uid });
     });
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */

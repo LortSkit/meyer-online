@@ -101,9 +101,13 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
 
   useEffect(() => {
     if (truePlayerNames.includes("")) {
-      setTimeout(function () {
-        window.location.reload();
-      });
+      if (gameInfo === null || gameInfo.gamePlayersNames.includes("")) {
+        setTimeout(function () {
+          window.location.reload();
+        });
+      } else {
+        setTruePlayerNames(gameInfo.gamePlayersNames.map(numberAfterName));
+      }
     }
   }, [truePlayerNames]);
 
