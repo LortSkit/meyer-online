@@ -96,10 +96,16 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
   useEffect(() => {
     if (gameInfo !== null) {
       setTruePlayerNames(gameInfo.gamePlayersNames.map(numberAfterName));
-    } else {
-      window.location.reload();
     }
   }, [gameInfo]);
+
+  useEffect(() => {
+    if (truePlayerNames.includes("")) {
+      setTimeout(function () {
+        window.location.reload();
+      });
+    }
+  }, [truePlayerNames]);
 
   const mainWidth = 62;
 

@@ -288,7 +288,9 @@ const SocketContextComponent: React.FunctionComponent<
     socket.on("game_owner_left", () => {
       navigate(base + "/find");
       confirm(translateOwnerLeft(isDanish));
-      window.location.reload();
+      setTimeout(function () {
+        window.location.reload();
+      });
     });
 
     /* When getting kicked */
@@ -296,7 +298,9 @@ const SocketContextComponent: React.FunctionComponent<
     socket.on("been_kicked", () => {
       navigate(base + "/find");
       confirm(translateKicked(isDanish));
-      window.location.reload();
+      setTimeout(function () {
+        window.location.reload();
+      });
     });
 
     /* Player left */
