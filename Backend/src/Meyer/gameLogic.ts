@@ -471,6 +471,10 @@ export class Meyer {
       };
     }
   }
+
+  public deleteTurnInformation(): void {
+    this.turnInformation = [];
+  }
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
 
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%GAME STATE UPDATERS%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//

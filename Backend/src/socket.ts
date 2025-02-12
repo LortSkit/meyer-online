@@ -316,6 +316,7 @@ export class ServerSocket {
         this.gameMeyer[gameId].getMeyerInfo()
       );
     }
+    this.gameMeyer[gameId].deleteTurnInformation();
   }
   ////////////////////////////////////////////////////////////////////////////////////////
 
