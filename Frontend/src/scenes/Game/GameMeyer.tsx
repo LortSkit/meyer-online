@@ -94,10 +94,12 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
   }
 
   useEffect(() => {
-    setTruePlayerNames(
-      gameInfo !== null ? gameInfo.gamePlayersNames.map(numberAfterName) : []
-    );
-  }, [gameInfo?.gamePlayersNames]);
+    if (gameInfo !== null) {
+      setTruePlayerNames(gameInfo.gamePlayersNames.map(numberAfterName));
+    } else {
+      console.log("Didn't retrieve players names!");
+    }
+  }, [gameInfo]);
 
   const mainWidth = 62;
 
