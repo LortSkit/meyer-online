@@ -97,7 +97,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
     if (gameInfo !== null) {
       setTruePlayerNames(gameInfo.gamePlayersNames.map(numberAfterName));
     } else {
-      console.log("Didn't retrieve players names!");
+      window.location.reload();
     }
   }, [gameInfo]);
 
