@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import useTheme from "@mui/material/styles/useTheme";
 import Edit from "@mui/icons-material/Edit";
+import DoneOutlined from "@mui/icons-material/DoneOutlined";
 import { useEffect, useState } from "react";
 import { tokens } from "../../../theme";
 import { translatePlayers } from "../../../utils/lang/Game/GameLobby/langGameLobbyPlayers";
@@ -37,8 +38,14 @@ const GameLobbyPlayers = ({
     setEditMaxNameChanger(String(maxNumberOfPlayers));
   }
 
+  function onConfirm() {
+    socket.emit("change_max_players", Number(editMaxChanger));
+    onBlur();
+  }
+
   function onEdit(): void {
     if (isOwner) {
+      setEditMaxNameChanger(String(maxNumberOfPlayers));
       setToggleEditMax(true);
     }
   }
@@ -61,16 +68,11 @@ const GameLobbyPlayers = ({
 
   function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") {
-      socket.emit("change_max_players", Number(editMaxChanger));
-      onBlur();
+      onConfirm();
     } else if (event.key === "Escape") {
       onBlur();
     }
   }
-
-  useEffect(() => {
-    setEditMaxNameChanger(String(maxNumberOfPlayers));
-  }, [maxNumberOfPlayers]);
 
   useEffect(() => {
     if (toggleEditMax) {
@@ -99,35 +101,35 @@ const GameLobbyPlayers = ({
             {translatePlayers(isDanish)}
             <Box paddingLeft="5px" />
             {numberOfPlayers}/
-            {!toggleEditMax && (
-              <>
-                <Box paddingLeft="2px" />
-                {maxNumberOfPlayers}
-                {isOwner && (
-                  <IconButton
-                    onClick={onEdit}
-                    sx={{
-                      position: "relative",
-                      width: "25px",
-                      height: "25px",
-                    }}
-                  >
-                    <Edit sx={{ width: "16px" }} />
-                  </IconButton>
-                )}
-              </>
+            <Box paddingLeft="2px" />
+            {!toggleEditMax && maxNumberOfPlayers}
+            {!toggleEditMax && isOwner && (
+              <IconButton
+                onClick={onEdit}
+                disabled={toggleEditMax}
+                sx={{
+                  position: "relative",
+                  width: "25px",
+                  height: "25px",
+                }}
+              >
+                <Edit sx={{ width: "16px" }} />
+              </IconButton>
             )}
           </Typography>
         </Box>
         {toggleEditMax && (
-          <Box display="flex" justifyContent="center" flexDirection="column">
+          <Box
+            display="flex"
+            justifyContent="center"
+            onBlur={() => setTimeout(onBlur, 100)}
+          >
             <Box
               display="flex"
               justifyContent="center"
               flexDirection="column"
               bgcolor={colors.primary[600]}
               borderRadius="3px"
-              onBlur={onBlur}
             >
               <InputBase
                 id="max-players-bar"
@@ -162,6 +164,19 @@ const GameLobbyPlayers = ({
                 onKeyDown={onKeyDown}
               />
             </Box>
+            {isOwner && (
+              <IconButton
+                onClick={onConfirm}
+                disabled={!toggleEditMax}
+                sx={{
+                  position: "static",
+                  width: "25px",
+                  height: "25px",
+                }}
+              >
+                <DoneOutlined sx={{ width: "16px" }} />
+              </IconButton>
+            )}
           </Box>
         )}
       </Box>

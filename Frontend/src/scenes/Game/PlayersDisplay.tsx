@@ -6,6 +6,7 @@ import InputBase from "@mui/material/InputBase";
 import ArrowForwardOutlined from "@mui/icons-material/ArrowForwardOutlined";
 import CloseOutlined from "@mui/icons-material/CloseOutlined";
 import Edit from "@mui/icons-material/Edit";
+import DoneOutlined from "@mui/icons-material/DoneOutlined";
 import StarOutlined from "@mui/icons-material/StarOutlined";
 import { tokens } from "../../theme";
 import { Dice } from "../../utils/diceUtils";
@@ -91,6 +92,22 @@ const PlayerDisplay = ({
     );
   };
 
+  const ConfirmButton = () => {
+    return (
+      <IconButton
+        onClick={onConfirm}
+        style={{
+          position: "relative",
+          transform: "translate(0%,5%)",
+          width: "20px",
+          height: "20px",
+        }}
+      >
+        <DoneOutlined sx={{ width: "18px", height: "18px" }} />
+      </IconButton>
+    );
+  };
+
   function onKick(uid: string) {
     return () => socket.emit("kick_player", uid);
   }
@@ -129,7 +146,13 @@ const PlayerDisplay = ({
   }
 
   function onEdit(): void {
+    setNameChanger(currentName);
     setToggleEditName(true);
+  }
+
+  function onConfirm(): void {
+    socket.emit("change_player_name", nameChanger);
+    onBlur();
   }
 
   function onChange(event: React.ChangeEvent<HTMLInputElement>): void {
@@ -142,16 +165,11 @@ const PlayerDisplay = ({
 
   function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") {
-      socket.emit("change_player_name", nameChanger);
-      onBlur();
+      onConfirm();
     } else if (event.key === "Escape") {
       onBlur();
     }
   }
-
-  useEffect(() => {
-    setNameChanger(currentName);
-  }, [currentName]);
 
   useEffect(() => {
     if (toggleEditName) {
@@ -172,7 +190,7 @@ const PlayerDisplay = ({
         bgcolor={colors.primary[600]}
         borderRadius="3px"
         paddingTop="1px"
-        onBlur={onBlur}
+        onBlur={() => setTimeout(onBlur, 100)}
       >
         <InputBase
           id={"player-name-bar" + index}
@@ -237,7 +255,7 @@ const PlayerDisplay = ({
             {((healths && (healths[index] > 0 || isOwner)) || !healths) && (
               <Box
                 display="flex"
-                flexDirection="column"
+                //flexDirection="column"
                 justifyContent="center"
                 height="24px"
                 onDoubleClick={() => {
@@ -285,6 +303,10 @@ const PlayerDisplay = ({
                     </Box>
                   }
                 />
+                {toggleEditName &&
+                  !inProgress &&
+                  playerUids[index] === thisUid &&
+                  ConfirmButton()}
               </Box>
             )}
           </Box>

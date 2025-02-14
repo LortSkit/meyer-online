@@ -4,6 +4,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import useTheme from "@mui/material/styles/useTheme";
 import Edit from "@mui/icons-material/Edit";
+import DoneOutlined from "@mui/icons-material/DoneOutlined";
 import LockOpenOutlined from "@mui/icons-material/LockOpenOutlined";
 import LockOutlined from "@mui/icons-material/LockOutlined";
 import { useEffect, useState } from "react";
@@ -44,10 +45,14 @@ const GameLobbyName = ({
     setLobbyNameChanger(name);
   }
 
+  function onConfirm() {
+    socket.emit("change_lobby_name", lobbyNameChanger);
+    onBlur();
+  }
+
   function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") {
-      socket.emit("change_lobby_name", lobbyNameChanger);
-      onBlur();
+      onConfirm();
     } else if (event.key === "Escape") {
       onBlur();
     }
@@ -63,6 +68,7 @@ const GameLobbyName = ({
 
   function onEdit(): void {
     if (isOwner) {
+      setLobbyNameChanger(name);
       setToggleEditLobbyName(true);
     }
   }
@@ -72,10 +78,6 @@ const GameLobbyName = ({
       socket.emit("toggle_public_private");
     }
   }
-
-  useEffect(() => {
-    setLobbyNameChanger(name);
-  }, [name]);
 
   useEffect(() => {
     if (toggleEditLobbyName) {
@@ -113,7 +115,7 @@ const GameLobbyName = ({
             display="flex"
             bgcolor={colors.primary[600]}
             borderRadius="3px"
-            onBlur={onBlur}
+            onBlur={() => setTimeout(onBlur, 100)}
           >
             <InputBase
               id="lobby-name-bar"
@@ -153,14 +155,26 @@ const GameLobbyName = ({
       {isOwner && (
         <Box display="flex" justifyContent="center">
           {/* EDIT NAME */}
-          <IconButton onClick={onEdit} disabled={toggleEditLobbyName}>
-            <Typography
-              fontSize="16px"
-              children={translateEditLobbyName(isDanish)}
-            />
+          {!toggleEditLobbyName && (
+            <IconButton onClick={onEdit} disabled={toggleEditLobbyName}>
+              <Typography
+                fontSize="16px"
+                children={translateEditLobbyName(isDanish)}
+              />
 
-            <Edit />
-          </IconButton>
+              <Edit />
+            </IconButton>
+          )}
+          {toggleEditLobbyName && (
+            <IconButton onClick={onConfirm} disabled={!toggleEditLobbyName}>
+              <Typography
+                fontSize="16px"
+                children={translateEditLobbyName(isDanish)}
+              />
+
+              <DoneOutlined />
+            </IconButton>
+          )}
 
           {/* TOGGLE PUBLIC/PRIVATE */}
           <IconButton onClick={togglePublicPrivate}>

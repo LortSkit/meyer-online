@@ -232,7 +232,9 @@ const SocketContextComponent: React.FunctionComponent<
     /* For Room: Game */
     socket.on("player_name_changed", (payload: string[]) => {
       SocketDispatch({ type: "update_player_name", payload: payload });
-      localStorage.setItem("playerName", payload[1]);
+      if (SocketState.uid === payload[0]) {
+        localStorage.setItem("playerName", payload[1]);
+      }
     });
 
     /* Lobby name changed */
