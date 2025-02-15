@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
-import RadioButtonCheckedOutlined from "@mui/icons-material/RadioButtonCheckedOutlined";
-import RadioButtonUnCheckedOutlined from "@mui/icons-material/RadioButtonUnCheckedOutlined";
+import RadioButtonCheckedOutlinedIcon from "@mui/icons-material/RadioButtonCheckedOutlined";
+import RadioButtonUncheckedOutlinedIcon from "@mui/icons-material/RadioButtonUncheckedOutlined";
 import useTheme from "@mui/material/styles/useTheme";
 import { tokens } from "../../theme";
 import Typography from "@mui/material/Typography";
@@ -30,9 +30,9 @@ const SetHealthRollRuleSet = ({
 
   const CheckIcon = (isChosen: boolean) => {
     if (isChosen) {
-      return <RadioButtonCheckedOutlined />;
+      return <RadioButtonCheckedOutlinedIcon />;
     } else {
-      return <RadioButtonUnCheckedOutlined />;
+      return <RadioButtonUncheckedOutlinedIcon />;
     }
   };
 
