@@ -12,6 +12,10 @@ export function translateWaiting(isDanish: boolean, player: string): string {
   );
 }
 
+export function translateBack(isDanish: boolean): string {
+  return isDanish ? "Tilbage" : "Back";
+}
+
 export function translatePlayAgain(isDanish: boolean): string {
   return isDanish
     ? "Spil igen med samme spillere"

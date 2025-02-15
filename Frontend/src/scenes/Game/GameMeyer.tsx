@@ -5,6 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import useTheme from "@mui/material/styles/useTheme";
 import Timer from "@mui/icons-material/Timer";
 import TimerOff from "@mui/icons-material/TimerOff";
+import ArrowBackIosNew from "@mui/icons-material/ArrowBackIosNew";
 import { GameInfo, MeyerInfo } from "../../contexts/Socket/SocketContext";
 import GameHeading from "../../components/game/GameHeading";
 import { useEffect, useState } from "react";
@@ -21,6 +22,7 @@ import ActionButton from "../../components/game/ActionButton";
 import BluffButton from "../../components/game/BluffButton";
 import GameOverHeading from "../../components/game/GameOverHeading";
 import {
+  translateBack,
   translatePlayAgain,
   translateReopen,
   translateToggle,
@@ -213,18 +215,33 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
               )}
               {/* BLUFF */}
               {meyerInfo.bluffChoices.length !== 0 && (
-                <Box display="flex" justifyContent="center" flexWrap="wrap">
-                  {meyerInfo.bluffChoices.map((bluff) => (
-                    <Box display="flex" justifyContent="center" key={bluff}>
-                      <BluffButton
-                        isDanish={isDanish}
-                        bluff={bluff}
-                        onClick={() => {
-                          socket.emit("take_action_bluff", "Error", bluff);
-                        }}
-                      />
-                    </Box>
-                  ))}
+                <Box display="flex" flexDirection="column">
+                  <Box display="flex" justifyContent="center">
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => {
+                        socket.emit("take_action_bluff", "Error", -1);
+                      }}
+                    >
+                      <ArrowBackIosNew />
+                      {translateBack(isDanish)}
+                    </Button>
+                  </Box>
+                  <Box paddingTop="5px" />
+                  <Box display="flex" justifyContent="center" flexWrap="wrap">
+                    {meyerInfo.bluffChoices.map((bluff) => (
+                      <Box display="flex" justifyContent="center" key={bluff}>
+                        <BluffButton
+                          isDanish={isDanish}
+                          bluff={bluff}
+                          onClick={() => {
+                            socket.emit("take_action_bluff", "Error", bluff);
+                          }}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
                 </Box>
               )}
             </Box>

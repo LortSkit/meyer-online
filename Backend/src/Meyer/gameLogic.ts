@@ -613,6 +613,11 @@ export class Meyer {
     this.canAdvanceTurn = true;
   }
 
+  public undoBluff(): void {
+    this.canAdvanceTurn = false;
+    this.currentAction = "Error";
+  }
+
   public resetGame(playerUids?: string[]): void {
     if (playerUids) {
       this.playerUids = playerUids;

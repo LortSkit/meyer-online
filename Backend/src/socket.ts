@@ -944,6 +944,14 @@ export class ServerSocket {
               this.updateMeyerInfo(inGameId, false, false);
             }
           } else {
+            //Undo bluff
+            if (action === "Error" && bluff === -1) {
+              this.gameMeyer[inGameId].undoBluff();
+              //Update only player to show him action choices again
+              this.updateMeyerInfo(inGameId, false, false);
+              return;
+            }
+
             //Choose bluff
             try {
               this.gameMeyer[inGameId].chooseBluff(bluff);
