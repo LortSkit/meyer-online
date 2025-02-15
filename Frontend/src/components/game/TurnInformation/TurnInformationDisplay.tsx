@@ -20,6 +20,7 @@ interface Props {
   isClicked: boolean[];
   isTimed?: boolean;
   playerNames?: string[];
+  showTimer: boolean;
   turnInfoList: TurnInfo[];
   onClick?:
     | React.MouseEventHandler<HTMLButtonElement>
@@ -34,6 +35,7 @@ const TurnInformationDisplay = ({
   isClicked,
   isTimed,
   playerNames,
+  showTimer,
   turnInfoList,
   onClick,
 }: Props) => {
@@ -94,7 +96,7 @@ const TurnInformationDisplay = ({
                 />
               </Box>
             </Button>
-            {isTimed && isVisible(index) && !hasClicked[index] && (
+            {isTimed && isVisible(index) && showTimer && !hasClicked[index] && (
               <>
                 <Box paddingLeft="10px" />
                 <Box

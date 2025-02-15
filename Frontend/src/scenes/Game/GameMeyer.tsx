@@ -1,7 +1,10 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
 import useTheme from "@mui/material/styles/useTheme";
+import Timer from "@mui/icons-material/Timer";
+import TimerOff from "@mui/icons-material/TimerOff";
 import { GameInfo, MeyerInfo } from "../../contexts/Socket/SocketContext";
 import GameHeading from "../../components/game/GameHeading";
 import { useEffect, useState } from "react";
@@ -20,6 +23,7 @@ import GameOverHeading from "../../components/game/GameOverHeading";
 import {
   translatePlayAgain,
   translateReopen,
+  translateToggle,
   translateWaiting,
 } from "../../utils/lang/Game/langGameMeyer";
 import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
@@ -41,6 +45,16 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
 
   const [truePlayerNames, setTruePlayerNames] = useState(
     gameInfo !== null ? gameInfo.gamePlayersNames.map(numberAfterName) : []
+  );
+  const [rightToggle, setRightToggle] = useState(
+    localStorage.getItem("rightSide") !== undefined
+      ? localStorage.getItem("rightSide") === "true"
+      : true
+  );
+  const [showTimer, setShowTimer] = useState(
+    localStorage.getItem("showTimer") !== undefined
+      ? localStorage.getItem("showTimer") === "true"
+      : true
   );
 
   function numberAfterName(name: string, index: number): string {
@@ -93,6 +107,24 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
     return uid === gameInfo.gamePlayers[0];
   }
 
+  const toggleTimerButton = () => {
+    return (
+      <Box display="flex" justifyContent="center">
+        <IconButton
+          onClick={() =>
+            setShowTimer((st) => {
+              localStorage.setItem("showTimer", String(!st));
+              return !st;
+            })
+          }
+        >
+          {showTimer && <Timer />}
+          {!showTimer && <TimerOff />}
+        </IconButton>
+      </Box>
+    );
+  };
+
   useEffect(() => {
     if (gameInfo !== null) {
       setTruePlayerNames(gameInfo.gamePlayersNames.map(numberAfterName));
@@ -144,6 +176,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
               turn={meyerInfo !== null ? meyerInfo.turn : 0}
             />
           </Box>
+          {/* CURRENT PLAYER DISPLAY */}
           {meyerInfo?.currentPlayer === uid && (
             <Box display="flex" flexDirection="column">
               {meyerInfo.roll !== -1 && (
@@ -162,6 +195,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                   />
                 </Typography>
               )}
+              {/* ACTION */}
               {meyerInfo.bluffChoices.length === 0 && (
                 <Box display="flex" justifyContent="center" flexWrap="wrap">
                   {meyerInfo.actionChoices.map((action) => (
@@ -177,6 +211,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                   ))}
                 </Box>
               )}
+              {/* BLUFF */}
               {meyerInfo.bluffChoices.length !== 0 && (
                 <Box display="flex" justifyContent="center" flexWrap="wrap">
                   {meyerInfo.bluffChoices.map((bluff) => (
@@ -194,6 +229,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
               )}
             </Box>
           )}
+          {/* NOT CURRENT PLAYER DISPLAY */}
           {meyerInfo?.currentPlayer !== uid && (
             <Typography
               fontSize="12px"
@@ -222,8 +258,10 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
               }
             />
           )}
+          {toggleTimerButton()}
         </Box>
       )}
+      {/* GAME OVER */}
       {meyerInfo?.isGameOver && (
         <Box display="flex" flexDirection="column">
           <GameOverHeading
@@ -261,22 +299,36 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
       )}
       <TurnInformation
         isDanish={isDanish}
-        round={meyerInfo !== null ? meyerInfo.round : 0}
         playerNames={gameInfo !== null ? gameInfo.gamePlayersNames : []}
-        turnInformation={meyerInfo !== null ? meyerInfo.turnInformation : []}
+        round={meyerInfo !== null ? meyerInfo.round : 0}
+        showTimer={showTimer}
         setTurnInformation={function (update: TurnInfo[]) {}}
+        turnInformation={meyerInfo !== null ? meyerInfo.turnInformation : []}
       />
     </MiddleChild>
   );
 
-  const rightChild = (
+  const sideChild = (
     <RightChild widthPercentage={100 - mainWidth}>
+      <Box display="flex" justifyContent="center" p={1}>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() =>
+            setRightToggle((rt) => {
+              localStorage.setItem("rightSide", String(!rt));
+              return !rt;
+            })
+          }
+        >
+          {translateToggle(isDanish, rightToggle)}
+        </Button>
+      </Box>
       <Box
         display="flex"
         flexDirection="column"
         sx={{ outline: "4px solid", outlineColor: colors.primary[600] }}
       >
-        <Box paddingTop="5px" />
         <Box display="flex" justifyContent="left">
           <PlayerDisplay
             currentName={playernameFromUid(
@@ -302,9 +354,11 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
 
   return (
     <CenteredPage
+      leftChild={!rightToggle ? sideChild : undefined}
+      rightWidthPercentage={!rightToggle ? 0 : undefined}
       middleChild={middleChild}
-      rightChild={rightChild}
-      leftWidthPercentage={0}
+      rightChild={rightToggle ? sideChild : undefined}
+      leftWidthPercentage={rightToggle ? 0 : undefined}
     />
   );
 };

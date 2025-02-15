@@ -117,8 +117,9 @@ const InGame = ({
       <TurnInformation
         isDanish={isDanish}
         round={round}
-        turnInformation={turnInformation}
+        showTimer
         setTurnInformation={setTurnInformation}
+        turnInformation={turnInformation}
       />
     </MiddleChild>
   );

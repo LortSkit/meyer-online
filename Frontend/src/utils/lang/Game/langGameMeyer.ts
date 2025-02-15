@@ -1,3 +1,9 @@
+export function translateToggle(isDanish: boolean, isRight: boolean): string {
+  return isDanish
+    ? "Skift til " + (isRight ? "venstre" : "højre")
+    : "Toggle " + (isRight ? "left" : "right");
+}
+
 export function translateWaiting(isDanish: boolean, player: string): string {
   return (
     (isDanish ? "Venter på at " : "Waiting for ") +
