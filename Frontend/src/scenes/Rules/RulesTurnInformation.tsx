@@ -32,6 +32,7 @@ const RulesTurnInformation = ({
 
   const possibleTurnInfoType = [
     "Check",
+    "Continue",
     "HealthRoll",
     "Roll",
     "Cheers",

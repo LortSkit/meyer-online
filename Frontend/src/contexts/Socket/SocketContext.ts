@@ -1,12 +1,14 @@
 import { createContext, useContext } from "react";
 import { Socket } from "socket.io-client";
 import { Action, TurnInfo } from "../../utils/gameTypes";
+import SetHealthRollRuleSet from "../../components/game/SetHealthRollRuleSet";
 
 export type Game = {
   id: string;
   name: string;
   numberOfPlayers: number;
   maxNumberOfPlayers: number;
+  healthRollRuleSet: number;
 };
 
 export type GameInfo = {
@@ -16,6 +18,7 @@ export type GameInfo = {
   gamePlayersNames: string[];
   gamePlayersTimeout: string[];
   maxNumberOfPlayers: number;
+  healthRollRuleSet: number;
   isPublic: boolean;
   isInProgress: boolean;
 };
@@ -23,6 +26,7 @@ export type GameInfo = {
 export type GameRequest = {
   name: string;
   maxNumberOfPlayers: number;
+  healthRollRuleSet: number;
 };
 
 export type MeyerInfo = {
@@ -69,6 +73,7 @@ export type TSocketContextActions =
   | "update_game_name"
   | "update_max_players"
   | "update_game_num_players"
+  | "update_healthroll_rule_set"
   /////GAME//////
   /* %%LOBBY%% */
   | "set_this_game"
@@ -83,6 +88,7 @@ export type TSocketContextActions =
   | "update_meyer_info"
   | "reopened_lobby"
   /* %%MIXED%% */
+  | "change_healthroll_rule_set"
   | "remove_game_player"
   | "add_user_timeout"
   | "remove_user_timeout";
@@ -110,6 +116,7 @@ export const SocketReducer = (
   action: ISocketContextActions
 ) => {
   let gameIndex;
+  let index;
   switch (action.type) {
     ////////////////////////////////////////BUILT-IN////////////////////////////////////////
     case "update_socket":
@@ -164,10 +171,19 @@ export const SocketReducer = (
       return { ...state, games: state.games };
 
     case "update_game_num_players":
-      let index = state.games.findIndex(
+      index = state.games.findIndex(
         (value: Game) => value.id === (action.payload as [string, number])[0]
       );
       state.games[index].numberOfPlayers = (
+        action.payload as [string, number]
+      )[1];
+      return { ...state, games: state.games };
+
+    case "update_healthroll_rule_set":
+      index = state.games.findIndex(
+        (value: Game) => value.id === (action.payload as [string, number])[0]
+      );
+      state.games[index].healthRollRuleSet = (
         action.payload as [string, number]
       )[1];
       return { ...state, games: state.games };
@@ -263,6 +279,15 @@ export const SocketReducer = (
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MIXED%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    case "change_healthroll_rule_set":
+      return {
+        ...state,
+        thisGame: {
+          ...state.thisGame,
+          healthRollRuleSet: action.payload as number,
+        },
+      };
+
     case "remove_game_player": {
       let playerIndex = state.thisGame.gamePlayers.findIndex(
         (value) => value === (action.payload as string)

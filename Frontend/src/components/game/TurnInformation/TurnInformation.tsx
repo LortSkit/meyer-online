@@ -68,7 +68,7 @@ const TurnInformation = ({
   }, [round]);
 
   return (
-    <Box display="flex" justifyContent="center" flexDirection="column">
+    <Box display="flex" justifyContent="flex-start" flexDirection="column">
       <TurnInformationDisplay
         isDanish={isDanish}
         hasClicked={hasClicked}

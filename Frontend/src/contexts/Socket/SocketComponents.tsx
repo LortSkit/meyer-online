@@ -204,6 +204,12 @@ const SocketContextComponent: React.FunctionComponent<
       SocketDispatch({ type: "update_game_num_players", payload: payload });
     });
 
+    /* Update health roll rule set*/
+    /* For Room: Find */
+    socket.on("update_healthroll_rule_set", (payload: [string, number]) => {
+      SocketDispatch({ type: "update_healthroll_rule_set", payload: payload });
+    });
+
     /* Game in progress - no longer joinable so remove */
     /* For Room: Find */
     socket.on("game_in_progress", (gameId: string) => {
@@ -232,9 +238,6 @@ const SocketContextComponent: React.FunctionComponent<
     /* For Room: Game */
     socket.on("player_name_changed", (payload: string[]) => {
       SocketDispatch({ type: "update_player_name", payload: payload });
-      if (SocketState.uid === payload[0]) {
-        localStorage.setItem("playerName", payload[1]);
-      }
     });
 
     /* Lobby name changed */
@@ -285,6 +288,15 @@ const SocketContextComponent: React.FunctionComponent<
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MIXED%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    /* Health roll rule set changed */
+    /* For Room: Game */
+    socket.on("healthroll_rule_set_changed", (selectedRuleSet: number[]) => {
+      SocketDispatch({
+        type: "change_healthroll_rule_set",
+        payload: selectedRuleSet[0],
+      });
+    });
+
     /* Owner left */
     /* For Room: (User) */
     socket.on("game_owner_left", () => {

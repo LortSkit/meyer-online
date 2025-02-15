@@ -148,6 +148,14 @@ export function translateTurnInfo(
             }`)
       );
 
+    case "Continue":
+      return (
+        translatePlayer(isDanish, typeof currentPlayer === "number") +
+        (isDanish
+          ? `${currentPlayer} valgte ikke at slå sit liv om...`
+          : `${currentPlayer} chose not to reroll their life...`)
+      );
+
     case "HealthRoll":
       healthRoll = turnInfo[1][1];
       return (

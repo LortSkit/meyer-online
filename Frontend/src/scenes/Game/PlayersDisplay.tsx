@@ -151,7 +151,15 @@ const PlayerDisplay = ({
   }
 
   function onConfirm(): void {
-    socket.emit("change_player_name", nameChanger);
+    socket.emit(
+      "change_player_name",
+      nameChanger,
+      (givenPlayerName: string) => {
+        if (givenPlayerName !== "") {
+          localStorage.setItem("playerName", givenPlayerName);
+        }
+      }
+    );
     onBlur();
   }
 

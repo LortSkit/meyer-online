@@ -11,6 +11,8 @@ import { base } from "../../utils/hostSubDirectory";
 import SearchBar from "../../components/SearchBar";
 import {
   translateGameId,
+  translateHealthRoll,
+  translateHealthRollCases,
   translateNoFiltered,
   translateNoGames,
   translatePlayers,
@@ -73,6 +75,23 @@ const Find = ({ isDanish, searchLobbyName, setSearchLobbyName }: Props) => {
                     {translatePlayers(isDanish)}
                     <strong>
                       {game.numberOfPlayers}/{game.maxNumberOfPlayers}
+                    </strong>
+                    <br />
+                  </>
+                }
+              />
+              <Typography
+                fontSize="14px"
+                fontStyle="normal"
+                textTransform="none"
+                children={
+                  <>
+                    {translateHealthRoll(isDanish) + ": "}
+                    <strong>
+                      {translateHealthRollCases(
+                        isDanish,
+                        game.healthRollRuleSet
+                      )}
                     </strong>
                     <br />
                   </>

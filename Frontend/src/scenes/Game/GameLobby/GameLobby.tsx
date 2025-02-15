@@ -11,6 +11,8 @@ import { Socket } from "socket.io-client";
 import {
   translateGameId,
   translateGameOwner,
+  translateHealthRoll,
+  translateHealthRollCases,
   translateNeedName,
   translateNeedPlayers,
   translateShare,
@@ -22,6 +24,7 @@ import GameLobbyPlayers from "./GameLobbyPlayers";
 import PlayerDisplay from "../PlayersDisplay";
 import loading from "../../../assets/discordLoadingDotsDiscordLoading.gif";
 import LeaveGameButton from "../LeaveGameButton";
+import SetHealthRollRuleSet from "../../../components/game/SetHealthRollRuleSet";
 
 interface Props {
   isDanish: boolean;
@@ -123,8 +126,33 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
         />
         <Box p={2} />
 
-        {/* NUMBER OF PLAYERS */}
+        {/* HEALTH RULE SET */}
+        {isOwner() && (
+          <SetHealthRollRuleSet
+            isDanish={isDanish}
+            chosenRuleSet={SocketState.thisGame.healthRollRuleSet}
+            setChosenRuleSet={(selectedRuleSet: number) => {
+              if (selectedRuleSet !== SocketState.thisGame.healthRollRuleSet) {
+                SocketState.socket?.emit(
+                  "change_healthroll_rule_set",
+                  selectedRuleSet
+                );
+              }
+            }}
+          />
+        )}
+        {!isOwner() && (
+          <Box display="flex" justifyContent="center">
+            {translateHealthRoll(isDanish)}
+            {": "}
+            {translateHealthRollCases(
+              isDanish,
+              SocketState.thisGame?.healthRollRuleSet
+            )}
+          </Box>
+        )}
 
+        {/* NUMBER OF PLAYERS */}
         <GameLobbyPlayers
           isDanish={isDanish}
           isOwner={isOwner()}

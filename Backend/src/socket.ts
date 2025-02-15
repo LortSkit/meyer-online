@@ -11,6 +11,7 @@ type GameBase = {
   id: string;
   name: string;
   maxNumberOfPlayers: number;
+  healthRollRuleSet: number;
 };
 
 type GameDisplay = {
@@ -18,6 +19,7 @@ type GameDisplay = {
   name: string;
   numberOfPlayers: number;
   maxNumberOfPlayers: number;
+  healthRollRuleSet: number;
 };
 
 type GameInfo = {
@@ -27,6 +29,7 @@ type GameInfo = {
   gamePlayersNames: string[];
   gamePlayersTimeout: string[];
   maxNumberOfPlayers: number;
+  healthRollRuleSet: number;
   isPublic: boolean;
   isInProgress: boolean;
 };
@@ -34,6 +37,7 @@ type GameInfo = {
 type GameRequest = {
   name: string;
   maxNumberOfPlayers: number;
+  healthRollRuleSet: number;
 };
 
 type Room = "Find" | "Create" | "Game";
@@ -43,6 +47,7 @@ function gameRequestToGameBase(gameRequest: GameRequest): GameBase {
     id: v4(),
     name: gameRequest.name,
     maxNumberOfPlayers: gameRequest.maxNumberOfPlayers,
+    healthRollRuleSet: gameRequest.healthRollRuleSet,
   };
 }
 
@@ -52,6 +57,7 @@ function gameBaseToGameDisplay(gameBase: GameBase): GameDisplay {
     name: gameBase.name,
     numberOfPlayers: 0,
     maxNumberOfPlayers: gameBase.maxNumberOfPlayers,
+    healthRollRuleSet: gameBase.healthRollRuleSet,
   };
 }
 
@@ -63,6 +69,7 @@ function gameBaseToGameInfo(gameBase: GameBase): GameInfo {
     gamePlayersNames: [],
     gamePlayersTimeout: [],
     maxNumberOfPlayers: gameBase.maxNumberOfPlayers,
+    healthRollRuleSet: gameBase.healthRollRuleSet,
     isPublic: false,
     isInProgress: false,
   };
@@ -124,7 +131,7 @@ export class ServerSocket {
   };
 
   SendMessage = (name: string, users: string[], payload?: Object) => {
-    if (!payload) {
+    if (!payload && payload !== 0) {
       console.info("Emitting event: " + name + " to", users);
     } else {
       console.info(
@@ -268,6 +275,18 @@ export class ServerSocket {
     }
 
     if (this.gameMeyer[gameId]) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public gameIsOver(gameId: string): boolean {
+    if (!this.gameExists(gameId)) {
+      return false;
+    }
+
+    if (this.gameMeyer[gameId] && this.gameMeyer[gameId].isGameOver()) {
       return true;
     }
 
@@ -567,12 +586,17 @@ export class ServerSocket {
         callback: (
           exists: boolean,
           inProgress: boolean,
-          enoughSpace: boolean
+          enoughSpace: boolean,
+          givenPlayerName: string
         ) => void
       ) => {
         console.info("Received event: join_game from " + socket.id);
 
         const joiningUid = this.GetUidFromSocketID(socket.id);
+        const givenPlayerName =
+          chosenPlayerName.length === 0 || chosenPlayerName.length > 12
+            ? ""
+            : chosenPlayerName;
         if (joiningUid) {
           const uid = this.gamesIdIndex[gameId];
           let exists = false;
@@ -585,22 +609,18 @@ export class ServerSocket {
                 this.gameBases[uid].maxNumberOfPlayers;
 
               if (this.gameIsInProgress(gameId)) {
-                callback(exists, true, false);
+                callback(exists, true, false, givenPlayerName);
                 return;
               } else if (!hasEnoughSpace) {
-                callback(exists, false, false);
+                callback(exists, false, false, givenPlayerName);
                 return;
               }
-              const playerName =
-                chosenPlayerName.length === 0 || chosenPlayerName.length > 12
-                  ? ""
-                  : chosenPlayerName;
 
               /* Game */
               this.SendMessage(
                 "player_joined",
                 [gameId],
-                [joiningUid, playerName]
+                [joiningUid, givenPlayerName]
               );
 
               this.leavePreviousRoom(socket, joiningUid);
@@ -609,9 +629,9 @@ export class ServerSocket {
 
               this.playerInGame[joiningUid] = gameId;
               this.gamePlayers[gameId].push(joiningUid);
-              this.gamePlayersNames[gameId].push(playerName);
+              this.gamePlayersNames[gameId].push(givenPlayerName);
 
-              callback(exists, false, hasEnoughSpace);
+              callback(exists, false, hasEnoughSpace, givenPlayerName);
 
               /* (User) */
               this.SendMessage(
@@ -642,7 +662,7 @@ export class ServerSocket {
               }
             } else {
               //User rejoined game
-              callback(true, false, true);
+              callback(true, false, true, givenPlayerName);
 
               socket.join(gameId);
 
@@ -677,7 +697,7 @@ export class ServerSocket {
 
             return;
           }
-          callback(false, true, false);
+          callback(false, true, false, givenPlayerName);
         }
       }
     );
@@ -685,37 +705,45 @@ export class ServerSocket {
     /* CHANGE NAME - Happens when a player edits their name and presses 'enter' */
     /* From Room: Game */
     /* Sends to: Game */
-    socket.on("change_player_name", (chosenPlayerName: string) => {
-      console.info("Received event: change_player_name from " + socket.id);
+    socket.on(
+      "change_player_name",
+      (
+        chosenPlayerName: string,
+        callback: (givenPlayerName: string) => void
+      ) => {
+        console.info("Received event: change_player_name from " + socket.id);
 
-      const uid = this.GetUidFromSocketID(socket.id);
-      if (uid) {
-        const playerName =
-          chosenPlayerName.length === 0 || chosenPlayerName.length > 12
-            ? ""
-            : chosenPlayerName;
+        const uid = this.GetUidFromSocketID(socket.id);
+        if (uid) {
+          const givenPlayerName =
+            chosenPlayerName.length === 0 || chosenPlayerName.length > 12
+              ? ""
+              : chosenPlayerName;
 
-        const inGameId = this.playerInGame[uid];
-        if (inGameId && !this.gameIsInProgress(inGameId)) {
-          if (playerName === "" || !inGameId) {
-            return;
+          const inGameId = this.playerInGame[uid];
+          if (inGameId && !this.gameIsInProgress(inGameId)) {
+            if (givenPlayerName === "" || !inGameId) {
+              return;
+            }
+
+            const playerIndex = this.gamePlayers[inGameId].findIndex(
+              (value) => value === uid
+            );
+
+            this.gamePlayersNames[inGameId][playerIndex] = givenPlayerName;
+
+            callback(givenPlayerName);
+
+            /* Game */
+            this.SendMessage(
+              "player_name_changed",
+              [inGameId],
+              [uid, givenPlayerName]
+            );
           }
-
-          const playerIndex = this.gamePlayers[inGameId].findIndex(
-            (value) => value === uid
-          );
-
-          this.gamePlayersNames[inGameId][playerIndex] = playerName;
-
-          /* Game */
-          this.SendMessage(
-            "player_name_changed",
-            [inGameId],
-            [uid, playerName]
-          );
         }
       }
-    });
+    );
 
     /* CHANGE LOBBY NAME - Happens when the lobby owner edits the lobby name and presses 'enter' */
     /* From Room: Game */
@@ -845,7 +873,7 @@ export class ServerSocket {
     /* START GAME */
     /* From Room: Game */
     /* Sends to: Find 
-       Through updateMeyerInfo call: (User)
+    Through updateMeyerInfo call: (User)
     */
     socket.on("start_game", () => {
       console.info("Received event: start_game from " + socket.id);
@@ -859,7 +887,8 @@ export class ServerSocket {
           this.gamePlayers[owningGame.id].length > 1
         ) {
           this.gameMeyer[owningGame.id] = new Meyer(
-            this.gamePlayers[owningGame.id]
+            this.gamePlayers[owningGame.id],
+            this.gameBases[uid].healthRollRuleSet
           );
           this.updateMeyerInfo(owningGame.id, true, true);
 
@@ -1002,7 +1031,8 @@ export class ServerSocket {
           this.gamePlayers[owningGame.id].length <= 20
         ) {
           this.gameMeyer[owningGame.id].resetGame(
-            this.gamePlayers[owningGame.id]
+            this.gamePlayers[owningGame.id],
+            this.gameBases[uid].healthRollRuleSet
           );
           this.updateMeyerInfo(owningGame.id, true, true);
         }
@@ -1011,12 +1041,46 @@ export class ServerSocket {
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%MIXED%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    /* CHANGE HEALTH ROLL RULE SET */
+    /* From Room: Game */
+    /* Sends to: Find, Game */
+    socket.on("change_healthroll_rule_set", (selectedRuleSet: number) => {
+      console.info(
+        "Received event: change_healthroll_rule_set from " + socket.id
+      );
+
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid) {
+        const owningGame = this.gameBases[uid];
+        if (
+          owningGame &&
+          (!this.gameIsInProgress(owningGame.id) ||
+            this.gameIsOver(owningGame.id))
+        ) {
+          this.gameBases[uid].healthRollRuleSet = selectedRuleSet;
+
+          /* Game */
+          this.SendMessage(
+            "healthroll_rule_set_changed",
+            [owningGame.id],
+            [selectedRuleSet]
+          );
+
+          /* Find */
+          this.SendMessage(
+            "update_healthroll_rule_set",
+            ["Find"],
+            [owningGame.id, selectedRuleSet]
+          );
+        }
+      }
+    });
 
     /* KICK PLAYER - Happens when lobby owner presses the x-button next to a player's name */
     /* From Room: Game */
     /* Sends to: (User), Game
-       Through leavePreviousRoom call: (User), Game, Find
-       Through disconnectUser call: (User), Find, Game, (All)
+    Through leavePreviousRoom call: (User), Game, Find
+    Through disconnectUser call: (User), Find, Game, (All)
     */
     socket.on("kick_player", (kickingUid: string) => {
       console.info("Received event: kick_player from " + socket.id);
@@ -1038,7 +1102,7 @@ export class ServerSocket {
     /* Sends to: Game
        Through leavePreviousRoom call: (User), Game, Find
        Through disconnectUser call: (User), Find, Game, (All)
-    */
+       */
     socket.on("leave_game", () => {
       console.info("Received event: leave_game from " + socket.id);
 

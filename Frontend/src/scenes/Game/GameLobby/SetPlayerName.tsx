@@ -20,7 +20,16 @@ const SetPlayerName = ({
 
   function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
     if (event.key === "Enter") {
-      socket.emit("change_player_name", chosenPlayerName);
+      socket.emit(
+        "change_player_name",
+        chosenPlayerName,
+        (givenPlayerName: string) => {
+          setChosenPlayerName(givenPlayerName);
+          if (givenPlayerName !== "") {
+            localStorage.setItem("playerName", givenPlayerName);
+          }
+        }
+      );
     }
   }
 

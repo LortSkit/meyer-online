@@ -98,16 +98,21 @@ export class Meyer {
   private round: number = 1;
 
   private turnInformation: TurnInfo[] = [];
+
+  private healthRollRuleSet: number = -1;
   //##############################################################################//
 
-  constructor(playerUids: string[]) {
+  constructor(playerUids: string[], healthRollRuleSet: number) {
     this.numberOfPlayers = playerUids.length;
     if (this.numberOfPlayers < 2 || this.numberOfPlayers > 20) {
       throw new Error(
         "Number of players has to be between 2 and 20 (inclusive)"
       );
+    } else if (healthRollRuleSet < 0 || healthRollRuleSet > 2) {
+      throw new Error("HealthRoll rule set has to be between 0-2 (inclusive)");
     }
     this.playerUids = playerUids;
+    this.healthRollRuleSet = healthRollRuleSet; //0 -> No healthroll, 1 -> player chooses, 2 -> player has to healthroll
     this.setHealths();
   }
 
@@ -283,6 +288,10 @@ export class Meyer {
         this.turnInformation = toBeTurnInfo;
         break;
 
+      case "Continue":
+        this.turnInformation = toBeTurnInfo;
+        break;
+
       case "HealthRoll":
         numbersList.push(this.healths[this.currentPlayer - 1]);
         toBeTurnInfo = [[this.currentAction, numbersList]];
@@ -368,9 +377,12 @@ export class Meyer {
       return [];
     } else if (
       this.healths[this.currentPlayer - 1] == 3 &&
-      !this.hasHealthRolled[this.currentPlayer - 1]
+      !this.hasHealthRolled[this.currentPlayer - 1] &&
+      this.healthRollRuleSet > 0
     ) {
-      return ["HealthRoll"];
+      return this.healthRollRuleSet == 2
+        ? ["HealthRoll"]
+        : ["HealthRoll", "Continue"];
     } else if (this.getRoll() == 32) {
       return ["Cheers"];
     } else if (this.getRoll() == -1) {
@@ -528,7 +540,8 @@ export class Meyer {
           //Edge case: Losing player has to healthroll before new round can begin
           if (
             this.healths[this.previousPlayer - 1] == 3 &&
-            !this.hasHealthRolled[this.previousPlayer - 1]
+            !this.hasHealthRolled[this.previousPlayer - 1] &&
+            this.healthRollRuleSet > 0
           ) {
             this.endTurnToHealthRoll(this.previousPlayer);
             return;
@@ -537,6 +550,10 @@ export class Meyer {
           this.endRoundPreviousPlayerLost();
           break;
         }
+
+      case "Continue":
+        this.endRoundBase();
+        break;
 
       case "HealthRoll":
         this.endRoundBase();
@@ -574,6 +591,10 @@ export class Meyer {
         throw new Error("This is unreachable");
 
       case "Check":
+        break;
+
+      case "Continue":
+        this.hasHealthRolled[this.currentPlayer - 1] = true;
         break;
 
       case "HealthRoll":
@@ -618,11 +639,15 @@ export class Meyer {
     this.currentAction = "Error";
   }
 
-  public resetGame(playerUids?: string[]): void {
-    if (playerUids) {
-      this.playerUids = playerUids;
-      this.numberOfPlayers = playerUids.length;
+  public resetGame(playerUids: string[], healthRollRuleSet: number): void {
+    if (healthRollRuleSet < 0 || healthRollRuleSet > 2) {
+      throw new Error("HealthRoll rule set has to be between 0-2 (inclusive)");
     }
+
+    this.playerUids = playerUids;
+    this.numberOfPlayers = playerUids.length;
+    this.healthRollRuleSet = healthRollRuleSet;
+
     this.resetRoll();
     //this.currentPlayer = this.currentPlayer; //winner gets to start next game
     this.previousPlayer = -1;

@@ -6,7 +6,7 @@ import {
   GameRequest,
   useGlobalContext,
 } from "../../../contexts/Socket/SocketContext";
-import SetNumberOfPlayers from "../../../components/SetNumberOfPlayers";
+import SetNumberOfPlayers from "../../../components/game/SetNumberOfPlayers";
 import { MiddleChild } from "../../../components/CenteredPage/PageChildren";
 import CenteredPage from "../../../components/CenteredPage/CenteredPage";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +18,7 @@ import {
   translateMaxNumberOfPlayers,
 } from "../../../utils/lang/Create/CreateOnline/langCreateOnline";
 import SetLobbyName from "./SetLobbyName";
+import SetHealthRollRuleSet from "../../../components/game/SetHealthRollRuleSet";
 
 interface Props {
   isDanish: boolean;
@@ -26,6 +27,11 @@ interface Props {
 const CreateOnline = ({ isDanish }: Props) => {
   const [numberOfPlayers, setNumberOfPlayers] = useState(20);
   const [lobbyName, setLobbyName] = useState("");
+  const [chosenRuleSet, setChosenRuleSet] = useState(
+    localStorage.getItem("ruleSet") === null
+      ? 1
+      : Number(localStorage.getItem("ruleSet"))
+  );
 
   const { SocketState, SocketDispatch } = useGlobalContext();
 
@@ -48,6 +54,7 @@ const CreateOnline = ({ isDanish }: Props) => {
     let game: GameRequest = {
       name: lobbyName,
       maxNumberOfPlayers: numberOfPlayers,
+      healthRollRuleSet: chosenRuleSet,
     };
     SocketState.socket?.emit("create_game", game, true, (gameId: string) => {
       navigate(`${base}/game/${gameId}`);
@@ -58,6 +65,7 @@ const CreateOnline = ({ isDanish }: Props) => {
     let game: GameRequest = {
       name: lobbyName,
       maxNumberOfPlayers: numberOfPlayers,
+      healthRollRuleSet: chosenRuleSet,
     };
     SocketState.socket?.emit("create_game", game, false, (gameId: string) => {
       navigate(`${base}/game/${gameId}`);
@@ -74,6 +82,16 @@ const CreateOnline = ({ isDanish }: Props) => {
         />
         <SetNumberOfPlayers setNumberOfPlayers={setNumberOfPlayers} />
       </Box>
+      <Box p={2} />
+
+      <Box display="flex" justifyContent="center">
+        <SetHealthRollRuleSet
+          isDanish={isDanish}
+          chosenRuleSet={chosenRuleSet}
+          setChosenRuleSet={setChosenRuleSet}
+        />
+      </Box>
+
       <Box p={2} />
       <Box display="flex" justifyContent="center">
         <Box display="flex" justifyContent="center" flexDirection="column">

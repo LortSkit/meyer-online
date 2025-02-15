@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import SetNumberOfPlayers from "../../../../components/SetNumberOfPlayers";
+import SetNumberOfPlayers from "../../../../components/game/SetNumberOfPlayers";
 import CreateNewGameButton from "./CreateNewGameButton";
 import { Meyer } from "../../../../utils/gameLogic";
 import { translateNumberOfPlayers } from "../../../../utils/lang/Create/CreateLocal/CreateNewGame/langCreateNewGame";

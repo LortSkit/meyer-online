@@ -1,6 +1,7 @@
 const possibleActions = [
   "Error",
   "Check",
+  "Continue",
   "HealthRoll",
   "Roll",
   "Cheers",

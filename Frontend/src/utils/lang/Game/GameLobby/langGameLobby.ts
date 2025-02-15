@@ -1,4 +1,10 @@
-import { translateGameId as parentTranslate } from "../../Find/langFind";
+import { translateGameId as parentTranslateGameId } from "../../Find/langFind";
+import {
+  translateCase1,
+  translateCase2,
+  translateCase3,
+} from "../../components/game/langHealthRollRuleSet";
+import { translateAction } from "../../components/game/langActionChoices";
 
 export function translateGameDoesNotExist(isDanish: boolean): string {
   return isDanish ? "Spillet eksisterer ikke" : "Game does not exist!";
@@ -17,7 +23,7 @@ export function translateChooseName(isDanish: boolean): string {
 }
 
 export function translateGameId(isDanish: boolean): string {
-  return parentTranslate(isDanish);
+  return parentTranslateGameId(isDanish);
 }
 
 export function translateShare(isDanish: boolean): string {
@@ -48,4 +54,21 @@ export function translateWaiting(isDanish: boolean): string {
   return isDanish
     ? "Venter på at spilejeren starter"
     : "Waiting for game owner to start";
+}
+
+export function translateHealthRoll(isDanish: boolean): string {
+  return translateAction(isDanish, "HealthRoll");
+}
+
+export function translateHealthRollCases(
+  isDanish: boolean,
+  ruleSet: number
+): string {
+  if (ruleSet === 0) {
+    return translateCase1(isDanish);
+  } else if (ruleSet === 1) {
+    return translateCase2(isDanish);
+  } else {
+    return translateCase3(isDanish);
+  }
 }

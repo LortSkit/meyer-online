@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import InputBase from "@mui/material/InputBase";
 import useTheme from "@mui/material/styles/useTheme";
-import { tokens } from "../theme";
+import { tokens } from "../../theme";
 
 interface Props {
   setNumberOfPlayers: React.Dispatch<React.SetStateAction<number>>;

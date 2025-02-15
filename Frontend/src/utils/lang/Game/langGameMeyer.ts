@@ -1,14 +1,31 @@
+import { translateHealthRoll as parentTranslateHealthRoll } from "./GameLobby/langGameLobby";
+import { translateHealthRollCases as parentTranslateHealthRollCases } from "./GameLobby/langGameLobby";
+
 export function translateToggle(isDanish: boolean, isRight: boolean): string {
   return isDanish
     ? "Skift til " + (isRight ? "venstre" : "højre")
     : "Toggle " + (isRight ? "left" : "right");
 }
 
-export function translateWaiting(isDanish: boolean, player: string): string {
+export function translateWaitingTurn(
+  isDanish: boolean,
+  player: string
+): string {
   return (
     (isDanish ? "Venter på at " : "Waiting for ") +
     player +
     (isDanish ? " afslutter sin tur" : " to finish their turn")
+  );
+}
+
+export function translateWaitingOwner(
+  isDanish: boolean,
+  player: string
+): string {
+  return (
+    (isDanish ? "Venter på at " : "Waiting for ") +
+    player +
+    (isDanish ? " starter et nyt spil" : " to start a new game")
   );
 }
 
@@ -24,4 +41,15 @@ export function translatePlayAgain(isDanish: boolean): string {
 
 export function translateReopen(isDanish: boolean): string {
   return isDanish ? "Genåben lobbyen" : "Reopen lobby";
+}
+
+export function translateHealthRoll(isDanish: boolean): string {
+  return parentTranslateHealthRoll(isDanish);
+}
+
+export function translateHealthRollCases(
+  isDanish: boolean,
+  ruleSet: number
+): string {
+  return parentTranslateHealthRollCases(isDanish, ruleSet);
 }

@@ -1,3 +1,6 @@
+import { translateHealthRoll as parentTranslateHealthRoll } from "../Game/GameLobby/langGameLobby";
+import { translateHealthRollCases as parentTranslateHealthRollCases } from "../Game/GameLobby/langGameLobby";
+
 export function translateUsersOnline(isDanish: boolean): string {
   return isDanish
     ? "Antallet af online spillere: "
@@ -24,4 +27,15 @@ export function translateNoFiltered(isDanish: boolean): string {
   return isDanish
     ? "Ingen søgeresultater passer"
     : "No matching search results";
+}
+
+export function translateHealthRoll(isDanish: boolean): string {
+  return parentTranslateHealthRoll(isDanish);
+}
+
+export function translateHealthRollCases(
+  isDanish: boolean,
+  ruleSet: number
+): string {
+  return parentTranslateHealthRollCases(isDanish, ruleSet);
 }

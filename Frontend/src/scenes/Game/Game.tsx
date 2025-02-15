@@ -38,7 +38,11 @@ const Game = ({ isDanish }: Props) => {
   const [gameExists, setGameExists] = useState(false);
   const [inProgressOnJoin, setInProgressOnJoin] = useState(true);
   const [hasEnoughSpace, setHasEnoughSpace] = useState(false);
-  const [chosenPlayerName, setChosenPlayerName] = useState("");
+  const [chosenPlayerName, setChosenPlayerName] = useState(
+    localStorage.getItem("playerName") === null
+      ? ""
+      : String(localStorage.getItem("playerName"))
+  );
 
   function thisPlayerName(): string {
     if (!SocketState.thisGame?.gamePlayers) {
@@ -85,19 +89,22 @@ const Game = ({ isDanish }: Props) => {
     if (!isValidUUID(gameId) && gameId !== "unknown") {
       navigate(base + "/game/unknown");
     } else {
-      const chosenPlayerName =
-        localStorage.getItem("playerName") === null
-          ? ""
-          : localStorage.getItem("playerName");
-
       SocketState.socket?.emit(
         "join_game",
         gameId,
         chosenPlayerName,
-        (exists: boolean, inProgress: boolean, enoughSpace: boolean) => {
+        (
+          exists: boolean,
+          inProgress: boolean,
+          enoughSpace: boolean,
+          givenPlayerName: string
+        ) => {
           setGameExists(exists);
           setInProgressOnJoin(inProgress);
           setHasEnoughSpace(enoughSpace);
+          if (givenPlayerName !== "") {
+            localStorage.setItem("playerName", givenPlayerName);
+          }
         }
       );
     }

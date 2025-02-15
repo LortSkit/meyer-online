@@ -23,15 +23,20 @@ import BluffButton from "../../components/game/BluffButton";
 import GameOverHeading from "../../components/game/GameOverHeading";
 import {
   translateBack,
+  translateHealthRoll,
+  translateHealthRollCases,
   translatePlayAgain,
   translateReopen,
   translateToggle,
-  translateWaiting,
+  translateWaitingOwner,
+  translateWaitingTurn,
 } from "../../utils/lang/Game/langGameMeyer";
 import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
 import TurnInformation from "../../components/game/TurnInformation/TurnInformation";
 import { TurnInfo } from "../../utils/gameTypes";
 import LeaveGameButton from "./LeaveGameButton";
+import SetHealthRollRuleSet from "../../components/game/SetHealthRollRuleSet";
+import { useMediaQuery } from "usehooks-ts";
 
 interface Props {
   isDanish: boolean;
@@ -44,6 +49,18 @@ interface Props {
 const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const queryMatches = useMediaQuery("only screen and (min-width: 400px)");
+
+  function isGameOverMobile(): boolean {
+    if (!queryMatches && meyerInfo !== null && meyerInfo.isGameOver) {
+      return true;
+    }
+
+    return false;
+  }
+
+  const mainWidthGameOverMobile = 95;
 
   const [truePlayerNames, setTruePlayerNames] = useState(
     gameInfo !== null ? gameInfo.gamePlayersNames.map(numberAfterName) : []
@@ -148,7 +165,9 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
   const mainWidth = 62;
 
   const middleChild = (
-    <MiddleChild widthPercentage={mainWidth}>
+    <MiddleChild
+      widthPercentage={isGameOverMobile() ? mainWidthGameOverMobile : mainWidth}
+    >
       <Box display="flex" justifyContent="center">
         <Typography
           variant="h1"
@@ -260,7 +279,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
               sx={{ display: "flex", justifyContent: "center" }}
               children={
                 <Box>
-                  {translateWaiting(
+                  {translateWaitingTurn(
                     isDanish,
                     playernameFromUid(
                       meyerInfo !== null ? meyerInfo.currentPlayer : ""
@@ -288,6 +307,19 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
             turnsTotal={meyerInfo.turnTotal + 1}
           />
           {isOwner() && (
+            <SetHealthRollRuleSet
+              isDanish={isDanish}
+              chosenRuleSet={
+                gameInfo !== null ? gameInfo?.healthRollRuleSet : 0
+              }
+              setChosenRuleSet={(selectedRuleSet: number) => {
+                if (selectedRuleSet !== gameInfo?.healthRollRuleSet) {
+                  socket?.emit("change_healthroll_rule_set", selectedRuleSet);
+                }
+              }}
+            />
+          )}
+          {isOwner() && (
             <Box display="flex" justifyContent="center">
               <Button
                 variant="contained"
@@ -312,16 +344,59 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
               </Button>
             </Box>
           )}
+          {!isOwner() && (
+            <Box display="flex" flexDirection="column">
+              <Typography
+                fontSize="12px"
+                fontStyle="normal"
+                textTransform="none"
+                component="span"
+                style={{
+                  wordBreak: "break-word",
+                  textAlign: "center",
+                }}
+                sx={{ display: "flex", justifyContent: "center" }}
+                children={
+                  <Box>
+                    {translateWaitingOwner(
+                      isDanish,
+                      gameInfo !== null ? gameInfo?.gamePlayersNames[0] : ""
+                    )}
+                    <img
+                      src={loading}
+                      width="35px"
+                      style={{ paddingLeft: "5px" }}
+                    />
+                  </Box>
+                }
+              />
+              <Box paddingTop="5px" />
+              <Box display="flex" justifyContent="center">
+                {translateHealthRoll(isDanish)}
+                {": "}
+                {translateHealthRollCases(
+                  isDanish,
+                  gameInfo !== null ? gameInfo.healthRollRuleSet : 2
+                )}
+              </Box>
+            </Box>
+          )}
         </Box>
       )}
-      <TurnInformation
-        isDanish={isDanish}
-        playerNames={gameInfo !== null ? gameInfo.gamePlayersNames : []}
-        round={meyerInfo !== null ? meyerInfo.round : 0}
-        showTimer={showTimer}
-        setTurnInformation={function (update: TurnInfo[]) {}}
-        turnInformation={meyerInfo !== null ? meyerInfo.turnInformation : []}
-      />
+      <Box display="flex" justifyContent="center">
+        <Box maxWidth={`${mainWidth + 40}%`}>
+          <TurnInformation
+            isDanish={isDanish}
+            playerNames={gameInfo !== null ? gameInfo.gamePlayersNames : []}
+            round={meyerInfo !== null ? meyerInfo.round : 0}
+            showTimer={showTimer}
+            setTurnInformation={function (update: TurnInfo[]) {}}
+            turnInformation={
+              meyerInfo !== null ? meyerInfo.turnInformation : []
+            }
+          />
+        </Box>
+      </Box>
     </MiddleChild>
   );
 
@@ -371,11 +446,19 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
 
   return (
     <CenteredPage
-      leftChild={!rightToggle ? sideChild : undefined}
-      rightWidthPercentage={!rightToggle ? 0 : undefined}
+      leftChild={
+        isGameOverMobile() ? undefined : !rightToggle ? sideChild : undefined
+      }
+      rightWidthPercentage={
+        isGameOverMobile() ? 2.5 : !rightToggle ? 0 : undefined
+      }
       middleChild={middleChild}
-      rightChild={rightToggle ? sideChild : undefined}
-      leftWidthPercentage={rightToggle ? 0 : undefined}
+      rightChild={
+        isGameOverMobile() ? undefined : rightToggle ? sideChild : undefined
+      }
+      leftWidthPercentage={
+        isGameOverMobile() ? 2.5 : rightToggle ? 0 : undefined
+      }
     />
   );
 };
