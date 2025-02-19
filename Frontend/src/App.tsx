@@ -26,7 +26,8 @@ const App = () => {
   const initIsCollapsed = localStorage.getItem("isCollapsed") === "true";
 
   const getIsDanish = localStorage.getItem("isDanish");
-  const initIsDanish = getIsDanish != null ? getIsDanish === "true" : true;
+  const initIsDanish =
+    getIsDanish != null ? getIsDanish === "true" : navigator.language === "da";
 
   const [isCollapsed, setIsCollapsed] = useState(initIsCollapsed);
   const [isVisible, setIsVisible] = useState(false);

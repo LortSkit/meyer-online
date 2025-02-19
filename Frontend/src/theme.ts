@@ -224,8 +224,11 @@ export const ColorModeContext = createContext({
 });
 
 export const useMode = () => {
+  const browserIsDark =
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
   const getMode = localStorage.getItem("mode");
-  const initMode = getMode != null ? getMode : "dark";
+  const initMode = getMode != null ? getMode : browserIsDark ? "dark" : "light";
   const [mode, setMode] = useState<"light" | "dark">(initMode as PaletteMode);
 
   const colorMode = useMemo(

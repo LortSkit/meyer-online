@@ -104,10 +104,14 @@ const SocketContextComponent: React.FunctionComponent<
     if (loading) {
       if (s) {
         SendHandshake(s);
-        window.removeEventListener("focus", windowEventListener(s)); //make sure we don't keep adding the same listener
         window.addEventListener("focus", windowEventListener(s));
       }
     }
+    return () => {
+      if (s) {
+        window.removeEventListener("focus", windowEventListener(s)); //make sure we don't keep adding the same listener
+      }
+    };
   }, []);
 
   const StartListeners = () => {
