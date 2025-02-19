@@ -299,7 +299,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
       )}
       {/* GAME OVER */}
       {meyerInfo?.isGameOver && (
-        <Box display="flex" flexDirection="column">
+        <Box display="flex" flexDirection="column" overflow="hidden">
           <GameOverHeading
             isDanish={isDanish}
             currentPlayer={playernameFromUid(meyerInfo.currentPlayer)}
@@ -307,17 +307,19 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
             turnsTotal={meyerInfo.turnTotal + 1}
           />
           {isOwner() && (
-            <SetHealthRollRuleSet
-              isDanish={isDanish}
-              chosenRuleSet={
-                gameInfo !== null ? gameInfo?.healthRollRuleSet : 0
-              }
-              setChosenRuleSet={(selectedRuleSet: number) => {
-                if (selectedRuleSet !== gameInfo?.healthRollRuleSet) {
-                  socket?.emit("change_healthroll_rule_set", selectedRuleSet);
+            <Box display="flex" justifyContent="center">
+              <SetHealthRollRuleSet
+                isDanish={isDanish}
+                chosenRuleSet={
+                  gameInfo !== null ? gameInfo?.healthRollRuleSet : 0
                 }
-              }}
-            />
+                setChosenRuleSet={(selectedRuleSet: number) => {
+                  if (selectedRuleSet !== gameInfo?.healthRollRuleSet) {
+                    socket?.emit("change_healthroll_rule_set", selectedRuleSet);
+                  }
+                }}
+              />
+            </Box>
           )}
           {isOwner() && (
             <Box display="flex" justifyContent="center">
@@ -384,7 +386,11 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
         </Box>
       )}
       <Box display="flex" justifyContent="center">
-        <Box maxWidth={`${mainWidth + 40}%`}>
+        <Box
+          flexBasis={`${
+            !queryMatches && showTimer ? mainWidth + 20 : mainWidth + 40
+          }%`}
+        >
           <TurnInformation
             isDanish={isDanish}
             playerNames={gameInfo !== null ? gameInfo.gamePlayersNames : []}

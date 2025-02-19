@@ -31,14 +31,14 @@ function CircularProgressWithLabel(
           display: "flex",
           position: "absolute",
           paddingTop: `${props.ringSize * 0.1}px`,
+          translate: props.trueValue >= 10 ? "10px" : "13px",
         }}
         {...passingProps}
       />
       <Typography
         fontSize={`${props.ringSize}px`}
-        paddingRight={`${
-          props.ringSize * valueDigitsPaddingMultiplier * 0.44
-        }px`}
+        position="relative"
+        sx={{ translate: props.trueValue >= 10 ? "5px" : "5px" }}
       >
         {Math.round((props.value * props.maxvalue) / 100) + 1}
       </Typography>

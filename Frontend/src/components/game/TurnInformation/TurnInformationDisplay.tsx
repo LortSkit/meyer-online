@@ -98,7 +98,6 @@ const TurnInformationDisplay = ({
             </Button>
             {isTimed && isVisible(index) && showTimer && !hasClicked[index] && (
               <>
-                <Box paddingLeft="10px" />
                 <Box
                   display="flex"
                   justifyContent="center"
