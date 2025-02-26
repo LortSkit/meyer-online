@@ -11,12 +11,15 @@ import {
   translateGameDoesNotExist,
   translateGameInProgress,
   translateNotEnoughSpace,
-} from "../../utils/lang/Game/GameLobby/langGameLobby";
+  translatePleaseWait,
+} from "../../utils/lang/Game/langGame";
 import SetPlayerName from "./GameLobby/SetPlayerName";
 import LeaveGameButton from "./LeaveGameButton";
 import GameLobby from "./GameLobby/GameLobby";
 import { Socket } from "socket.io-client";
 import GameMeyer from "./GameMeyer";
+import ReloadButton from "./ReloadButton";
+import Typography from "@mui/material/Typography";
 
 function baseMessage(message: string) {
   return (
@@ -35,6 +38,7 @@ const Game = ({ isDanish }: Props) => {
   const navigate = useNavigate();
 
   const { SocketState, SocketDispatch } = useGlobalContext();
+  const [hasEmitted, setHasEmitted] = useState(false);
   const [gameExists, setGameExists] = useState(false);
   const [inProgressOnJoin, setInProgressOnJoin] = useState(true);
   const [hasEnoughSpace, setHasEnoughSpace] = useState(false);
@@ -65,6 +69,24 @@ const Game = ({ isDanish }: Props) => {
     );
   };
 
+  const NotEmittedMessage = () => {
+    return (
+      <MiddleChild widthPercentage={100}>
+        <Box p={4} />
+        <Typography
+          display="flex"
+          justifyContent="center"
+          style={{
+            wordBreak: "break-word",
+            textAlign: "center",
+          }}
+          children={baseMessage(translatePleaseWait(isDanish))}
+        />
+        <ReloadButton isDanish={isDanish} />
+      </MiddleChild>
+    );
+  };
+
   const NotEnoughSpaceMessage = () => {
     return (
       <MiddleChild widthPercentage={100}>
@@ -85,43 +107,54 @@ const Game = ({ isDanish }: Props) => {
     );
   };
 
+  function joinGame() {
+    SocketState.socket?.emit(
+      "join_game",
+      gameId,
+      chosenPlayerName,
+      (
+        exists: boolean,
+        inProgress: boolean,
+        enoughSpace: boolean,
+        givenPlayerName: string
+      ) => {
+        setHasEmitted(true);
+        setGameExists(exists);
+        setInProgressOnJoin(inProgress);
+        setHasEnoughSpace(enoughSpace);
+        if (givenPlayerName !== "") {
+          localStorage.setItem("playerName", givenPlayerName);
+        }
+      }
+    );
+  }
+
   useEffect(() => {
     if (!isValidUUID(gameId) && gameId !== "unknown") {
       navigate(base + "/game/unknown");
     } else {
-      SocketState.socket?.emit(
-        "join_game",
-        gameId,
-        chosenPlayerName,
-        (
-          exists: boolean,
-          inProgress: boolean,
-          enoughSpace: boolean,
-          givenPlayerName: string
-        ) => {
-          setGameExists(exists);
-          setInProgressOnJoin(inProgress);
-          setHasEnoughSpace(enoughSpace);
-          if (givenPlayerName !== "") {
-            localStorage.setItem("playerName", givenPlayerName);
-          }
-        }
-      );
+      joinGame();
     }
   }, []);
+
+  useEffect(() => {
+    joinGame();
+  }, [SocketState.socket?.id]);
 
   let middleChild: JSX.Element;
 
   if (gameId === "unknown") {
     middleChild = <StandardErrorMessage />;
+  } else if (SocketState.thisGame === null) {
+    middleChild = <StandardErrorMessage />;
+  } else if (!hasEmitted) {
+    middleChild = <NotEmittedMessage />;
   } else if (!gameExists) {
     middleChild = <StandardErrorMessage />;
   } else if (inProgressOnJoin) {
     return <GameInProgressMessage />;
   } else if (!hasEnoughSpace) {
     middleChild = <NotEnoughSpaceMessage />;
-  } else if (SocketState.thisGame === null) {
-    middleChild = <StandardErrorMessage />;
   } else if (thisPlayerName() === "") {
     middleChild = (
       <MiddleChild widthPercentage={100}>

@@ -1,4 +1,6 @@
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CachedOutlinedIcon from "@mui/icons-material/CachedOutlined";
 import { PropsWithChildren, useEffect, useReducer, useState } from "react";
 import {
   defaultSocketContextState,
@@ -15,6 +17,8 @@ import {
   translateLoading,
   translateReconnectFailure,
   translateOwnerLeft,
+  translateReloadMessage,
+  translateReload,
 } from "../../utils/lang/langSocketComponents";
 import { base } from "../../utils/hostSubDirectory";
 import { Socket } from "socket.io-client";
@@ -32,6 +36,7 @@ const SocketContextComponent: React.FunctionComponent<
     defaultSocketContextState
   );
   const [loading, setLoading] = useState(true);
+  const [inactive, setInactive] = useState(document.visibilityState);
 
   const navigate = useNavigate();
 
@@ -80,16 +85,13 @@ const SocketContextComponent: React.FunctionComponent<
     emitHandshake(s ? s : socket);
   }
 
-  function windowEventListener(s?: Socket): () => void {
-    return () => {
-      /* Save the socket in context */
-      SocketDispatch({ type: "update_socket", payload: s });
-      SendHandshake(s);
-    };
+  function onVisibilityChange() {
+    setInactive(document.visibilityState);
   }
 
   useEffect(() => {
     /* Connect to the Web Socket */
+    document.addEventListener("visibilitychange", onVisibilityChange, false);
     let s = undefined as unknown as Socket;
     if (loading) {
       s = socket.connect();
@@ -104,14 +106,8 @@ const SocketContextComponent: React.FunctionComponent<
     if (loading) {
       if (s) {
         SendHandshake(s);
-        window.addEventListener("focus", windowEventListener(s));
       }
     }
-    return () => {
-      if (s) {
-        window.removeEventListener("focus", windowEventListener(s)); //make sure we don't keep adding the same listener
-      }
-    };
   }, []);
 
   const StartListeners = () => {
@@ -355,6 +351,29 @@ const SocketContextComponent: React.FunctionComponent<
         </Box>
       </Box>
     );
+  else if (inactive === "hidden") {
+    return (
+      <Box display="flex" justifyContent="center" flexBasis="100%">
+        <Box display="flex" justifyContent="center" flexDirection="column">
+          {translateReloadMessage(isDanish)}
+          <Box display="flex" justifyContent="center">
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => {
+                setTimeout(function () {
+                  window.location.reload();
+                });
+              }}
+            >
+              <CachedOutlinedIcon />
+              {translateReload(isDanish)}
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     <SocketContextProvider value={{ SocketState, SocketDispatch }}>

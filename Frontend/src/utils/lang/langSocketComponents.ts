@@ -42,3 +42,13 @@ export function translateLoading(isDanish: boolean): string {
     ? "Forbinder dig til serveren..."
     : "Connecting you to server...";
 }
+
+export function translateReloadMessage(isDanish: boolean): string {
+  return isDanish
+    ? "Din fane er inaktiv. For at genaktivere den, venligst genindlæs siden ved at trykke på knappen forneden:"
+    : "Your tab is inactive. To reactivate it, please press the button below:";
+}
+
+export function translateReload(isDanish: boolean): string {
+  return isDanish ? "Genindlæs" : "Reload";
+}
