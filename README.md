@@ -14,17 +14,15 @@ IMPORTANT: The .env files have been mostly prepared for DEVELOPMENT usage, pleas
 
 The contents are as follows:
 
-#### Frontend .env file:
+#### Frontend .env.example file:
 
 ```
 #Check .env file in the Backend, they have to coincide!
 
 VITE_CERTS_FOLDER  =                # Only used if PROTOCOL = https, defaults to "./certs/"
-VITE_KEYFILENAME   =                # Only used if PROTOCOL = https, defaults to "key.pem"
-VITE_CERTFILENAME  =                # Only used if PROTOCOL = https, defaults to "cert.pem"
 
 VITE_PROTOCOL      =                # http or https, defaults to http
-                                    # When using https: mkcert plugin creates keyfile and certfile for you if it doesn't find any in the certification folder
+                                    # When using https: basicSsl plugin creates certfile for you called _cert.pem. NOTE: to have both a keyfile and cert file for the backend, simply copy the _cert.pem and rename it.
                                     # If you have a key and certfile already, use the above three variables to point to them.
 
 VITE_HOSTNAME      =                # Frontend host name, defaults to localhost
@@ -40,7 +38,7 @@ VITE_BASE          =                # Should be left blank if landing page is ju
 VITE_SOCKETPORT    =                # Change to reflect which port the socket is communicating on
 ```
 
-#### Backend .env file:
+#### Backend .env.example file:
 
 ```
 #Check .env file in the Frontend, they have to coincide!

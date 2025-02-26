@@ -1,7 +1,8 @@
 import { defineConfig } from "vite";
+import { ServerOptions as HttpsServerOptions } from "node:https";
 import react from "@vitejs/plugin-react";
 import { config } from "dotenv";
-import mkcert from "vite-plugin-mkcert";
+import basicSsl from "@vitejs/plugin-basic-ssl";
 config();
 
 // https://vitejs.dev/config/
@@ -19,23 +20,29 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    mkcert({
-      savePath: process.env.VITE_CERTS_FOLDER
+    basicSsl({
+      /** name of certification */
+      name: "test",
+      /** custom trust domains */
+      domains: [
+        "https://" + process.env.VITE_HOSTNAME
+          ? process.env.VITE_HOSTNAME
+          : "localhost",
+        "https://" + process.env.VITE_HOSTNAME
+          ? process.env.VITE_HOSTNAME
+          : "localhost" + process.env.VITE_HOSTPORT,
+      ],
+      /** custom certification directory */
+      certDir: process.env.VITE_CERTS_FOLDER
         ? process.env.VITE_CERTS_FOLDER.endsWith("/") ||
           process.env.VITE_CERTS_FOLDER.endsWith("\\")
           ? process.env.VITE_CERTS_FOLDER
           : process.env.VITE_CERTS_FOLDER + "/"
         : "./certs/",
-      keyFileName: process.env.VITE_KEYFILENAME
-        ? process.env.VITE_KEYFILENAME
-        : "key.pem",
-      certFileName: process.env.VITE_CERTFILENAME
-        ? process.env.VITE_CERTFILENAME
-        : "cert.pem",
     }),
   ],
   server: {
-    https: process.env.VITE_PROTOCOL === "https",
+    https: (process.env.VITE_PROTOCOL === "https") as any as HttpsServerOptions,
     host: process.env.VITE_HOSTNAME ? process.env.VITE_HOSTNAME : "localhost",
     port: process.env.VITE_HOSTPORT ? Number(process.env.VITE_HOSTPORT) : 3000,
   },
