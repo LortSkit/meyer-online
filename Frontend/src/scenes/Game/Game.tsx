@@ -164,6 +164,7 @@ const Game = ({ isDanish }: Props) => {
         </Box>
         <Box display="flex" justifyContent="center">
           <SetPlayerName
+            isDanish={isDanish}
             chosenPlayerName={chosenPlayerName}
             socket={SocketState.socket as Socket}
             setChosenPlayerName={setChosenPlayerName}
