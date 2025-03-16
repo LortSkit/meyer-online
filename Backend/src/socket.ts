@@ -3,7 +3,7 @@
 import { Server as HttpServer } from "http";
 import { Socket, Server } from "socket.io";
 import { v4 } from "uuid";
-import { frontendURL, socketURL } from "./environmentUtils";
+import { frontendURL, frontendWWWURL, socketURL } from "./environmentUtils";
 import { Meyer } from "./Meyer/gameLogic";
 import { Action } from "./Meyer/gameTypes";
 
@@ -112,7 +112,7 @@ export class ServerSocket {
       pingTimeout: 5000,
       cookie: false,
       cors: {
-        origin: [frontendURL, socketURL],
+        origin: [frontendURL, frontendWWWURL, socketURL],
         allowedHeaders: "*:*",
         credentials: true,
         optionsSuccessStatus: 200,

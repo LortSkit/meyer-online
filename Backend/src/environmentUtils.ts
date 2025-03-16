@@ -43,6 +43,12 @@ export const frontendURL = process.env.OVERRIDE
   ? process.env.OVERRIDE
   : `${protocol}://${hostName}${mode == "production" ? "" : ":" + hostPort}`;
 
+export const frontendWWWURL = process.env.OVERRIDE
+  ? process.env.OVERRIDE
+  : `${protocol}://www.${hostName}${
+      mode == "production" ? "" : ":" + hostPort
+    }`;
+
 export const socketURL = `${protocol}://${socketHost}:${socketPort}`;
 
 export const serverStartupMessage = `Server is running.\nExpecting Frontend at ${frontendURL}\nListening for socket messages at ${socketURL}`;
