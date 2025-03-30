@@ -36,7 +36,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Connect SSH
-        uses: appleboy/ssh-action@v1.2.0
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.ADDRESS }}
           username: ${{ secrets.SSHUSER }}
