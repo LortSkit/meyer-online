@@ -19,6 +19,7 @@ import { base } from "./utils/hostSubDirectory";
 import Footer from "./scenes/global/Footer";
 import CreateLocal from "./scenes/Create/CreateLocal/CreateLocal";
 import CreateOnline from "./scenes/Create/CreateOnline/CreateOnline";
+import { ToastProvider } from "./components/Toast/Toast";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -45,99 +46,101 @@ const App = () => {
   const { hash, pathname, search } = location;
 
   return (
-    <ColorModeContext.Provider value={colorMode}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <div {...handlers} className="app">
-          {!isInLobby(pathname) && (
-            <SidebarDesktop
-              isCollapsed={isCollapsed}
-              setIsCollapsed={setIsCollapsed}
-              isDanish={isDanish}
-            />
-          )}
-
-          <div className="sidebarMobileWrapper">
+    <ToastProvider>
+      <ColorModeContext.Provider value={colorMode}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <div {...handlers} className="app">
             {!isInLobby(pathname) && (
-              <SidebarMobile
-                isVisible={isVisible}
-                setIsVisible={setIsVisible}
+              <SidebarDesktop
+                isCollapsed={isCollapsed}
+                setIsCollapsed={setIsCollapsed}
                 isDanish={isDanish}
               />
             )}
-            {!isInLobby(pathname) && isVisible && (
-              <div
-                className="sidebarMobileOverlay"
-                onClick={() => setIsVisible(false)}
+
+            <div className="sidebarMobileWrapper">
+              {!isInLobby(pathname) && (
+                <SidebarMobile
+                  isVisible={isVisible}
+                  setIsVisible={setIsVisible}
+                  isDanish={isDanish}
+                />
+              )}
+              {!isInLobby(pathname) && isVisible && (
+                <div
+                  className="sidebarMobileOverlay"
+                  onClick={() => setIsVisible(false)}
+                />
+              )}
+            </div>
+            <div className="rest">
+              <Topbar
+                isDanish={isDanish}
+                pathname={pathname}
+                searchLobbyName={searchLobbyName}
+                setIsDanish={setIsDanish}
+                setIsVisible={setIsVisible}
+                setSearchLobbyName={setSearchLobbyName}
               />
-            )}
+              <main className="content">
+                <Routes>
+                  <Route
+                    path={base + "/"}
+                    element={<Home isDanish={isDanish} />}
+                  />
+                  <Route
+                    path={base + "/create"}
+                    element={<Create isDanish={isDanish} />}
+                  />
+                  <Route
+                    path={base + "/create/local"}
+                    element={<CreateLocal isDanish={isDanish} />}
+                  />
+                  <Route
+                    path={base + "/create/online"}
+                    element={
+                      <SocketContextComponent isDanish={isDanish}>
+                        <CreateOnline isDanish={isDanish} />
+                      </SocketContextComponent>
+                    }
+                  />
+                  <Route
+                    path={base + "/find"}
+                    element={
+                      <SocketContextComponent isDanish={isDanish}>
+                        <Find
+                          isDanish={isDanish}
+                          searchLobbyName={searchLobbyName}
+                          setSearchLobbyName={setSearchLobbyName}
+                        />
+                      </SocketContextComponent>
+                    }
+                  />
+                  <Route
+                    path={base + "/rules"}
+                    element={<Rules isDanish={isDanish} />}
+                  />
+                  <Route
+                    path={base + "/game/:gameId"}
+                    element={
+                      <SocketContextComponent isDanish={isDanish}>
+                        <Game isDanish={isDanish} />
+                      </SocketContextComponent>
+                    }
+                  />
+                  <Route
+                    path={base + "/game"}
+                    element={<Navigate to={base + "/game/unknown"} />}
+                  />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
           </div>
-          <div className="rest">
-            <Topbar
-              isDanish={isDanish}
-              pathname={pathname}
-              searchLobbyName={searchLobbyName}
-              setIsDanish={setIsDanish}
-              setIsVisible={setIsVisible}
-              setSearchLobbyName={setSearchLobbyName}
-            />
-            <main className="content">
-              <Routes>
-                <Route
-                  path={base + "/"}
-                  element={<Home isDanish={isDanish} />}
-                />
-                <Route
-                  path={base + "/create"}
-                  element={<Create isDanish={isDanish} />}
-                />
-                <Route
-                  path={base + "/create/local"}
-                  element={<CreateLocal isDanish={isDanish} />}
-                />
-                <Route
-                  path={base + "/create/online"}
-                  element={
-                    <SocketContextComponent isDanish={isDanish}>
-                      <CreateOnline isDanish={isDanish} />
-                    </SocketContextComponent>
-                  }
-                />
-                <Route
-                  path={base + "/find"}
-                  element={
-                    <SocketContextComponent isDanish={isDanish}>
-                      <Find
-                        isDanish={isDanish}
-                        searchLobbyName={searchLobbyName}
-                        setSearchLobbyName={setSearchLobbyName}
-                      />
-                    </SocketContextComponent>
-                  }
-                />
-                <Route
-                  path={base + "/rules"}
-                  element={<Rules isDanish={isDanish} />}
-                />
-                <Route
-                  path={base + "/game/:gameId"}
-                  element={
-                    <SocketContextComponent isDanish={isDanish}>
-                      <Game isDanish={isDanish} />
-                    </SocketContextComponent>
-                  }
-                />
-                <Route
-                  path={base + "/game"}
-                  element={<Navigate to={base + "/game/unknown"} />}
-                />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </div>
-      </ThemeProvider>
-    </ColorModeContext.Provider>
+        </ThemeProvider>
+      </ColorModeContext.Provider>
+    </ToastProvider>
   );
 };
 

@@ -8,6 +8,7 @@ import IosShareOutlined from "@mui/icons-material/IosShareOutlined";
 import GameLobbyName from "./GameLobbyName";
 import { ISocketContextState } from "../../../contexts/Socket/SocketContext";
 import { Socket } from "socket.io-client";
+import { useMediaQuery } from "usehooks-ts";
 import {
   translateGameId,
   translateGameOwner,
@@ -16,6 +17,9 @@ import {
   translateNeedName,
   translateNeedPlayers,
   translateShare,
+  translateShareMessage,
+  translateToastCopy,
+  translateShareLobby,
   translateStartGame,
   translateWaiting,
 } from "../../../utils/lang/Game/GameLobby/langGameLobby";
@@ -25,6 +29,7 @@ import PlayerDisplay from "../PlayersDisplay";
 import loading from "../../../assets/discordLoadingDotsDiscordLoading.gif";
 import LeaveGameButton from "../LeaveGameButton";
 import SetHealthRollRuleSet from "../../../components/game/SetHealthRollRuleSet";
+import { useToast } from "../../../contexts/Toast/ToastContext";
 
 interface Props {
   isDanish: boolean;
@@ -34,6 +39,9 @@ interface Props {
 const GameLobby = ({ isDanish, SocketState }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const toast = useToast();
+
+  const queryMatches = useMediaQuery("only screen and (min-width: 400px)");
 
   function thisPlayerName(): string {
     if (!SocketState.thisGame?.gamePlayers) {
@@ -41,7 +49,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
     }
 
     const playerIndex = SocketState.thisGame?.gamePlayers.findIndex(
-      (value) => value === SocketState.uid
+      (value) => value === SocketState.uid,
     );
 
     return SocketState.thisGame?.gamePlayersNames[playerIndex];
@@ -97,7 +105,21 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
             {translateShare(isDanish)}
           </Box>
           <IconButton
-            onClick={() => navigator.clipboard.writeText(window.location.href)} //SHARING BUTTON - ONLY WORKS WITH HTTPS PROTOCOL!
+            onClick={() => {
+              !queryMatches &&
+                navigator.share({
+                  title: translateShareMessage(isDanish),
+                  text:
+                    translateShareLobby(isDanish) +
+                    ' "' +
+                    SocketState.thisGame?.name +
+                    '"',
+                  url: window.location.href,
+                });
+              queryMatches &&
+                navigator.clipboard.writeText(window.location.href);
+              queryMatches && toast?.open(translateToastCopy(isDanish));
+            }} //SHARING BUTTON - ONLY WORKS WITH HTTPS PROTOCOL!
             sx={{
               position: "relative",
             }}
@@ -135,7 +157,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
               if (selectedRuleSet !== SocketState.thisGame.healthRollRuleSet) {
                 SocketState.socket?.emit(
                   "change_healthroll_rule_set",
-                  selectedRuleSet
+                  selectedRuleSet,
                 );
               }
             }}
@@ -147,7 +169,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
             {": "}
             {translateHealthRollCases(
               isDanish,
-              SocketState.thisGame?.healthRollRuleSet
+              SocketState.thisGame?.healthRollRuleSet,
             )}
           </Box>
         )}

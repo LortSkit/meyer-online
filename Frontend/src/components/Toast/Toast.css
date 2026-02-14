@@ -1,0 +1,25 @@
+/* Most code stolen from https://www.youtube.com/watch?v=52g9qcTD6ZI */
+
+.toasts {
+  display: flex;
+  position: fixed;
+  top: 68px;
+  right: 10px;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@keyframes slidein {
+  0% {
+    transform: translateX(100%);
+  }
+  60% {
+    transform: translateX(-15%);
+  }
+  80% {
+    transform: translateX(5%);
+  }
+  80% {
+    transform: translateX(0);
+  }
+}

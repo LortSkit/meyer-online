@@ -14,6 +14,22 @@ export function translateShare(isDanish: boolean): string {
   return isDanish ? "Invitér andre:" : "Invite others:";
 }
 
+export function translateShareMessage(isDanish: boolean): string {
+  return isDanish ? "Spil Meyer Online med mig!" : "Join my Meyer Online game!";
+}
+
+export function translateToastCopy(isDanish: boolean): string {
+  return isDanish
+    ? "Link kopieret!\nDel linket med dine venner, og så kan de tilslutte din lobby!"
+    : "Link copied!\nShare the link with your friends and then they can join your lobby!";
+}
+
+export function translateShareLobby(isDanish: boolean): string {
+  return isDanish
+    ? "Forbind til Meyer Online lobbyen"
+    : "Join my Meyer Online lobby";
+}
+
 export function translateGameOwner(isDanish: boolean): string {
   return isDanish ? "Du er spilejeren" : "You are the game owner";
 }
@@ -46,7 +62,7 @@ export function translateHealthRoll(isDanish: boolean): string {
 
 export function translateHealthRollCases(
   isDanish: boolean,
-  ruleSet: number
+  ruleSet: number,
 ): string {
   if (ruleSet === 0) {
     return translateCase1(isDanish);
