@@ -45,7 +45,7 @@ const Game = ({ isDanish }: Props) => {
   const [chosenPlayerName, setChosenPlayerName] = useState(
     localStorage.getItem("playerName") === null
       ? ""
-      : String(localStorage.getItem("playerName"))
+      : String(localStorage.getItem("playerName")),
   );
 
   function thisPlayerName(): string {
@@ -54,7 +54,7 @@ const Game = ({ isDanish }: Props) => {
     }
 
     const playerIndex = SocketState.thisGame?.gamePlayers.findIndex(
-      (value) => value === SocketState.uid
+      (value) => value === SocketState.uid,
     );
 
     return SocketState.thisGame?.gamePlayersNames[playerIndex];
@@ -116,7 +116,7 @@ const Game = ({ isDanish }: Props) => {
         exists: boolean,
         inProgress: boolean,
         enoughSpace: boolean,
-        givenPlayerName: string
+        givenPlayerName: string,
       ) => {
         setHasEmitted(true);
         setGameExists(exists);
@@ -125,7 +125,7 @@ const Game = ({ isDanish }: Props) => {
         if (givenPlayerName !== "") {
           localStorage.setItem("playerName", givenPlayerName);
         }
-      }
+      },
     );
   }
 
@@ -176,17 +176,9 @@ const Game = ({ isDanish }: Props) => {
     middleChild = (
       <MiddleChild widthPercentage={100}>
         {!SocketState.thisGame.isInProgress && (
-          <GameLobby isDanish={isDanish} SocketState={SocketState} />
+          <GameLobby isDanish={isDanish} />
         )}
-        {SocketState.thisGame.isInProgress && (
-          <GameMeyer
-            isDanish={isDanish}
-            gameInfo={SocketState.thisGame}
-            meyerInfo={SocketState.meyerInfo}
-            socket={SocketState.socket as Socket}
-            uid={SocketState.uid}
-          />
-        )}
+        {SocketState.thisGame.isInProgress && <GameMeyer isDanish={isDanish} />}
       </MiddleChild>
     );
   }

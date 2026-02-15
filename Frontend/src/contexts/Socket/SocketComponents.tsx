@@ -33,7 +33,7 @@ const SocketContextComponent: React.FunctionComponent<
 
   const [SocketState, SocketDispatch] = useReducer(
     SocketReducer,
-    defaultSocketContextState
+    defaultSocketContextState,
   );
   const [loading, setLoading] = useState(true);
   const [inactive, setInactive] = useState(document.visibilityState);
@@ -46,8 +46,8 @@ const SocketContextComponent: React.FunctionComponent<
   const socketHost = import.meta.env.VITE_SOCKETHOST
     ? import.meta.env.VITE_SOCKETHOST
     : import.meta.env.VITE_HOSTNAME
-    ? import.meta.env.VITE_HOSTNAME
-    : "localhost";
+      ? import.meta.env.VITE_HOSTNAME
+      : "localhost";
   const socketPort = import.meta.env.VITE_SOCKETPORT
     ? Number(import.meta.env.VITE_SOCKETPORT)
     : 1337;
@@ -77,7 +77,7 @@ const SocketContextComponent: React.FunctionComponent<
         setLoading(false);
         localStorage.setItem("storedUid", uid);
         localStorage.setItem("storedSocketId", socket.id as string);
-      }
+      },
     );
   }
 
@@ -298,13 +298,19 @@ const SocketContextComponent: React.FunctionComponent<
     });
 
     /* Owner left */
-    /* For Room: (User) */
+    /* For Room: (User) */ //TODO: How should this change?
     socket.on("game_owner_left", () => {
       navigate(base + "/find");
       confirm(translateOwnerLeft(isDanish));
       setTimeout(function () {
         window.location.reload();
       });
+    });
+
+    /* Owner changed */
+    /* For Room: Game */
+    socket.on("owner_changed", (payload: string[]) => {
+      SocketDispatch({ type: "owner_change", payload: payload });
     });
 
     /* When getting kicked */

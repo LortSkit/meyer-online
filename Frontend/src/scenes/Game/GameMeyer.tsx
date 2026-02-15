@@ -6,7 +6,7 @@ import useTheme from "@mui/material/styles/useTheme";
 import Timer from "@mui/icons-material/Timer";
 import TimerOff from "@mui/icons-material/TimerOff";
 import ArrowBackIosNew from "@mui/icons-material/ArrowBackIosNew";
-import { GameInfo, MeyerInfo } from "../../contexts/Socket/SocketContext";
+import { useGlobalContext } from "../../contexts/Socket/SocketContext";
 import GameHeading from "../../components/game/GameHeading";
 import { useEffect, useState } from "react";
 import {
@@ -14,7 +14,6 @@ import {
   RightChild,
 } from "../../components/CenteredPage/PageChildren";
 import PlayerDisplay from "./PlayersDisplay";
-import { Socket } from "socket.io-client";
 import CenteredPage from "../../components/CenteredPage/CenteredPage";
 import { RollWithName } from "../../utils/diceUtils";
 import { tokens } from "../../theme";
@@ -40,20 +39,18 @@ import { useMediaQuery } from "usehooks-ts";
 
 interface Props {
   isDanish: boolean;
-  gameInfo: GameInfo | null;
-  meyerInfo: MeyerInfo | null;
-  socket: Socket;
-  uid: string;
 }
 
-const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
+const GameMeyer = ({ isDanish }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const { SocketState, SocketDispatch } = useGlobalContext();
 
   const queryMatches = useMediaQuery("only screen and (min-width: 400px)");
 
   function isGameOverMobile(): boolean {
-    if (!queryMatches && meyerInfo !== null && meyerInfo.isGameOver) {
+    if (!queryMatches && SocketState.meyerInfo.isGameOver) {
       return true;
     }
 
@@ -63,31 +60,34 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
   const mainWidthGameOverMobile = 95;
 
   const [truePlayerNames, setTruePlayerNames] = useState(
-    gameInfo !== null ? gameInfo.gamePlayersNames.map(numberAfterName) : []
+    SocketState.thisGame.gamePlayersNames.map(numberAfterName),
   );
   const [rightToggle, setRightToggle] = useState(
     localStorage.getItem("rightSide") !== undefined
       ? localStorage.getItem("rightSide") === "true"
-      : true
+      : true,
   );
   const [showTimer, setShowTimer] = useState(
     localStorage.getItem("showTimer") !== undefined
       ? localStorage.getItem("showTimer") === "true"
-      : true
+      : true,
   );
 
   function numberAfterName(name: string, index: number): string {
-    if (gameInfo === null || meyerInfo === null) {
+    if (SocketState.thisGame === null || SocketState.meyerInfo === null) {
       return "";
     }
     if (index === 0) {
-      return gameInfo.gamePlayersNames
-        .slice(1, gameInfo.gamePlayersNames.length)
+      return SocketState.thisGame.gamePlayersNames
+        .slice(1, SocketState.thisGame.gamePlayersNames.length)
         .includes(name)
         ? name + " (1)"
         : name;
     } else {
-      const previousNames = gameInfo.gamePlayersNames.slice(0, index);
+      const previousNames = SocketState.thisGame.gamePlayersNames.slice(
+        0,
+        index,
+      );
       if (previousNames.includes(name)) {
         let i = 0;
         previousNames.forEach((value) => {
@@ -98,8 +98,8 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
 
         return name + " (" + (i + 1) + ")";
       } else if (
-        gameInfo.gamePlayersNames
-          .slice(index + 1, gameInfo.gamePlayersNames.length)
+        SocketState.thisGame.gamePlayersNames
+          .slice(index + 1, SocketState.thisGame.gamePlayersNames.length)
           .includes(name)
       ) {
         return name + " (1)";
@@ -110,20 +110,13 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
   }
 
   function playernameFromUid(uid: string): string {
-    if (gameInfo === null || meyerInfo === null) {
+    if (SocketState.thisGame === null || SocketState.meyerInfo === null) {
       return "";
     }
-    const playerIndex = gameInfo.gamePlayers.findIndex(
-      (value) => value === uid
+    const playerIndex = SocketState.thisGame.gamePlayers.findIndex(
+      (value) => value === uid,
     );
     return truePlayerNames[playerIndex];
-  }
-
-  function isOwner(): boolean {
-    if (gameInfo === null || meyerInfo === null) {
-      return false;
-    }
-    return uid === gameInfo.gamePlayers[0];
   }
 
   const toggleTimerButton = () => {
@@ -145,19 +138,26 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
   };
 
   useEffect(() => {
-    if (gameInfo !== null) {
-      setTruePlayerNames(gameInfo.gamePlayersNames.map(numberAfterName));
+    if (SocketState.thisGame !== null) {
+      setTruePlayerNames(
+        SocketState.thisGame.gamePlayersNames.map(numberAfterName),
+      );
     }
-  }, [gameInfo]);
+  }, [SocketState.thisGame]);
 
   useEffect(() => {
     if (truePlayerNames.includes("")) {
-      if (gameInfo === null || gameInfo.gamePlayersNames.includes("")) {
+      if (
+        SocketState.thisGame === null ||
+        SocketState.thisGame.gamePlayersNames.includes("")
+      ) {
         setTimeout(function () {
           window.location.reload();
         });
       } else {
-        setTruePlayerNames(gameInfo.gamePlayersNames.map(numberAfterName));
+        setTruePlayerNames(
+          SocketState.thisGame.gamePlayersNames.map(numberAfterName),
+        );
       }
     }
   }, [truePlayerNames]);
@@ -178,29 +178,35 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
             wordBreak: "break-all",
             textAlign: "center",
           }}
-          children={<strong>{gameInfo !== null ? gameInfo.name : ""}</strong>}
+          children={
+            <strong>
+              {SocketState.thisGame !== null ? SocketState.thisGame.name : ""}
+            </strong>
+          }
         />
       </Box>
       <Box display="flex" justifyContent="center" paddingBottom="10.8px">
-        <LeaveGameButton isDanish={isDanish} socket={socket} />
+        <LeaveGameButton isDanish={isDanish} socket={SocketState.socket} />
       </Box>
       {/* IN GAME */}
-      {!meyerInfo?.isGameOver && (
+      {!SocketState.meyerInfo?.isGameOver && (
         <Box display="flex" flexDirection="column">
           <Box display="flex" justifyContent="center">
             <GameHeading
               isDanish={isDanish}
               currentPlayer={playernameFromUid(
-                meyerInfo !== null ? meyerInfo.currentPlayer : ""
+                SocketState.meyerInfo !== null
+                  ? SocketState.meyerInfo.currentPlayer
+                  : "",
               )}
-              round={meyerInfo !== null ? meyerInfo.round : 0}
-              turn={meyerInfo !== null ? meyerInfo.turn : 0}
+              round={SocketState.meyerInfo.round}
+              turn={SocketState.meyerInfo.turn}
             />
           </Box>
           {/* CURRENT PLAYER DISPLAY */}
-          {meyerInfo?.currentPlayer === uid && (
+          {SocketState.meyerInfo?.currentPlayer === SocketState.uid && (
             <Box display="flex" flexDirection="column">
-              {meyerInfo.roll !== -1 && (
+              {SocketState.meyerInfo.roll !== -1 && (
                 <Typography
                   fontSize="25px"
                   fontStyle="normal"
@@ -210,22 +216,26 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                 >
                   <RollWithName
                     isDanish={isDanish}
-                    roll={meyerInfo.roll}
+                    roll={SocketState.meyerInfo.roll}
                     color={colors.blueAccent[100]}
                     sideLength={30}
                   />
                 </Typography>
               )}
               {/* ACTION */}
-              {meyerInfo.bluffChoices.length === 0 && (
+              {SocketState.meyerInfo.bluffChoices.length === 0 && (
                 <Box display="flex" justifyContent="center" flexWrap="wrap">
-                  {meyerInfo.actionChoices.map((action) => (
+                  {SocketState.meyerInfo.actionChoices.map((action) => (
                     <Box display="flex" justifyContent="center" key={action}>
                       <ActionButton
                         isDanish={isDanish}
                         action={action}
                         onClick={() => {
-                          socket.emit("take_action_bluff", action, -1);
+                          SocketState.socket?.emit(
+                            "take_action_bluff",
+                            action,
+                            -1,
+                          );
                         }}
                       />
                     </Box>
@@ -233,14 +243,18 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                 </Box>
               )}
               {/* BLUFF */}
-              {meyerInfo.bluffChoices.length !== 0 && (
+              {SocketState.meyerInfo.bluffChoices.length !== 0 && (
                 <Box display="flex" flexDirection="column">
                   <Box display="flex" justifyContent="center">
                     <Button
                       variant="contained"
                       color="secondary"
                       onClick={() => {
-                        socket.emit("take_action_bluff", "Error", -1);
+                        SocketState.socket?.emit(
+                          "take_action_bluff",
+                          "Error",
+                          -1,
+                        );
                       }}
                     >
                       <ArrowBackIosNew />
@@ -249,13 +263,17 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                   </Box>
                   <Box paddingTop="5px" />
                   <Box display="flex" justifyContent="center" flexWrap="wrap">
-                    {meyerInfo.bluffChoices.map((bluff) => (
+                    {SocketState.meyerInfo.bluffChoices.map((bluff) => (
                       <Box display="flex" justifyContent="center" key={bluff}>
                         <BluffButton
                           isDanish={isDanish}
                           bluff={bluff}
                           onClick={() => {
-                            socket.emit("take_action_bluff", "Error", bluff);
+                            SocketState.socket?.emit(
+                              "take_action_bluff",
+                              "Error",
+                              bluff,
+                            );
                           }}
                         />
                       </Box>
@@ -266,7 +284,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
             </Box>
           )}
           {/* NOT CURRENT PLAYER DISPLAY */}
-          {meyerInfo?.currentPlayer !== uid && (
+          {SocketState.meyerInfo?.currentPlayer !== SocketState.uid && (
             <Typography
               fontSize="12px"
               fontStyle="normal"
@@ -281,9 +299,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                 <Box>
                   {translateWaitingTurn(
                     isDanish,
-                    playernameFromUid(
-                      meyerInfo !== null ? meyerInfo.currentPlayer : ""
-                    )
+                    playernameFromUid(SocketState.meyerInfo.currentPlayer),
                   )}
                   <img
                     src={loading}
@@ -298,40 +314,43 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
         </Box>
       )}
       {/* GAME OVER */}
-      {meyerInfo?.isGameOver && (
+      {SocketState.meyerInfo.isGameOver && (
         <Box display="flex" flexDirection="column" overflow="hidden">
           <GameOverHeading
             isDanish={isDanish}
-            currentPlayer={playernameFromUid(meyerInfo.currentPlayer)}
-            round={meyerInfo.round + 1}
-            turnsTotal={meyerInfo.turnTotal + 1}
+            currentPlayer={playernameFromUid(
+              SocketState.meyerInfo.currentPlayer,
+            )}
+            round={SocketState.meyerInfo.round + 1}
+            turnsTotal={SocketState.meyerInfo.turnTotal + 1}
           />
-          {isOwner() && (
+          {SocketState.thisGame.owner === SocketState.uid && (
             <Box display="flex" justifyContent="center">
               <SetHealthRollRuleSet
                 isDanish={isDanish}
-                chosenRuleSet={
-                  gameInfo !== null ? gameInfo?.healthRollRuleSet : 0
-                }
+                chosenRuleSet={SocketState.thisGame.healthRollRuleSet}
                 setChosenRuleSet={(selectedRuleSet: number) => {
-                  if (selectedRuleSet !== gameInfo?.healthRollRuleSet) {
-                    socket?.emit("change_healthroll_rule_set", selectedRuleSet);
+                  if (
+                    selectedRuleSet !== SocketState.thisGame.healthRollRuleSet
+                  ) {
+                    SocketState.socket?.emit(
+                      "change_healthroll_rule_set",
+                      selectedRuleSet,
+                    );
                   }
                 }}
               />
             </Box>
           )}
-          {isOwner() && (
+          {SocketState.thisGame?.owner === SocketState.uid && (
             <Box display="flex" justifyContent="center">
               <Button
                 variant="contained"
                 color="secondary"
                 onClick={() => {
-                  socket.emit("restart_game");
+                  SocketState.socket?.emit("restart_game");
                 }}
-                disabled={
-                  gameInfo !== null ? gameInfo.gamePlayers.length < 2 : false
-                }
+                disabled={SocketState.thisGame.gamePlayers.length < 2}
               >
                 {translatePlayAgain(isDanish)}
               </Button>
@@ -339,14 +358,14 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                 variant="contained"
                 color="secondary"
                 onClick={() => {
-                  socket.emit("reopen_lobby");
+                  SocketState.socket?.emit("reopen_lobby");
                 }}
               >
                 {translateReopen(isDanish)}
               </Button>
             </Box>
           )}
-          {!isOwner() && (
+          {SocketState.thisGame.owner !== SocketState.uid && (
             <Box display="flex" flexDirection="column">
               <Typography
                 fontSize="12px"
@@ -362,7 +381,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                   <Box>
                     {translateWaitingOwner(
                       isDanish,
-                      gameInfo !== null ? gameInfo?.gamePlayersNames[0] : ""
+                      SocketState.thisGame.gamePlayersNames[0],
                     )}
                     <img
                       src={loading}
@@ -378,7 +397,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
                 {": "}
                 {translateHealthRollCases(
                   isDanish,
-                  gameInfo !== null ? gameInfo.healthRollRuleSet : 2
+                  SocketState.thisGame.healthRollRuleSet,
                 )}
               </Box>
             </Box>
@@ -393,13 +412,11 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
         >
           <TurnInformation
             isDanish={isDanish}
-            playerNames={gameInfo !== null ? gameInfo.gamePlayersNames : []}
-            round={meyerInfo !== null ? meyerInfo.round : 0}
+            playerNames={SocketState.thisGame.gamePlayersNames}
+            round={SocketState.meyerInfo.round}
             showTimer={showTimer}
             setTurnInformation={function (update: TurnInfo[]) {}}
-            turnInformation={
-              meyerInfo !== null ? meyerInfo.turnInformation : []
-            }
+            turnInformation={SocketState.meyerInfo.turnInformation}
           />
         </Box>
       </Box>
@@ -428,23 +445,7 @@ const GameMeyer = ({ isDanish, gameInfo, meyerInfo, socket, uid }: Props) => {
         sx={{ outline: "4px solid", outlineColor: colors.primary[600] }}
       >
         <Box display="flex" justifyContent="left">
-          <PlayerDisplay
-            currentName={playernameFromUid(
-              meyerInfo !== null ? meyerInfo.currentPlayer : ""
-            )}
-            currentUid={meyerInfo !== null ? meyerInfo.currentPlayer : ""}
-            healths={meyerInfo !== null ? meyerInfo.healths : []}
-            inProgress={gameInfo !== null ? gameInfo.isInProgress : false}
-            isOwner={isOwner()}
-            isGameOver={meyerInfo !== null ? meyerInfo.isGameOver : false}
-            playerNames={truePlayerNames}
-            playersTimedOut={
-              gameInfo !== null ? gameInfo.gamePlayersTimeout : []
-            }
-            playerUids={gameInfo !== null ? gameInfo.gamePlayers : []}
-            socket={socket}
-            thisUid={uid}
-          />
+          <PlayerDisplay currentName={playernameFromUid} />
         </Box>
       </Box>
     </RightChild>

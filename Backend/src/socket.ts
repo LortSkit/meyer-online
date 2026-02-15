@@ -10,6 +10,7 @@ import { Action } from "./Meyer/gameTypes";
 type GameBase = {
   id: string;
   name: string;
+  owner: string;
   maxNumberOfPlayers: number;
   healthRollRuleSet: number;
 };
@@ -25,6 +26,7 @@ type GameDisplay = {
 type GameInfo = {
   id: string;
   name: string;
+  owner: string;
   gamePlayers: string[];
   gamePlayersNames: string[];
   gamePlayersTimeout: string[];
@@ -46,6 +48,7 @@ function gameRequestToGameBase(gameRequest: GameRequest): GameBase {
   return {
     id: v4(),
     name: gameRequest.name,
+    owner: "",
     maxNumberOfPlayers: gameRequest.maxNumberOfPlayers,
     healthRollRuleSet: gameRequest.healthRollRuleSet,
   };
@@ -65,6 +68,7 @@ function gameBaseToGameInfo(gameBase: GameBase): GameInfo {
   return {
     id: gameBase.id,
     name: gameBase.name,
+    owner: gameBase.owner,
     gamePlayers: [],
     gamePlayersNames: [],
     gamePlayersTimeout: [],
@@ -136,17 +140,17 @@ export class ServerSocket {
     } else {
       console.info(
         "Emitting event: " + name + " to " + users + " with with payload",
-        payload
+        payload,
       );
     }
     users.forEach((id) =>
-      payload ? this.io.to(id).emit(name, payload) : this.io.to(id).emit(name)
+      payload ? this.io.to(id).emit(name, payload) : this.io.to(id).emit(name),
     );
   };
 
   public deleteErroneousSocketUser(socketId: string): void {
     const erroneousEntry = Object.entries(this.users).find(
-      (value) => value[1] === socketId
+      (value) => value[1] === socketId,
     );
 
     if (erroneousEntry) {
@@ -161,19 +165,19 @@ export class ServerSocket {
 
     if (inGameId) {
       let playerIndex = this.gamePlayers[inGameId].findIndex(
-        (value) => value === uid
+        (value) => value === uid,
       );
 
       this.gamePlayers[inGameId] = this.gamePlayers[inGameId].filter(
-        (value, index) => index !== playerIndex
+        (value, index) => index !== playerIndex,
       );
       this.gamePlayersNames[inGameId] = this.gamePlayersNames[inGameId].filter(
-        (value, index) => index !== playerIndex
+        (value, index) => index !== playerIndex,
       );
 
       if (inGameOwnerUid === uid) {
         const restPlayers = this.gamePlayers[inGameId].filter(
-          (value) => value !== inGameOwnerUid
+          (value) => value !== inGameOwnerUid,
         );
         /* (User) */
         this.SendMessage("game_owner_left", restPlayers);
@@ -185,7 +189,7 @@ export class ServerSocket {
       } else {
         /* Game */
         const playerIndex = this.gamePlayers[inGameId].findIndex(
-          (value) => value === uid
+          (value) => value === uid,
         );
         delete this.gamePlayers[inGameId][playerIndex];
         delete this.gamePlayersNames[inGameId][playerIndex];
@@ -199,7 +203,7 @@ export class ServerSocket {
           this.SendMessage(
             "update_game_num_players",
             ["Find"],
-            [inGameId, this.gamePlayers[inGameId].length]
+            [inGameId, this.gamePlayers[inGameId].length],
           );
         }
       }
@@ -230,7 +234,7 @@ export class ServerSocket {
 
   public getPublicGameDisplays(): GameDisplay[] {
     const publicGamesFiltered: [string, GameBase][] = Object.entries(
-      this.gameBases
+      this.gameBases,
     ).filter(([uid, game]) => {
       return this.publicGames[uid] === game.id;
     });
@@ -295,7 +299,7 @@ export class ServerSocket {
 
   public getTimedOutUsers(uids: string[]): string[] {
     return uids.filter((value) =>
-      Object.keys(this.userTimeout).includes(value)
+      Object.keys(this.userTimeout).includes(value),
     );
   }
 
@@ -314,17 +318,17 @@ export class ServerSocket {
   public updateMeyerInfo(
     gameId: string,
     updateEveryone: boolean,
-    gameStarted: boolean
+    gameStarted: boolean,
   ): void {
     const currentPlayer = this.gameMeyer[gameId].getCurrentPlayerUid();
     const restPlayers = this.gamePlayers[gameId].filter(
-      (value) => value !== currentPlayer
+      (value) => value !== currentPlayer,
     );
     /* (User) */
     this.SendMessage(
       gameStarted ? "game_started" : "update_meyer_info",
       [currentPlayer],
-      this.gameMeyer[gameId].getMeyerInfo(currentPlayer)
+      this.gameMeyer[gameId].getMeyerInfo(currentPlayer),
     );
 
     if (updateEveryone) {
@@ -332,7 +336,7 @@ export class ServerSocket {
       this.SendMessage(
         gameStarted ? "game_started" : "update_meyer_info",
         restPlayers,
-        this.gameMeyer[gameId].getMeyerInfo()
+        this.gameMeyer[gameId].getMeyerInfo(),
       );
     }
     this.gameMeyer[gameId].deleteTurnInformation();
@@ -351,7 +355,7 @@ export class ServerSocket {
       (
         storedUid: string,
         storedSocketId: string,
-        callback: (reconnect: boolean, uid: string, userstotal: number) => void
+        callback: (reconnect: boolean, uid: string, userstotal: number) => void,
       ) => {
         console.info("Handshake received from: " + socket.id);
 
@@ -409,7 +413,7 @@ export class ServerSocket {
               this.SendMessage(
                 "remove_user_timeout",
                 [this.playerInGame[uid]],
-                uid
+                uid,
               );
             }
 
@@ -435,9 +439,9 @@ export class ServerSocket {
         this.SendMessage(
           "user_connected",
           users.filter((id) => id !== socket.id),
-          users.length
+          users.length,
         );
-      }
+      },
     );
 
     /* DISCONNECT - Happens on socket disconnect*/
@@ -487,7 +491,7 @@ export class ServerSocket {
         this.SendMessage(
           "joined_find",
           [this.users[uid]],
-          this.getPublicGameDisplays()
+          this.getPublicGameDisplays(),
         );
       }
     });
@@ -518,13 +522,16 @@ export class ServerSocket {
       (
         gameRequest: GameRequest,
         isPublic: boolean,
-        callback: (gameId: string) => void
+        callback: (gameId: string) => void,
       ) => {
         console.info("Received event: create_game from " + socket.id);
 
         const uid = this.GetUidFromSocketID(socket.id);
         if (uid) {
-          const gameBase = gameRequestToGameBase(gameRequest);
+          const gameBase = {
+            ...gameRequestToGameBase(gameRequest),
+            owner: uid,
+          };
           const existingGame = this.gameBases[uid];
           const existingGameIsPublic = this.gameIsPublic(existingGame?.id);
 
@@ -567,7 +574,7 @@ export class ServerSocket {
             callback("");
           }
         }
-      }
+      },
     );
     ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -587,8 +594,8 @@ export class ServerSocket {
           exists: boolean,
           inProgress: boolean,
           enoughSpace: boolean,
-          givenPlayerName: string
-        ) => void
+          givenPlayerName: string,
+        ) => void,
       ) => {
         console.info("Received event: join_game from " + socket.id);
 
@@ -620,7 +627,7 @@ export class ServerSocket {
               this.SendMessage(
                 "player_joined",
                 [gameId],
-                [joiningUid, givenPlayerName]
+                [joiningUid, givenPlayerName],
               );
 
               this.leavePreviousRoom(socket, joiningUid);
@@ -640,16 +647,16 @@ export class ServerSocket {
 
                 {
                   ...gameBaseToGameInfo(
-                    this.gameBases[this.gamesIdIndex[gameId]]
+                    this.gameBases[this.gamesIdIndex[gameId]],
                   ),
                   gamePlayers: this.gamePlayers[gameId],
                   gamePlayersNames: this.gamePlayersNames[gameId],
                   gamePlayersTimeout: this.getTimedOutUsers(
-                    this.gamePlayers[gameId]
+                    this.gamePlayers[gameId],
                   ),
                   isPublic: this.gameIsPublic(gameId),
                   isInProgress: this.gameIsInProgress(gameId),
-                } as GameInfo
+                } as GameInfo,
               );
 
               if (this.gameIsPublic(gameId)) {
@@ -657,7 +664,7 @@ export class ServerSocket {
                 this.SendMessage(
                   "update_game_num_players",
                   ["Find"],
-                  [gameId, this.gamePlayers[gameId].length]
+                  [gameId, this.gamePlayers[gameId].length],
                 );
               }
             } else {
@@ -673,16 +680,16 @@ export class ServerSocket {
 
                 {
                   ...gameBaseToGameInfo(
-                    this.gameBases[this.gamesIdIndex[gameId]]
+                    this.gameBases[this.gamesIdIndex[gameId]],
                   ),
                   gamePlayers: this.gamePlayers[gameId],
                   gamePlayersNames: this.gamePlayersNames[gameId],
                   gamePlayersTimeout: this.getTimedOutUsers(
-                    this.gamePlayers[gameId]
+                    this.gamePlayers[gameId],
                   ),
                   isPublic: this.gameIsPublic(gameId),
                   isInProgress: this.gameIsInProgress(gameId),
-                } as GameInfo
+                } as GameInfo,
               );
 
               if (this.gameIsInProgress(gameId)) {
@@ -690,7 +697,7 @@ export class ServerSocket {
                 this.SendMessage(
                   "update_meyer_info",
                   [joiningUid],
-                  this.gameMeyer[gameId].getMeyerInfo(joiningUid)
+                  this.gameMeyer[gameId].getMeyerInfo(joiningUid),
                 );
               }
             }
@@ -699,7 +706,7 @@ export class ServerSocket {
           }
           callback(false, true, false, givenPlayerName);
         }
-      }
+      },
     );
 
     /* CHANGE NAME - Happens when a player edits their name and presses 'enter' */
@@ -709,7 +716,7 @@ export class ServerSocket {
       "change_player_name",
       (
         chosenPlayerName: string,
-        callback: (givenPlayerName: string) => void
+        callback: (givenPlayerName: string) => void,
       ) => {
         console.info("Received event: change_player_name from " + socket.id);
 
@@ -727,7 +734,7 @@ export class ServerSocket {
             }
 
             const playerIndex = this.gamePlayers[inGameId].findIndex(
-              (value) => value === uid
+              (value) => value === uid,
             );
 
             this.gamePlayersNames[inGameId][playerIndex] = givenPlayerName;
@@ -738,11 +745,11 @@ export class ServerSocket {
             this.SendMessage(
               "player_name_changed",
               [inGameId],
-              [uid, givenPlayerName]
+              [uid, givenPlayerName],
             );
           }
         }
-      }
+      },
     );
 
     /* CHANGE LOBBY NAME - Happens when the lobby owner edits the lobby name and presses 'enter' */
@@ -769,7 +776,7 @@ export class ServerSocket {
             this.SendMessage(
               "update_game_name",
               ["Find"],
-              [owningGame.id, newLobbyName]
+              [owningGame.id, newLobbyName],
             );
           }
         }
@@ -798,7 +805,7 @@ export class ServerSocket {
           if (this.gamePlayers[owningGame.id].length > newMaxNumberOfPlayers) {
             const playersToKick = this.gamePlayers[owningGame.id].slice(
               newMaxNumberOfPlayers,
-              this.gamePlayers[owningGame.id].length
+              this.gamePlayers[owningGame.id].length,
             );
             playersToKick.forEach((uid) => {
               this.leavePreviousRoom(socket, uid);
@@ -812,7 +819,7 @@ export class ServerSocket {
               this.SendMessage(
                 "update_game_num_players",
                 ["Find"],
-                [owningGame.id, this.gamePlayers[owningGame.id].length]
+                [owningGame.id, this.gamePlayers[owningGame.id].length],
               );
             }
           }
@@ -821,14 +828,14 @@ export class ServerSocket {
           this.SendMessage(
             "max_players_changed",
             [owningGame.id],
-            newMaxNumberOfPlayers
+            newMaxNumberOfPlayers,
           );
           if (this.gameIsPublic(owningGame.id)) {
             /* Find */
             this.SendMessage(
               "update_max_players",
               ["Find"],
-              [owningGame.id, newMaxNumberOfPlayers]
+              [owningGame.id, newMaxNumberOfPlayers],
             );
           }
         }
@@ -887,8 +894,8 @@ export class ServerSocket {
           this.gamePlayers[owningGame.id].length > 1
         ) {
           this.gameMeyer[owningGame.id] = new Meyer(
-            this.gamePlayers[owningGame.id],
-            this.gameBases[uid].healthRollRuleSet
+            this.gamePlayers[owningGame.id], //TODO: set according to order
+            this.gameBases[uid].healthRollRuleSet,
           );
           this.updateMeyerInfo(owningGame.id, true, true);
 
@@ -948,7 +955,7 @@ export class ServerSocket {
                 "Failed on taking action",
                 action,
                 "got error:",
-                e.message
+                e.message,
               );
               return;
             }
@@ -962,7 +969,7 @@ export class ServerSocket {
                   "Failed on advancing turn",
                   action,
                   "got error:",
-                  e.message
+                  e.message,
                 );
                 return;
               }
@@ -989,7 +996,7 @@ export class ServerSocket {
                 "Failed on choosing bluff",
                 action,
                 "got error:",
-                e.message
+                e.message,
               );
               return;
             }
@@ -1002,7 +1009,7 @@ export class ServerSocket {
                 "Failed on advancing turn",
                 action,
                 "got error:",
-                e.message
+                e.message,
               );
               return;
             }
@@ -1032,7 +1039,7 @@ export class ServerSocket {
         ) {
           this.gameMeyer[owningGame.id].resetGame(
             this.gamePlayers[owningGame.id],
-            this.gameBases[uid].healthRollRuleSet
+            this.gameBases[uid].healthRollRuleSet,
           );
           this.updateMeyerInfo(owningGame.id, true, true);
         }
@@ -1046,7 +1053,7 @@ export class ServerSocket {
     /* Sends to: Find, Game */
     socket.on("change_healthroll_rule_set", (selectedRuleSet: number) => {
       console.info(
-        "Received event: change_healthroll_rule_set from " + socket.id
+        "Received event: change_healthroll_rule_set from " + socket.id,
       );
 
       const uid = this.GetUidFromSocketID(socket.id);
@@ -1063,15 +1070,50 @@ export class ServerSocket {
           this.SendMessage(
             "healthroll_rule_set_changed",
             [owningGame.id],
-            [selectedRuleSet]
+            [selectedRuleSet],
           );
 
           /* Find */
           this.SendMessage(
             "update_healthroll_rule_set",
             ["Find"],
-            [owningGame.id, selectedRuleSet]
+            [owningGame.id, selectedRuleSet],
           );
+        }
+      }
+    });
+
+    /* CHANGE OWNER */
+    /* From Room: Game */
+    /* Sends to: Find, Game */ //TODO: Does it send to Find?
+    socket.on("change_owner", (playerUid: string) => {
+      console.info("Received event: change_owner from " + socket.id);
+
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid && uid !== playerUid) {
+        const owningGame = this.gameBases[uid];
+        if (owningGame) {
+          if (
+            this.gamePlayers[owningGame?.id].filter(
+              (value, index) => value == playerUid,
+            ).length === 1
+          ) {
+            const isPublic = this.gameIsPublic(owningGame.id);
+            this.gameBases[playerUid] = {
+              ...this.gameBases[uid],
+              owner: playerUid,
+            };
+            this.gamesIdIndex[owningGame.id] = playerUid;
+            if (isPublic) {
+              this.publicGames[playerUid] = this.publicGames[uid];
+              delete this.publicGames[uid];
+            }
+            delete this.gameBases[uid];
+            delete this.gamesIdIndex[uid];
+
+            /* Game */
+            this.SendMessage("owner_changed", [owningGame.id], [playerUid]);
+          }
         }
       }
     });
@@ -1086,7 +1128,7 @@ export class ServerSocket {
       console.info("Received event: kick_player from " + socket.id);
 
       const uid = this.GetUidFromSocketID(socket.id);
-      if (uid) {
+      if (uid && uid !== kickingUid) {
         const owningGame = this.gameBases[uid];
         if (owningGame) {
           /* (User) */

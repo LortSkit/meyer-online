@@ -6,7 +6,7 @@ import useTheme from "@mui/material/styles/useTheme";
 import StarOutlined from "@mui/icons-material/StarOutlined";
 import IosShareOutlined from "@mui/icons-material/IosShareOutlined";
 import GameLobbyName from "./GameLobbyName";
-import { ISocketContextState } from "../../../contexts/Socket/SocketContext";
+import { useGlobalContext } from "../../../contexts/Socket/SocketContext";
 import { Socket } from "socket.io-client";
 import { useMediaQuery } from "usehooks-ts";
 import {
@@ -33,13 +33,14 @@ import { useToast } from "../../../contexts/Toast/ToastContext";
 
 interface Props {
   isDanish: boolean;
-  SocketState: ISocketContextState;
 }
 
-const GameLobby = ({ isDanish, SocketState }: Props) => {
+const GameLobby = ({ isDanish }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const toast = useToast();
+
+  const { SocketState, SocketDispatch } = useGlobalContext();
 
   const queryMatches = useMediaQuery("only screen and (min-width: 400px)");
 
@@ -56,7 +57,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
   }
 
   function isOwner(): boolean {
-    return SocketState.uid === SocketState.thisGame?.gamePlayers[0];
+    return SocketState.uid === SocketState.thisGame?.owner;
   }
 
   function isMissingPlayers(): boolean {
@@ -133,11 +134,22 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
           <Box display="flex" justifyContent="center">
             {translateGameOwner(isDanish)}
             <Box paddingLeft="5px" />
-            <StarOutlined
-              sx={{
-                position: "relative",
+            <IconButton
+              onClick={() => {
+                SocketState.socket?.emit(
+                  "change_owner",
+                  SocketState.thisGame?.gamePlayers.filter(
+                    (value) => value !== SocketState.uid,
+                  )[0],
+                );
               }}
-            />
+            >
+              <StarOutlined
+                sx={{
+                  position: "relative",
+                }}
+              />
+            </IconButton>
           </Box>
         )}
 
@@ -152,9 +164,9 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
         {isOwner() && (
           <SetHealthRollRuleSet
             isDanish={isDanish}
-            chosenRuleSet={SocketState.thisGame.healthRollRuleSet}
+            chosenRuleSet={SocketState.thisGame?.healthRollRuleSet}
             setChosenRuleSet={(selectedRuleSet: number) => {
-              if (selectedRuleSet !== SocketState.thisGame.healthRollRuleSet) {
+              if (selectedRuleSet !== SocketState.thisGame?.healthRollRuleSet) {
                 SocketState.socket?.emit(
                   "change_healthroll_rule_set",
                   selectedRuleSet,
@@ -196,16 +208,7 @@ const GameLobby = ({ isDanish, SocketState }: Props) => {
             bgcolor={colors.primary[600]}
             borderRadius="50px"
           >
-            <PlayerDisplay
-              currentName={thisPlayerName()}
-              currentUid={SocketState.uid}
-              isOwner={isOwner()}
-              playerNames={SocketState.thisGame.gamePlayersNames}
-              playersTimedOut={SocketState.thisGame.gamePlayersTimeout}
-              playerUids={SocketState.thisGame.gamePlayers}
-              socket={SocketState.socket as Socket}
-              thisUid={SocketState.uid}
-            />
+            <PlayerDisplay currentName={(uid: string) => thisPlayerName()} />
           </Box>
         </Box>
 

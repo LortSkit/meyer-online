@@ -14,6 +14,7 @@ export type Game = {
 export type GameInfo = {
   id: string;
   name: string;
+  owner: string;
   gamePlayers: string[];
   gamePlayersNames: string[];
   gamePlayersTimeout: string[];
@@ -90,6 +91,7 @@ export type TSocketContextActions =
   /* %%MIXED%% */
   | "change_healthroll_rule_set"
   | "remove_game_player"
+  | "owner_change"
   | "add_user_timeout"
   | "remove_user_timeout";
 
@@ -113,7 +115,7 @@ export interface ISocketContextActions {
 
 export const SocketReducer = (
   state: ISocketContextState,
-  action: ISocketContextActions
+  action: ISocketContextActions,
 ) => {
   let gameIndex;
   let index;
@@ -150,20 +152,20 @@ export const SocketReducer = (
       return {
         ...state,
         games: state.games.filter(
-          (game: Game) => game.id !== (action.payload as string)
+          (game: Game) => game.id !== (action.payload as string),
         ),
       };
 
     case "update_game_name":
       gameIndex = state.games.findIndex(
-        (game) => game.id === (action.payload as string[])[0]
+        (game) => game.id === (action.payload as string[])[0],
       );
       state.games[gameIndex].name = (action.payload as string[])[1];
       return { ...state, games: state.games };
 
     case "update_max_players":
       gameIndex = state.games.findIndex(
-        (game) => game.id === (action.payload as [string, number])[0]
+        (game) => game.id === (action.payload as [string, number])[0],
       );
       state.games[gameIndex].maxNumberOfPlayers = (
         action.payload as [string, number]
@@ -172,7 +174,7 @@ export const SocketReducer = (
 
     case "update_game_num_players":
       index = state.games.findIndex(
-        (value: Game) => value.id === (action.payload as [string, number])[0]
+        (value: Game) => value.id === (action.payload as [string, number])[0],
       );
       state.games[index].numberOfPlayers = (
         action.payload as [string, number]
@@ -181,7 +183,7 @@ export const SocketReducer = (
 
     case "update_healthroll_rule_set":
       index = state.games.findIndex(
-        (value: Game) => value.id === (action.payload as [string, number])[0]
+        (value: Game) => value.id === (action.payload as [string, number])[0],
       );
       state.games[index].healthRollRuleSet = (
         action.payload as [string, number]
@@ -220,7 +222,7 @@ export const SocketReducer = (
       const givenPlayerName = (action.payload as string[])[1];
 
       const playerIndex = state.thisGame.gamePlayers.findIndex(
-        (value) => value === uid
+        (value) => value === uid,
       );
       state.thisGame.gamePlayersNames[playerIndex] = givenPlayerName;
       return {
@@ -288,19 +290,28 @@ export const SocketReducer = (
         },
       };
 
+    case "owner_change":
+      return {
+        ...state,
+        thisGame: {
+          ...state.thisGame,
+          owner: action.payload as string,
+        },
+      };
+
     case "remove_game_player": {
       let playerIndex = state.thisGame.gamePlayers.findIndex(
-        (value) => value === (action.payload as string)
+        (value) => value === (action.payload as string),
       );
       return {
         ...state,
         thisGame: {
           ...state.thisGame,
           gamePlayers: state.thisGame.gamePlayers.filter(
-            (value, index) => index !== playerIndex
+            (value, index) => index !== playerIndex,
           ),
           gamePlayersNames: state.thisGame.gamePlayersNames.filter(
-            (value, index) => index !== playerIndex
+            (value, index) => index !== playerIndex,
           ),
         },
       };
@@ -323,7 +334,7 @@ export const SocketReducer = (
           thisGame: {
             ...state.thisGame,
             gamePlayersTimeout: state.thisGame.gamePlayersTimeout.filter(
-              (value) => value !== (action.payload as string)
+              (value) => value !== (action.payload as string),
             ),
           },
         };

@@ -14,49 +14,38 @@ import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import { useMediaQuery } from "usehooks-ts";
+import { useGlobalContext } from "../../contexts/Socket/SocketContext";
 
 interface Props {
-  currentName: string;
-  currentUid: string;
-  healths?: number[];
-  inProgress?: boolean;
-  isOwner: boolean;
-  isGameOver?: boolean;
-  playerNames: string[];
-  playersTimedOut: string[];
-  playerUids: string[];
-  socket: Socket;
-  thisUid: string;
+  currentName: (uid: string) => string;
 }
 
-const PlayerDisplay = ({
-  currentName,
-  currentUid,
-  healths,
-  inProgress,
-  isOwner,
-  isGameOver,
-  playerNames,
-  playersTimedOut,
-  playerUids,
-  socket,
-  thisUid,
-}: Props) => {
+const PlayerDisplay = ({ currentName }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const queryMatches = useMediaQuery("only screen and (min-width: 790px)");
 
+  const { SocketState, SocketDispatch } = useGlobalContext();
+
   const [toggleEditName, setToggleEditName] = useState(false);
-  const [nameChanger, setNameChanger] = useState(currentName);
+
+  const [nameChanger, setNameChanger] = useState(
+    currentName(SocketState.meyerInfo?.currentPlayer),
+  );
 
   function numberAfterName(name: string, index: number): string {
     if (index === 0) {
-      return playerNames.slice(1, playerNames.length).includes(name)
+      return SocketState.thisGame?.gamePlayersNames
+        .slice(1, SocketState.thisGame?.gamePlayersNames.length)
+        .includes(name)
         ? " (1)"
         : "";
     } else {
-      const previousNames = playerNames.slice(0, index);
+      const previousNames = SocketState.thisGame?.gamePlayersNames.slice(
+        0,
+        index,
+      );
       if (previousNames.includes(name)) {
         let i = 0;
         previousNames.forEach((value) => {
@@ -67,7 +56,9 @@ const PlayerDisplay = ({
 
         return " (" + (i + 1) + ")";
       } else if (
-        playerNames.slice(index + 1, playerNames.length).includes(name)
+        SocketState.thisGame?.gamePlayersNames
+          .slice(index + 1, SocketState.thisGame?.gamePlayersNames.length)
+          .includes(name)
       ) {
         return " (1)";
       }
@@ -109,7 +100,7 @@ const PlayerDisplay = ({
   };
 
   function onKick(uid: string) {
-    return () => socket.emit("kick_player", uid);
+    return () => SocketState.socket?.emit("kick_player", uid);
   }
 
   const KickPlayerButton = (uid: string) => {
@@ -151,14 +142,14 @@ const PlayerDisplay = ({
   }
 
   function onConfirm(): void {
-    socket.emit(
+    SocketState.socket?.emit(
       "change_player_name",
       nameChanger,
       (givenPlayerName: string) => {
         if (givenPlayerName !== "") {
           localStorage.setItem("playerName", givenPlayerName);
         }
-      }
+      },
     );
     onBlur();
   }
@@ -182,7 +173,10 @@ const PlayerDisplay = ({
   useEffect(() => {
     if (toggleEditName) {
       const input = document.getElementById(
-        "player-name-bar" + playerUids.findIndex((uid) => uid === thisUid)
+        "player-name-bar" +
+          SocketState.thisGame.gamePlayers.findIndex(
+            (uid) => uid === SocketState.uid,
+          ),
       ) as HTMLInputElement;
       input?.focus();
       input?.setSelectionRange(input?.value.length, input?.value.length);
@@ -226,23 +220,29 @@ const PlayerDisplay = ({
 
   return (
     <Box display="flex" flexDirection="column" flexWrap="wrap" width="273px">
-      {playerNames.map((name, index) => (
+      {SocketState.thisGame.gamePlayersNames.map((name, index) => (
         <Box display="flex" flexDirection="column" key={index}>
           <Box display="flex">
             {/* ARROW - (if wanted) */}
-            {isGameOver !== undefined &&
-              playerUids[index] === currentUid &&
-              !isGameOver && (
+            {SocketState.meyerInfo &&
+              SocketState.thisGame.gamePlayers[index] ===
+                SocketState.meyerInfo.currentPlayer &&
+              !SocketState.meyerInfo.isGameOver && (
                 <Box display="flex" bgcolor={colors.primary[500]}>
                   <ArrowForwardOutlined />
                 </Box>
               )}
-            {isGameOver !== undefined &&
-              !(playerUids[index] === currentUid && !isGameOver) && (
-                <Box paddingLeft="calc(20.5px + 5px)" />
-              )}
+            {SocketState.meyerInfo &&
+              !(
+                SocketState.thisGame.gamePlayers[index] ===
+                  SocketState.meyerInfo.currentPlayer &&
+                !SocketState.meyerInfo.isGameOver
+              ) && <Box paddingLeft="calc(20.5px + 5px)" />}
             {/* DICE ICON */}
-            {((healths && (healths[index] > 0 || isOwner)) || !healths) && (
+            {((SocketState.meyerInfo?.healths &&
+              (SocketState.meyerInfo.healths[index] > 0 ||
+                SocketState.thisGame.owner === SocketState.uid)) ||
+              !SocketState.meyerInfo?.healths) && (
               <Box display="flex">
                 <Box
                   display="flex"
@@ -250,7 +250,11 @@ const PlayerDisplay = ({
                   justifyContent="center"
                 >
                   <Dice
-                    eyes={healths ? healths[index] : 6}
+                    eyes={
+                      SocketState.meyerInfo
+                        ? SocketState.meyerInfo?.healths[index]
+                        : 6
+                    }
                     color={colors.blueAccent[100]}
                     sideLength={25}
                   />
@@ -260,31 +264,47 @@ const PlayerDisplay = ({
             )}
 
             {/* NAME */}
-            {((healths && (healths[index] > 0 || isOwner)) || !healths) && (
+            {((SocketState.meyerInfo?.healths &&
+              (SocketState.meyerInfo.healths[index] > 0 ||
+                SocketState.thisGame.owner === SocketState.uid)) ||
+              !SocketState.meyerInfo?.healths) && (
               <Box
                 display="flex"
                 //flexDirection="column"
                 justifyContent="center"
                 height="24px"
                 onDoubleClick={() => {
-                  if (playerUids[index] === thisUid && !inProgress) onEdit();
+                  if (
+                    SocketState.thisGame.gamePlayers[index] ===
+                      SocketState.uid &&
+                    !SocketState.thisGame.isInProgress
+                  )
+                    onEdit();
                 }}
               >
                 <Typography
-                  fontSize={!queryMatches && inProgress ? "10px" : "14px"}
+                  fontSize={
+                    !queryMatches && SocketState.thisGame.isInProgress
+                      ? "10px"
+                      : "14px"
+                  }
                   style={{
                     wordBreak: "break-all",
                     textAlign: "center",
                   }}
                   color={
-                    playersTimedOut.includes(playerUids[index])
+                    SocketState.thisGame.gamePlayersTimeout.includes(
+                      SocketState.thisGame.gamePlayers[index],
+                    )
                       ? colors.grey[500]
                       : undefined
                   }
                   component="span"
                   children={
                     <Box>
-                      {(!toggleEditName || playerUids[index] !== thisUid) && (
+                      {(!toggleEditName ||
+                        SocketState.thisGame.gamePlayers[index] !==
+                          SocketState.uid) && (
                         <>
                           {name !== "" && name}
                           {name === "" && (
@@ -295,25 +315,36 @@ const PlayerDisplay = ({
                             />
                           )}
                           {numberAfterName(name, index)}
-                          {playerUids[index] === thisUid &&
-                            !inProgress &&
+                          {SocketState.thisGame.gamePlayers[index] ===
+                            SocketState.uid &&
+                            !SocketState.thisGame.isInProgress &&
                             EditNameButton()}
                         </>
                       )}
                       {toggleEditName &&
-                        !inProgress &&
-                        playerUids[index] === thisUid &&
+                        !SocketState.thisGame.isInProgress &&
+                        SocketState.thisGame.gamePlayers[index] ===
+                          SocketState.uid &&
                         InputNameElement(index)}
-                      {isOwner &&
-                        playerUids[index] !== thisUid &&
-                        KickPlayerButton(playerUids[index])}
-                      {!isOwner && index === 0 && Star()}
+                      {SocketState.thisGame.owner === SocketState.uid &&
+                        SocketState.thisGame.gamePlayers[index] !==
+                          SocketState.uid &&
+                        KickPlayerButton(
+                          SocketState.thisGame.gamePlayers[index],
+                        )}
+                      {SocketState.thisGame.owner === SocketState.uid &&
+                        index ===
+                          SocketState.thisGame.gamePlayers.findIndex(
+                            (value) => value === SocketState.thisGame.owner,
+                          ) &&
+                        !toggleEditName &&
+                        Star()}
                     </Box>
                   }
                 />
                 {toggleEditName &&
-                  !inProgress &&
-                  playerUids[index] === thisUid &&
+                  !SocketState.thisGame.isInProgress &&
+                  SocketState.thisGame.gamePlayers[index] === SocketState.uid &&
                   ConfirmButton()}
               </Box>
             )}
