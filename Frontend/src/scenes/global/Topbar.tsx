@@ -9,7 +9,7 @@ import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
 import { useContext, useState } from "react";
 import { ColorModeContext, tokens } from "../../theme";
 import "/node_modules/flag-icons/css/flag-icons.min.css";
-import { isInFind, isInLobby } from "../../utils/appUtils";
+import { is404, isInFind, isInLobby } from "../../utils/appUtils";
 import SearchBar from "../../components/SearchBar";
 
 interface Props {
@@ -50,7 +50,7 @@ const Topbar = ({
       {/* MOBILE MENU + SEARCH BAR */}
       <Box display="flex" justifyContent="space-between">
         {/* MENU BUTTON - Only visible if screen is small enough */}
-        {!isInLobby(pathname) && (
+        {!isInLobby(pathname) && !is404(pathname) && (
           <div
             className="menuButtonMobile"
             style={{
@@ -66,7 +66,7 @@ const Topbar = ({
         )}
 
         {/* SEARCH BAR */}
-        {!isInLobby(pathname) && !isInFind(pathname) && (
+        {!isInLobby(pathname) && !is404(pathname) && !isInFind(pathname) && (
           <SearchBar
             isDanish={isDanish}
             searchLobbyName={searchLobbyName}
@@ -80,7 +80,7 @@ const Topbar = ({
           onClick={() => {
             localStorage.setItem(
               "mode",
-              localStorage.getItem("mode") === "dark" ? "light" : "dark"
+              localStorage.getItem("mode") === "dark" ? "light" : "dark",
             );
             colorMode.toggleColorMode();
           }}

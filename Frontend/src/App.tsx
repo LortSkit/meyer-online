@@ -13,13 +13,14 @@ import Find from "./scenes/Find/Find";
 import Rules from "./scenes/Rules/Rules";
 import SocketContextComponent from "./contexts/Socket/SocketComponents";
 import Game from "./scenes/Game/Game";
-import { isInLobby } from "./utils/appUtils";
+import { is404, isInLobby } from "./utils/appUtils";
 import { useSwipeable } from "react-swipeable";
 import { base } from "./utils/hostSubDirectory";
 import Footer from "./scenes/global/Footer";
 import CreateLocal from "./scenes/Create/CreateLocal/CreateLocal";
 import CreateOnline from "./scenes/Create/CreateOnline/CreateOnline";
 import { ToastProvider } from "./components/Toast/Toast";
+import NotFound from "./scenes/global/NotFound";
 
 const App = () => {
   const [theme, colorMode] = useMode();
@@ -51,7 +52,7 @@ const App = () => {
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <div {...handlers} className="app">
-            {!isInLobby(pathname) && (
+            {!isInLobby(pathname) && !is404(pathname) && (
               <SidebarDesktop
                 isCollapsed={isCollapsed}
                 setIsCollapsed={setIsCollapsed}
@@ -60,14 +61,14 @@ const App = () => {
             )}
 
             <div className="sidebarMobileWrapper">
-              {!isInLobby(pathname) && (
+              {!isInLobby(pathname) && !is404(pathname) && (
                 <SidebarMobile
                   isVisible={isVisible}
                   setIsVisible={setIsVisible}
                   isDanish={isDanish}
                 />
               )}
-              {!isInLobby(pathname) && isVisible && (
+              {!isInLobby(pathname) && !is404(pathname) && isVisible && (
                 <div
                   className="sidebarMobileOverlay"
                   onClick={() => setIsVisible(false)}
@@ -133,6 +134,8 @@ const App = () => {
                     path={base + "/game"}
                     element={<Navigate to={base + "/game/unknown"} />}
                   />
+
+                  <Route path="*" element={<NotFound isDanish={isDanish} />} />
                 </Routes>
               </main>
               <Footer />
