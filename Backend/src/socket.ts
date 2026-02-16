@@ -1085,7 +1085,7 @@ export class ServerSocket {
 
     /* CHANGE OWNER */
     /* From Room: Game */
-    /* Sends to: Find, Game */ //TODO: Does it send to Find?
+    /* Sends to: Game */
     socket.on("change_owner", (playerUid: string) => {
       console.info("Received event: change_owner from " + socket.id);
 

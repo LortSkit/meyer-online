@@ -300,46 +300,6 @@ export const SocketReducer = (
         },
       };
     }
-    // return {
-    //   socket: state.socket as Socket | undefined,
-    //   uid: state.uid,
-    //   usersTotal: state.usersTotal,
-    //   games: state.games as Game[],
-    //   thisGame: {
-    //     id: state.thisGame.id,
-    //     name: state.thisGame.name,
-    //     owner: action.payload as string,
-    //     gamePlayers: state.thisGame.gamePlayers,
-    //     gamePlayersNames: state.thisGame.gamePlayersNames,
-    //     gamePlayersTimeout: state.thisGame.gamePlayersTimeout,
-    //     maxNumberOfPlayers: state.thisGame.maxNumberOfPlayers,
-    //     healthRollRuleSet: state.thisGame.healthRollRuleSet,
-    //     isPublic: state.thisGame.isPublic,
-    //     isInProgress: state.thisGame.isInProgress,
-    //   } as GameInfo,
-    //   meyerInfo: {
-    //     round: state.meyerInfo?.round ? state.meyerInfo.round : 0,
-    //     turn: state.meyerInfo?.turn ? state.meyerInfo.turn : 0,
-    //     turnTotal: state.meyerInfo?.turnTotal ? state.meyerInfo.turnTotal : 0,
-    //     isGameOver: state.meyerInfo?.isGameOver
-    //       ? state.meyerInfo.isGameOver
-    //       : true,
-    //     healths: state.meyerInfo?.healths ? state.meyerInfo.healths : [6, 6], //TODO: if keeping this solution, don't hard code this value!
-    //     currentPlayer: state.meyerInfo?.currentPlayer
-    //       ? state.meyerInfo.currentPlayer
-    //       : state.uid,
-    //     roll: state.meyerInfo?.roll ? state.meyerInfo.roll : 0,
-    //     actionChoices: state.meyerInfo?.actionChoices
-    //       ? state.meyerInfo.actionChoices
-    //       : ([] as Action[]),
-    //     bluffChoices: state.meyerInfo?.bluffChoices
-    //       ? state.meyerInfo.bluffChoices
-    //       : [],
-    //     turnInformation: state.meyerInfo?.turnInformation
-    //       ? state.meyerInfo.turnInformation
-    //       : [],
-    //   } as MeyerInfo,
-    // } as ISocketContextState;
 
     case "remove_game_player": {
       let playerIndex = state.thisGame.gamePlayers.findIndex(

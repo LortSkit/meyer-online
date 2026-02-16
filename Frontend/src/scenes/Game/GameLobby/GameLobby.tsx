@@ -143,6 +143,7 @@ const GameLobby = ({ isDanish }: Props) => {
             </Box>
             <IconButton
               onClick={() => {
+                //TODO: don't emit here, but allow the user to choose who should be owner
                 SocketState.socket?.emit(
                   "change_owner",
                   SocketState.thisGame?.gamePlayers.filter(
