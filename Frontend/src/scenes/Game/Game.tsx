@@ -138,6 +138,10 @@ const Game = ({ isDanish }: Props) => {
   }, []);
 
   useEffect(() => {
+    console.log("Owner is now " + SocketState.thisGame?.owner);
+  }, [SocketState.thisGame?.owner]);
+
+  useEffect(() => {
     joinGame();
   }, [SocketState.socket?.id]);
 
@@ -175,9 +179,10 @@ const Game = ({ isDanish }: Props) => {
   } else {
     middleChild = (
       <MiddleChild widthPercentage={100}>
-        {!SocketState.thisGame.isInProgress && (
-          <GameLobby isDanish={isDanish} />
-        )}
+        {!SocketState.thisGame.isInProgress &&
+          SocketState.thisGame.owner !== undefined && (
+            <GameLobby isDanish={isDanish} />
+          )}
         {SocketState.thisGame.isInProgress && <GameMeyer isDanish={isDanish} />}
       </MiddleChild>
     );

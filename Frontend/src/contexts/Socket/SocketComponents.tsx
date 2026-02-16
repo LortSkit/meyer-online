@@ -310,7 +310,7 @@ const SocketContextComponent: React.FunctionComponent<
     /* Owner changed */
     /* For Room: Game */
     socket.on("owner_changed", (payload: string[]) => {
-      SocketDispatch({ type: "owner_change", payload: payload });
+      SocketDispatch({ type: "set_this_game", payload: payload });
     });
 
     /* When getting kicked */

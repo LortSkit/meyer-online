@@ -132,8 +132,15 @@ const GameLobby = ({ isDanish }: Props) => {
         {/* YOU ARE GAME OWNER - (if you are) */}
         {isOwner() && (
           <Box display="flex" justifyContent="center">
-            {translateGameOwner(isDanish)}
-            <Box paddingLeft="5px" />
+            <Box
+              display="flex"
+              justifyContent="center"
+              flexDirection="column"
+              paddingTop="5px"
+              paddingBottom="5px"
+            >
+              {translateGameOwner(isDanish)}
+            </Box>
             <IconButton
               onClick={() => {
                 SocketState.socket?.emit(
@@ -143,15 +150,16 @@ const GameLobby = ({ isDanish }: Props) => {
                   )[0],
                 );
               }}
+              sx={{
+                position: "relative",
+              }}
             >
-              <StarOutlined
-                sx={{
-                  position: "relative",
-                }}
-              />
+              <StarOutlined style={{ color: colors.blackAccent[100] }} />
             </IconButton>
           </Box>
         )}
+
+        <Box p={2} />
 
         {/* LEAVE GAME BUTTON */}
         <LeaveGameButton

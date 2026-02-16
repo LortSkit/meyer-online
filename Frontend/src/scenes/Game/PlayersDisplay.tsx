@@ -332,11 +332,8 @@ const PlayerDisplay = ({ currentName }: Props) => {
                         KickPlayerButton(
                           SocketState.thisGame.gamePlayers[index],
                         )}
-                      {SocketState.thisGame.owner === SocketState.uid &&
-                        index ===
-                          SocketState.thisGame.gamePlayers.findIndex(
-                            (value) => value === SocketState.thisGame.owner,
-                          ) &&
+                      {SocketState.thisGame.owner ===
+                        SocketState.thisGame.gamePlayers[index] &&
                         !toggleEditName &&
                         Star()}
                     </Box>

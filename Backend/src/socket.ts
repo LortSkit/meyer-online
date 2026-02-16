@@ -139,7 +139,7 @@ export class ServerSocket {
       console.info("Emitting event: " + name + " to", users);
     } else {
       console.info(
-        "Emitting event: " + name + " to " + users + " with with payload",
+        "Emitting event: " + name + " to " + users + " with payload",
         payload,
       );
     }
@@ -1112,7 +1112,19 @@ export class ServerSocket {
             delete this.gamesIdIndex[uid];
 
             /* Game */
-            this.SendMessage("owner_changed", [owningGame.id], [playerUid]);
+            this.SendMessage("owner_changed", [owningGame.id], {
+              // same as joined_game
+              ...gameBaseToGameInfo(
+                this.gameBases[this.gamesIdIndex[owningGame.id]],
+              ),
+              gamePlayers: this.gamePlayers[owningGame.id],
+              gamePlayersNames: this.gamePlayersNames[owningGame.id],
+              gamePlayersTimeout: this.getTimedOutUsers(
+                this.gamePlayers[owningGame.id],
+              ),
+              isPublic: this.gameIsPublic(owningGame.id),
+              isInProgress: this.gameIsInProgress(owningGame.id),
+            } as GameInfo);
           }
         }
       }
