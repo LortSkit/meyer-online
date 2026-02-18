@@ -197,22 +197,22 @@ export class ServerSocket {
         );
         delete this.gamePlayers[inGameId][playerIndex];
         delete this.gamePlayersNames[inGameId][playerIndex];
-        this.SendMessage("player_left", [inGameId], uid);
-        if (this.gameIsInProgress(inGameId)) {
-          this.gameMeyer[inGameId].playerLeft(uid);
-          this.updateMeyerInfo(inGameId, true, false);
-        }
-        if (this.gameIsPublic(inGameId)) {
-          /* Find */
-          this.SendMessage(
-            "update_game_num_players",
-            ["Find"],
-            [inGameId, this.gamePlayers[inGameId].length],
-          );
-        }
         delete this.gamesIdIndex[game?.id];
         delete this.gameMeyer[game?.id];
         delete this.playerInGame[game?.id];
+      }
+      if (this.gameIsInProgress(inGameId)) {
+        this.gameMeyer[inGameId].playerLeft(uid);
+        this.updateMeyerInfo(inGameId, true, false);
+      }
+      this.SendMessage("player_left", [inGameId], uid);
+      if (this.gameIsPublic(inGameId)) {
+        /* Find */
+        this.SendMessage(
+          "update_game_num_players",
+          ["Find"],
+          [inGameId, this.gamePlayers[inGameId].length],
+        );
       }
     }
 
