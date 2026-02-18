@@ -17,11 +17,11 @@ export function translateOtherTabOpened(isDanish: boolean): string {
   );
 }
 
-export function translateOwnerLeft(isDanish: boolean): string {
+export function translateDifferentTabJoined(isDanish: boolean): string {
   return (
     (isDanish
-      ? "Ejeren har forladt spillet. Vi har omdirigeret dig til "
-      : "Game owner has left. We have redirected you to ") +
+      ? "Du har tilsluttet spillet fra en anden fane - sender dig til forsiden på denne fane."
+      : "You have connected from another tab - sending you to the home page on this tab.") +
     translateFind(isDanish) +
     translatePage(isDanish)
   );

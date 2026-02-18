@@ -179,12 +179,16 @@ export class ServerSocket {
         const restPlayers = this.gamePlayers[inGameId].filter(
           (value) => value !== inGameOwnerUid,
         );
-        /* (User) */
-        this.SendMessage("game_owner_left", restPlayers);
-
-        if (this.gameIsPublic(inGameId)) {
-          /* Find */
-          this.SendMessage("remove_game", ["Find"], inGameId);
+        /* Game */
+        if (this.gamePlayers[inGameId].length > 0) {
+          const newOwner = this.gamePlayers[inGameId][0];
+          console.info(
+            "Owner with uid " +
+              uid +
+              " left, changing ownership to " +
+              newOwner,
+          );
+          this.changeOwner(game, uid, newOwner);
         }
       } else {
         /* Game */
@@ -206,13 +210,13 @@ export class ServerSocket {
             [inGameId, this.gamePlayers[inGameId].length],
           );
         }
+        delete this.gamesIdIndex[game?.id];
+        delete this.gameMeyer[game?.id];
+        delete this.playerInGame[game?.id];
       }
     }
 
     delete this.gameBases[uid];
-    delete this.gamesIdIndex[game?.id];
-    delete this.gameMeyer[game?.id];
-    delete this.playerInGame[game?.id];
     delete this.publicGames[uid];
     delete this.playerInGame[uid];
     delete this.inRoom[uid];
@@ -340,6 +344,40 @@ export class ServerSocket {
       );
     }
     this.gameMeyer[gameId].deleteTurnInformation();
+  }
+
+  public changeOwner(owningGame, uid, playerUid) {
+    if (
+      this.gamePlayers[owningGame?.id].filter(
+        (value, index) => value == playerUid,
+      ).length === 1
+    ) {
+      const isPublic = this.gameIsPublic(owningGame.id);
+      this.gameBases[playerUid] = {
+        ...this.gameBases[uid],
+        owner: playerUid,
+      };
+      this.gamesIdIndex[owningGame.id] = playerUid;
+      if (isPublic) {
+        this.publicGames[playerUid] = this.publicGames[uid];
+        delete this.publicGames[uid];
+      }
+      delete this.gameBases[uid];
+      delete this.gamesIdIndex[uid];
+
+      /* Game */
+      this.SendMessage("owner_changed", [owningGame.id], {
+        // same as joined_game
+        ...gameBaseToGameInfo(this.gameBases[this.gamesIdIndex[owningGame.id]]),
+        gamePlayers: this.gamePlayers[owningGame.id],
+        gamePlayersNames: this.gamePlayersNames[owningGame.id],
+        gamePlayersTimeout: this.getTimedOutUsers(
+          this.gamePlayers[owningGame.id],
+        ),
+        isPublic: this.gameIsPublic(owningGame.id),
+        isInProgress: this.gameIsInProgress(owningGame.id),
+      } as GameInfo);
+    }
   }
   ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1085,7 +1123,8 @@ export class ServerSocket {
 
     /* CHANGE OWNER */
     /* From Room: Game */
-    /* Sends to: Game */
+    /* Sends to:  
+    Through updateMeyerInfo call: Game*/
     socket.on("change_owner", (playerUid: string) => {
       console.info("Received event: change_owner from " + socket.id);
 
@@ -1093,39 +1132,8 @@ export class ServerSocket {
       if (uid && uid !== playerUid) {
         const owningGame = this.gameBases[uid];
         if (owningGame) {
-          if (
-            this.gamePlayers[owningGame?.id].filter(
-              (value, index) => value == playerUid,
-            ).length === 1
-          ) {
-            const isPublic = this.gameIsPublic(owningGame.id);
-            this.gameBases[playerUid] = {
-              ...this.gameBases[uid],
-              owner: playerUid,
-            };
-            this.gamesIdIndex[owningGame.id] = playerUid;
-            if (isPublic) {
-              this.publicGames[playerUid] = this.publicGames[uid];
-              delete this.publicGames[uid];
-            }
-            delete this.gameBases[uid];
-            delete this.gamesIdIndex[uid];
-
-            /* Game */
-            this.SendMessage("owner_changed", [owningGame.id], {
-              // same as joined_game
-              ...gameBaseToGameInfo(
-                this.gameBases[this.gamesIdIndex[owningGame.id]],
-              ),
-              gamePlayers: this.gamePlayers[owningGame.id],
-              gamePlayersNames: this.gamePlayersNames[owningGame.id],
-              gamePlayersTimeout: this.getTimedOutUsers(
-                this.gamePlayers[owningGame.id],
-              ),
-              isPublic: this.gameIsPublic(owningGame.id),
-              isInProgress: this.gameIsInProgress(owningGame.id),
-            } as GameInfo);
-          }
+          console.info("Owner changed from " + uid + " to " + playerUid);
+          this.changeOwner(owningGame, uid, playerUid);
         }
       }
     });

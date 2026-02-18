@@ -80,18 +80,20 @@ const GameLobby = ({ isDanish }: Props) => {
 
   return (
     <Box display="flex" justifyContent="center">
-      <Box
-        sx={{
-          inset: 0,
-          opacity: changingOwner ? 0.5 : 0,
-          pointerEvents: "fill",
-          position: "fixed",
-          backgroundColor: changingOwner
-            ? colors.grey[100]
-            : colors.primary[500],
-          zIndex: 1,
-        }}
-      />
+      {changingOwner && (
+        <Box
+          sx={{
+            inset: 0,
+            opacity: changingOwner ? 0.5 : 0,
+            pointerEvents: "fill",
+            position: "fixed",
+            backgroundColor: changingOwner
+              ? colors.grey[100]
+              : colors.primary[500],
+            zIndex: 1,
+          }}
+        />
+      )}
       <Box display="flex" justifyContent="center" flexDirection="column">
         {/* HEADING */}
         <Box
@@ -184,7 +186,7 @@ const GameLobby = ({ isDanish }: Props) => {
                 {translateGameOwner(isDanish)}
               </Box>
               <IconButton
-                //disabled={SocketState.thisGame.gamePlayers.length <= 1}
+                disabled={SocketState.thisGame.gamePlayers.length <= 1}
                 onClick={() => {
                   setChangingOwner((prev) => !prev);
                 }}
@@ -226,29 +228,32 @@ const GameLobby = ({ isDanish }: Props) => {
 
         {/* HEALTH RULE SET */}
         {isOwner() && (
-          <Box
-            display="flex"
-            justifyContent="center"
-            flexDirection="column"
-            sx={{
-              inset: 0,
-              opacity: changingOwner ? 0.5 : 1,
-            }}
-          >
-            <SetHealthRollRuleSet
-              isDanish={isDanish}
-              chosenRuleSet={SocketState.thisGame?.healthRollRuleSet}
-              setChosenRuleSet={(selectedRuleSet: number) => {
-                if (
-                  selectedRuleSet !== SocketState.thisGame?.healthRollRuleSet
-                ) {
-                  SocketState.socket?.emit(
-                    "change_healthroll_rule_set",
-                    selectedRuleSet,
-                  );
-                }
+          <Box display="flex" justifyContent="center" flexBasis="100%">
+            <Box
+              display="flex"
+              justifyContent="center"
+              flexDirection="column"
+              maxWidth="360px"
+              sx={{
+                inset: 0,
+                opacity: changingOwner ? 0.5 : 1,
               }}
-            />{" "}
+            >
+              <SetHealthRollRuleSet
+                isDanish={isDanish}
+                chosenRuleSet={SocketState.thisGame?.healthRollRuleSet}
+                setChosenRuleSet={(selectedRuleSet: number) => {
+                  if (
+                    selectedRuleSet !== SocketState.thisGame?.healthRollRuleSet
+                  ) {
+                    SocketState.socket?.emit(
+                      "change_healthroll_rule_set",
+                      selectedRuleSet,
+                    );
+                  }
+                }}
+              />
+            </Box>
           </Box>
         )}
         {!isOwner() && (

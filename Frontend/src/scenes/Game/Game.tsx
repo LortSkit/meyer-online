@@ -138,10 +138,6 @@ const Game = ({ isDanish }: Props) => {
   }, []);
 
   useEffect(() => {
-    console.log("Owner is now " + SocketState.thisGame?.owner);
-  }, [SocketState.thisGame?.owner]);
-
-  useEffect(() => {
     joinGame();
   }, [SocketState.socket?.id]);
 

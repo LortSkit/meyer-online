@@ -239,13 +239,23 @@ const PlayerDisplay = ({
             setHovered("");
           }}
           onClick={() => {
-            if (SocketState.thisGame.gamePlayers[index] !== SocketState.uid) {
+            if (
+              changingOwner &&
+              SocketState.thisGame.gamePlayers[index] !== SocketState.uid
+            ) {
               setChangingOwner(false);
               SocketState.socket?.emit(
                 "change_owner",
                 SocketState.thisGame.gamePlayers[index],
               );
             }
+          }}
+          sx={{
+            cursor:
+              changingOwner &&
+              SocketState.thisGame.gamePlayers[index] !== SocketState.uid
+                ? "pointer"
+                : "auto",
           }}
         >
           <Box display="flex">

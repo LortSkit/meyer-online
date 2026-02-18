@@ -16,7 +16,7 @@ import {
   translateKicked,
   translateLoading,
   translateReconnectFailure,
-  translateOwnerLeft,
+  translateDifferentTabJoined,
   translateReloadMessage,
   translateReload,
 } from "../../utils/lang/langSocketComponents";
@@ -156,7 +156,7 @@ const SocketContextComponent: React.FunctionComponent<
     /* For Room: (User) */
     socket.on("reset_socket", () => {
       navigate(base + "/");
-      confirm(translateOwnerLeft(isDanish));
+      confirm(translateDifferentTabJoined(isDanish));
       SocketDispatch({ type: "reset_state", payload: null });
     });
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -297,19 +297,9 @@ const SocketContextComponent: React.FunctionComponent<
       });
     });
 
-    /* Owner left */
-    /* For Room: (User) */ //TODO: How should this change?
-    socket.on("game_owner_left", () => {
-      navigate(base + "/find");
-      confirm(translateOwnerLeft(isDanish));
-      setTimeout(function () {
-        window.location.reload();
-      });
-    });
-
     /* Owner changed */
     /* For Room: Game */
-    socket.on("owner_changed", (payload: string[]) => {
+    socket.on("owner_changed", (payload: GameInfo) => {
       SocketDispatch({ type: "set_this_game", payload: payload });
     });
 
