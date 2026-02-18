@@ -25,7 +25,7 @@ import {
 } from "../../../utils/lang/Game/GameLobby/langGameLobby";
 import { tokens } from "../../../theme";
 import GameLobbyPlayers from "./GameLobbyPlayers";
-import PlayerDisplay from "../PlayersDisplay";
+import PlayerDisplay from "../PlayerDisplay/PlayersDisplay";
 import loading from "../../../assets/discordLoadingDotsDiscordLoading.gif";
 import LeaveGameButton from "../LeaveGameButton";
 import SetHealthRollRuleSet from "../../../components/game/SetHealthRollRuleSet";

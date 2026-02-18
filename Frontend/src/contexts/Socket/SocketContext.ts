@@ -1,7 +1,6 @@
 import { createContext, useContext } from "react";
 import { Socket } from "socket.io-client";
 import { Action, TurnInfo } from "../../utils/gameTypes";
-import SetHealthRollRuleSet from "../../components/game/SetHealthRollRuleSet";
 
 export type Game = {
   id: string;
@@ -17,6 +16,7 @@ export type GameInfo = {
   owner: string;
   gamePlayers: string[];
   gamePlayersNames: string[];
+  gamePlayersOrder: number[];
   gamePlayersTimeout: string[];
   maxNumberOfPlayers: number;
   healthRollRuleSet: number;

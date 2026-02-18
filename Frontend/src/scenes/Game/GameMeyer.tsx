@@ -13,7 +13,7 @@ import {
   MiddleChild,
   RightChild,
 } from "../../components/CenteredPage/PageChildren";
-import PlayerDisplay from "./PlayersDisplay";
+import PlayerDisplay from "./PlayerDisplay/PlayersDisplay";
 import CenteredPage from "../../components/CenteredPage/CenteredPage";
 import { RollWithName } from "../../utils/diceUtils";
 import { tokens } from "../../theme";

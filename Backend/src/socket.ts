@@ -29,6 +29,7 @@ type GameInfo = {
   owner: string;
   gamePlayers: string[];
   gamePlayersNames: string[];
+  gamePlayersOrder: number[];
   gamePlayersTimeout: string[];
   maxNumberOfPlayers: number;
   healthRollRuleSet: number;
@@ -71,6 +72,7 @@ function gameBaseToGameInfo(gameBase: GameBase): GameInfo {
     owner: gameBase.owner,
     gamePlayers: [],
     gamePlayersNames: [],
+    gamePlayersOrder: [],
     gamePlayersTimeout: [],
     maxNumberOfPlayers: gameBase.maxNumberOfPlayers,
     healthRollRuleSet: gameBase.healthRollRuleSet,
@@ -90,6 +92,7 @@ export class ServerSocket {
   public gamesIdIndex: { [gameId: string]: string }; // gameId -> uid
   public gamePlayers: { [gameId: string]: string[] }; // gameId -> uid[]
   public gamePlayersNames: { [gameId: string]: string[] }; // gameId -> string[]
+  public gamePlayersOrder: { [gameId: string]: number[] }; // gameId -> number[]
   public playerInGame: { [uid: string]: string }; // uid -> gameId
   public publicGames: { [uid: string]: string }; // uid -> gameId
   public gameMeyer: { [gameId: string]: Meyer }; //gameId -> Meyer
@@ -104,6 +107,7 @@ export class ServerSocket {
     this.gamesIdIndex = {};
     this.gamePlayers = {};
     this.gamePlayersNames = {};
+    this.gamePlayersOrder = {};
     this.playerInGame = {};
     this.publicGames = {};
     this.gameMeyer = {};
@@ -164,7 +168,7 @@ export class ServerSocket {
     const inGameOwnerUid = this.gamesIdIndex[inGameId];
 
     if (inGameId) {
-      let playerIndex = this.gamePlayers[inGameId].findIndex(
+      const playerIndex = this.gamePlayers[inGameId].findIndex(
         (value) => value === uid,
       );
 
@@ -174,29 +178,33 @@ export class ServerSocket {
       this.gamePlayersNames[inGameId] = this.gamePlayersNames[inGameId].filter(
         (value, index) => index !== playerIndex,
       );
+      this.subtract1ToOrders(
+        inGameId,
+        this.gamePlayersOrder[inGameId][playerIndex],
+      );
+      this.gamePlayersOrder[inGameId] = this.gamePlayersOrder[inGameId].filter(
+        (value, index) => index !== playerIndex,
+      );
 
-      if (inGameOwnerUid === uid) {
+      if (inGameOwnerUid === uid && this.gamePlayers[inGameId].length > 0) {
         const restPlayers = this.gamePlayers[inGameId].filter(
           (value) => value !== inGameOwnerUid,
         );
         /* Game */
-        if (this.gamePlayers[inGameId].length > 0) {
-          const newOwner = this.gamePlayers[inGameId][0];
-          console.info(
-            "Owner with uid " +
-              uid +
-              " left, changing ownership to " +
-              newOwner,
-          );
-          this.changeOwner(game, uid, newOwner);
-        }
+        const newOwner = this.gamePlayers[inGameId][0];
+        console.info(
+          "Owner with uid " + uid + " left, changing ownership to " + newOwner,
+        );
+        this.changeOwner(game, uid, newOwner);
       } else {
         /* Game */
-        const playerIndex = this.gamePlayers[inGameId].findIndex(
-          (value) => value === uid,
+        this.gamePlayers[inGameId] = this.gamePlayers[inGameId].filter(
+          (value, index) => index !== playerIndex,
         );
-        delete this.gamePlayers[inGameId][playerIndex];
-        delete this.gamePlayersNames[inGameId][playerIndex];
+        this.gamePlayersNames[inGameId] = this.gamePlayersNames[
+          inGameId
+        ].filter((value, index) => index !== playerIndex);
+
         delete this.gamesIdIndex[game?.id];
         delete this.gameMeyer[game?.id];
         delete this.playerInGame[game?.id];
@@ -371,6 +379,7 @@ export class ServerSocket {
         ...gameBaseToGameInfo(this.gameBases[this.gamesIdIndex[owningGame.id]]),
         gamePlayers: this.gamePlayers[owningGame.id],
         gamePlayersNames: this.gamePlayersNames[owningGame.id],
+        gamePlayersOrder: this.gamePlayersOrder[owningGame.id],
         gamePlayersTimeout: this.getTimedOutUsers(
           this.gamePlayers[owningGame.id],
         ),
@@ -378,6 +387,32 @@ export class ServerSocket {
         isInProgress: this.gameIsInProgress(owningGame.id),
       } as GameInfo);
     }
+  }
+
+  private changeAllNumber(gameId: string, amount: number, cutoff: number) {
+    for (let i = 0; i < this.gamePlayersOrder[gameId].length; i++) {
+      if (
+        (cutoff > 0 && this.gamePlayersOrder[gameId][i] > cutoff) ||
+        (cutoff < 0 && this.gamePlayersOrder[gameId][i] < cutoff)
+      ) {
+        this.gamePlayersOrder[gameId][i] += amount;
+      }
+    }
+  }
+
+  public add1ToOrders(gameId: string, cutoff: number) {
+    this.changeAllNumber(gameId, 1, cutoff);
+  }
+
+  public subtract1ToOrders(gameId: string, cutoff: number) {
+    console.info(
+      "Subtracting 1 from [" +
+        this.gamePlayersOrder[gameId] +
+        "] above " +
+        cutoff,
+    );
+    this.changeAllNumber(gameId, -1, cutoff);
+    console.info("We now have [" + this.gamePlayersOrder[gameId] + "]");
   }
   ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -584,6 +619,7 @@ export class ServerSocket {
             this.gamesIdIndex[gameBase.id] = uid;
             this.gamePlayers[gameBase.id] = [];
             this.gamePlayersNames[gameBase.id] = [];
+            this.gamePlayersOrder[gameBase.id] = [];
           }
 
           if (existingGameIsPublic) {
@@ -675,6 +711,9 @@ export class ServerSocket {
               this.playerInGame[joiningUid] = gameId;
               this.gamePlayers[gameId].push(joiningUid);
               this.gamePlayersNames[gameId].push(givenPlayerName);
+              this.gamePlayersOrder[gameId].push(
+                this.gamePlayersNames[gameId].length,
+              );
 
               callback(exists, false, hasEnoughSpace, givenPlayerName);
 
@@ -689,6 +728,7 @@ export class ServerSocket {
                   ),
                   gamePlayers: this.gamePlayers[gameId],
                   gamePlayersNames: this.gamePlayersNames[gameId],
+                  gamePlayersOrder: this.gamePlayersOrder[gameId],
                   gamePlayersTimeout: this.getTimedOutUsers(
                     this.gamePlayers[gameId],
                   ),
@@ -722,6 +762,7 @@ export class ServerSocket {
                   ),
                   gamePlayers: this.gamePlayers[gameId],
                   gamePlayersNames: this.gamePlayersNames[gameId],
+                  gamePlayersOrder: this.gamePlayersOrder[gameId],
                   gamePlayersTimeout: this.getTimedOutUsers(
                     this.gamePlayers[gameId],
                   ),
