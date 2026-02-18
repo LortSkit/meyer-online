@@ -30,6 +30,7 @@ import loading from "../../../assets/discordLoadingDotsDiscordLoading.gif";
 import LeaveGameButton from "../LeaveGameButton";
 import SetHealthRollRuleSet from "../../../components/game/SetHealthRollRuleSet";
 import { useToast } from "../../../contexts/Toast/ToastContext";
+import { useState } from "react";
 
 interface Props {
   isDanish: boolean;
@@ -41,6 +42,7 @@ const GameLobby = ({ isDanish }: Props) => {
   const toast = useToast();
 
   const { SocketState, SocketDispatch } = useGlobalContext();
+  const [changingOwner, setChangingOwner] = useState(false);
 
   const queryMatches = useMediaQuery("only screen and (min-width: 400px)");
 
@@ -78,24 +80,59 @@ const GameLobby = ({ isDanish }: Props) => {
 
   return (
     <Box display="flex" justifyContent="center">
+      <Box
+        sx={{
+          inset: 0,
+          opacity: changingOwner ? 0.5 : 0,
+          pointerEvents: "fill",
+          position: "fixed",
+          backgroundColor: changingOwner
+            ? colors.grey[100]
+            : colors.primary[500],
+          zIndex: 1,
+        }}
+      />
       <Box display="flex" justifyContent="center" flexDirection="column">
         {/* HEADING */}
-        <GameLobbyName
-          isDanish={isDanish}
-          isOwner={isOwner()}
-          isPublic={SocketState.thisGame?.isPublic}
-          name={SocketState.thisGame?.name}
-          socket={SocketState.socket as Socket}
-        />
+        <Box
+          display="flex"
+          flexDirection="column"
+          sx={{
+            inset: 0,
+            opacity: changingOwner ? 0.5 : 1,
+          }}
+        >
+          <GameLobbyName
+            isDanish={isDanish}
+            isOwner={isOwner()}
+            isPublic={SocketState.thisGame?.isPublic}
+            name={SocketState.thisGame?.name}
+            socket={SocketState.socket as Socket}
+          />
+        </Box>
 
         {/* GAME ID */}
-        <Box display="flex" justifyContent="center">
+        <Box
+          display="flex"
+          justifyContent="center"
+          sx={{
+            inset: 0,
+            opacity: changingOwner ? 0.5 : 1,
+          }}
+        >
           {translateGameId(isDanish)} <Box paddingLeft="5px" />
           <strong>{SocketState.thisGame.id}</strong>
         </Box>
 
         {/* INVITE LINK */}
-        <Box display="flex" justifyContent="center">
+        <Box
+          display="flex"
+          justifyContent="center"
+          sx={{
+            inset: 0,
+            opacity: changingOwner ? 0.5 : 1,
+          }}
+        >
           <Box
             display="flex"
             justifyContent="center"
@@ -131,58 +168,88 @@ const GameLobby = ({ isDanish }: Props) => {
 
         {/* YOU ARE GAME OWNER - (if you are) */}
         {isOwner() && (
-          <Box display="flex" justifyContent="center">
+          <Box display="flex" justifyContent="center" zIndex={3}>
             <Box
               display="flex"
               justifyContent="center"
-              flexDirection="column"
-              paddingTop="5px"
-              paddingBottom="5px"
+              sx={{ backgroundColor: colors.primary[500] }}
             >
-              {translateGameOwner(isDanish)}
+              <Box
+                display="flex"
+                justifyContent="center"
+                flexDirection="column"
+                paddingTop="5px"
+                paddingBottom="5px"
+              >
+                {translateGameOwner(isDanish)}
+              </Box>
+              <IconButton
+                //disabled={SocketState.thisGame.gamePlayers.length <= 1}
+                onClick={() => {
+                  setChangingOwner((prev) => !prev);
+                }}
+                sx={{
+                  position: "relative",
+                }}
+              >
+                <StarOutlined
+                  style={{
+                    color:
+                      SocketState.thisGame.gamePlayers.length <= 1
+                        ? colors.grey[700]
+                        : colors.blackAccent[100],
+                  }}
+                />
+              </IconButton>
             </Box>
-            <IconButton
-              onClick={() => {
-                //TODO: don't emit here, but allow the user to choose who should be owner
-                SocketState.socket?.emit(
-                  "change_owner",
-                  SocketState.thisGame?.gamePlayers.filter(
-                    (value) => value !== SocketState.uid,
-                  )[0],
-                );
-              }}
-              sx={{
-                position: "relative",
-              }}
-            >
-              <StarOutlined style={{ color: colors.blackAccent[100] }} />
-            </IconButton>
           </Box>
         )}
 
         <Box p={2} />
 
         {/* LEAVE GAME BUTTON */}
-        <LeaveGameButton
-          isDanish={isDanish}
-          socket={SocketState.socket as Socket}
-        />
+        <Box
+          display="flex"
+          justifyContent="center"
+          flexDirection="column"
+          sx={{
+            inset: 0,
+            opacity: changingOwner ? 0.5 : 1,
+          }}
+        >
+          <LeaveGameButton
+            isDanish={isDanish}
+            socket={SocketState.socket as Socket}
+          />
+        </Box>
         <Box p={2} />
 
         {/* HEALTH RULE SET */}
         {isOwner() && (
-          <SetHealthRollRuleSet
-            isDanish={isDanish}
-            chosenRuleSet={SocketState.thisGame?.healthRollRuleSet}
-            setChosenRuleSet={(selectedRuleSet: number) => {
-              if (selectedRuleSet !== SocketState.thisGame?.healthRollRuleSet) {
-                SocketState.socket?.emit(
-                  "change_healthroll_rule_set",
-                  selectedRuleSet,
-                );
-              }
+          <Box
+            display="flex"
+            justifyContent="center"
+            flexDirection="column"
+            sx={{
+              inset: 0,
+              opacity: changingOwner ? 0.5 : 1,
             }}
-          />
+          >
+            <SetHealthRollRuleSet
+              isDanish={isDanish}
+              chosenRuleSet={SocketState.thisGame?.healthRollRuleSet}
+              setChosenRuleSet={(selectedRuleSet: number) => {
+                if (
+                  selectedRuleSet !== SocketState.thisGame?.healthRollRuleSet
+                ) {
+                  SocketState.socket?.emit(
+                    "change_healthroll_rule_set",
+                    selectedRuleSet,
+                  );
+                }
+              }}
+            />{" "}
+          </Box>
         )}
         {!isOwner() && (
           <Box display="flex" justifyContent="center">
@@ -196,18 +263,29 @@ const GameLobby = ({ isDanish }: Props) => {
         )}
 
         {/* NUMBER OF PLAYERS */}
-        <GameLobbyPlayers
-          isDanish={isDanish}
-          isOwner={isOwner()}
-          numberOfPlayers={SocketState.thisGame?.gamePlayers.length}
-          maxNumberOfPlayers={SocketState.thisGame?.maxNumberOfPlayers}
-          socket={SocketState.socket as Socket}
-        />
+        <Box
+          display="flex"
+          justifyContent="center"
+          flexDirection="column"
+          sx={{
+            inset: 0,
+            opacity: changingOwner ? 0.5 : 1,
+          }}
+        >
+          <GameLobbyPlayers
+            isDanish={isDanish}
+            isOwner={isOwner()}
+            numberOfPlayers={SocketState.thisGame?.gamePlayers.length}
+            maxNumberOfPlayers={SocketState.thisGame?.maxNumberOfPlayers}
+            socket={SocketState.socket as Socket}
+            changingOwner={changingOwner}
+          />
+        </Box>
 
         <Box paddingBottom="5px" />
 
         {/* PLAYERS */}
-        <Box display="flex" justifyContent="center">
+        <Box display="flex" justifyContent="center" zIndex={3}>
           <Box
             display="flex"
             justifyContent="center"
@@ -217,21 +295,39 @@ const GameLobby = ({ isDanish }: Props) => {
             bgcolor={colors.primary[600]}
             borderRadius="50px"
           >
-            <PlayerDisplay currentName={(uid: string) => thisPlayerName()} />
+            <PlayerDisplay
+              currentName={(uid: string) => thisPlayerName()}
+              changingOwner={changingOwner}
+              setChangingOwner={setChangingOwner}
+            />
           </Box>
         </Box>
 
         <Box p={1} />
         {/* NEED AT LEAST TWO PLAYERS */}
         {isMissingPlayers() && (
-          <Box display="flex" justifyContent="center">
+          <Box
+            display="flex"
+            justifyContent="center"
+            sx={{
+              inset: 0,
+              opacity: changingOwner ? 0.5 : 1,
+            }}
+          >
             {translateNeedPlayers(isDanish)}
           </Box>
         )}
 
         {/* PLAYERS HAVE TO HAVE A NAME */}
         {isMissingNames() && (
-          <Box display="flex" justifyContent="center">
+          <Box
+            display="flex"
+            justifyContent="center"
+            sx={{
+              inset: 0,
+              opacity: changingOwner ? 0.5 : 1,
+            }}
+          >
             {translateNeedName(isDanish)}
             <Box display="flex" justifyContent="center" flexDirection="column">
               <img src={loading} width="35px" style={{ paddingLeft: "5px" }} />
@@ -241,7 +337,14 @@ const GameLobby = ({ isDanish }: Props) => {
 
         {/* START GAME */}
         {isOwner() && (
-          <Box display="flex" justifyContent="center">
+          <Box
+            display="flex"
+            justifyContent="center"
+            sx={{
+              inset: 0,
+              opacity: changingOwner ? 0.5 : 1,
+            }}
+          >
             <Button
               variant="contained"
               color="secondary"

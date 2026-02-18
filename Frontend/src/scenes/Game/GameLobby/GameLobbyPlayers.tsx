@@ -16,6 +16,7 @@ interface Props {
   numberOfPlayers: number;
   maxNumberOfPlayers: number;
   socket: Socket;
+  changingOwner: boolean;
 }
 
 const GameLobbyPlayers = ({
@@ -24,13 +25,14 @@ const GameLobbyPlayers = ({
   numberOfPlayers,
   maxNumberOfPlayers,
   socket,
+  changingOwner,
 }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
   const [toggleEditMax, setToggleEditMax] = useState(false);
   const [editMaxChanger, setEditMaxNameChanger] = useState(
-    String(maxNumberOfPlayers)
+    String(maxNumberOfPlayers),
   );
 
   function onBlur() {
@@ -62,8 +64,8 @@ const GameLobbyPlayers = ({
     event.target.value.slice(0, 1) === "0" && event.target.value.length > 1
       ? (event.target.value = event.target.value.slice(1, 2))
       : 20 < Number(event.target.value)
-      ? (event.target.value = "20")
-      : fallback();
+        ? (event.target.value = "20")
+        : fallback();
   }
 
   function onKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -77,7 +79,7 @@ const GameLobbyPlayers = ({
   useEffect(() => {
     if (toggleEditMax) {
       const input = document.getElementById(
-        "max-players-bar"
+        "max-players-bar",
       ) as HTMLInputElement;
       input?.focus();
     }
@@ -103,7 +105,7 @@ const GameLobbyPlayers = ({
             {numberOfPlayers}/
             <Box paddingLeft="2px" />
             {!toggleEditMax && maxNumberOfPlayers}
-            {!toggleEditMax && isOwner && (
+            {!toggleEditMax && isOwner && !changingOwner && (
               <IconButton
                 onClick={onEdit}
                 disabled={toggleEditMax}

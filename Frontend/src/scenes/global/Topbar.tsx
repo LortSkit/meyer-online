@@ -44,11 +44,11 @@ const Topbar = ({
       flexDirection="row"
       justifyContent="space-between"
       padding="10px 16px 10px 16px"
-      zIndex={1}
+      zIndex={2}
       sx={{ outline: "1px solid", outlineColor: colors.primary[600] }}
     >
       {/* MOBILE MENU + SEARCH BAR */}
-      <Box display="flex" justifyContent="space-between">
+      <Box display="flex" justifyContent="space-between" zIndex={2}>
         {/* MENU BUTTON - Only visible if screen is small enough */}
         {!isInLobby(pathname) && !is404(pathname) && (
           <div
@@ -99,7 +99,7 @@ const Topbar = ({
           }}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => {
-            setHovered(!hovered);
+            setHovered(false);
             setJustClicked(false);
           }}
         >

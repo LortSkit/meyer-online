@@ -12,15 +12,20 @@ import { tokens } from "../../theme";
 import { Dice } from "../../utils/diceUtils";
 import loading from "../../assets/discordLoadingDotsDiscordLoading.gif";
 import { useEffect, useState } from "react";
-import { Socket } from "socket.io-client";
 import { useMediaQuery } from "usehooks-ts";
 import { useGlobalContext } from "../../contexts/Socket/SocketContext";
 
 interface Props {
   currentName: (uid: string) => string;
+  changingOwner: boolean;
+  setChangingOwner: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const PlayerDisplay = ({ currentName }: Props) => {
+const PlayerDisplay = ({
+  currentName,
+  changingOwner,
+  setChangingOwner,
+}: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
@@ -33,6 +38,8 @@ const PlayerDisplay = ({ currentName }: Props) => {
   const [nameChanger, setNameChanger] = useState(
     currentName(SocketState.meyerInfo?.currentPlayer),
   );
+
+  const [hovered, setHovered] = useState("");
 
   function numberAfterName(name: string, index: number): string {
     if (index === 0) {
@@ -221,7 +228,26 @@ const PlayerDisplay = ({ currentName }: Props) => {
   return (
     <Box display="flex" flexDirection="column" flexWrap="wrap" width="273px">
       {SocketState.thisGame.gamePlayersNames.map((name, index) => (
-        <Box display="flex" flexDirection="column" key={index}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          key={index}
+          onMouseEnter={() =>
+            setHovered(SocketState.thisGame.gamePlayers[index])
+          }
+          onMouseLeave={() => {
+            setHovered("");
+          }}
+          onClick={() => {
+            if (SocketState.thisGame.gamePlayers[index] !== SocketState.uid) {
+              setChangingOwner(false);
+              SocketState.socket?.emit(
+                "change_owner",
+                SocketState.thisGame.gamePlayers[index],
+              );
+            }
+          }}
+        >
           <Box display="flex">
             {/* ARROW - (if wanted) */}
             {SocketState.meyerInfo &&
@@ -248,6 +274,14 @@ const PlayerDisplay = ({ currentName }: Props) => {
                   display="flex"
                   flexDirection="column"
                   justifyContent="center"
+                  sx={{
+                    opacity:
+                      changingOwner &&
+                      SocketState.thisGame.gamePlayers[index] ===
+                        SocketState.uid
+                        ? 0.5
+                        : 1,
+                  }}
                 >
                   <Dice
                     eyes={
@@ -275,11 +309,20 @@ const PlayerDisplay = ({ currentName }: Props) => {
                 height="24px"
                 onDoubleClick={() => {
                   if (
+                    !changingOwner &&
                     SocketState.thisGame.gamePlayers[index] ===
                       SocketState.uid &&
                     !SocketState.thisGame.isInProgress
                   )
                     onEdit();
+                }}
+                sx={{
+                  inset: 0,
+                  opacity:
+                    changingOwner &&
+                    SocketState.thisGame.gamePlayers[index] === SocketState.uid
+                      ? 0.5
+                      : 1,
                 }}
               >
                 <Typography
@@ -315,8 +358,9 @@ const PlayerDisplay = ({ currentName }: Props) => {
                             />
                           )}
                           {numberAfterName(name, index)}
-                          {SocketState.thisGame.gamePlayers[index] ===
-                            SocketState.uid &&
+                          {!changingOwner &&
+                            SocketState.thisGame.gamePlayers[index] ===
+                              SocketState.uid &&
                             !SocketState.thisGame.isInProgress &&
                             EditNameButton()}
                         </>
@@ -326,7 +370,8 @@ const PlayerDisplay = ({ currentName }: Props) => {
                         SocketState.thisGame.gamePlayers[index] ===
                           SocketState.uid &&
                         InputNameElement(index)}
-                      {SocketState.thisGame.owner === SocketState.uid &&
+                      {!changingOwner &&
+                        SocketState.thisGame.owner === SocketState.uid &&
                         SocketState.thisGame.gamePlayers[index] !==
                           SocketState.uid &&
                         KickPlayerButton(
@@ -335,6 +380,12 @@ const PlayerDisplay = ({ currentName }: Props) => {
                       {SocketState.thisGame.owner ===
                         SocketState.thisGame.gamePlayers[index] &&
                         !toggleEditName &&
+                        Star()}
+                      {changingOwner &&
+                        SocketState.thisGame.owner !==
+                          SocketState.thisGame.gamePlayers[index] &&
+                        !toggleEditName &&
+                        hovered === SocketState.thisGame.gamePlayers[index] &&
                         Star()}
                     </Box>
                   }

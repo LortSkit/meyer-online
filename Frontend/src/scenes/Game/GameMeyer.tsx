@@ -445,7 +445,11 @@ const GameMeyer = ({ isDanish }: Props) => {
         sx={{ outline: "4px solid", outlineColor: colors.primary[600] }}
       >
         <Box display="flex" justifyContent="left">
-          <PlayerDisplay currentName={playernameFromUid} />
+          <PlayerDisplay
+            currentName={playernameFromUid}
+            changingOwner={false}
+            setChangingOwner={() => {}}
+          />
         </Box>
       </Box>
     </RightChild>
