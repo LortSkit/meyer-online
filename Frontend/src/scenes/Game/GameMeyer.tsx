@@ -449,6 +449,8 @@ const GameMeyer = ({ isDanish }: Props) => {
             currentName={playernameFromUid}
             changingOwner={false}
             setChangingOwner={() => {}}
+            reordering={false}
+            setReordering={() => {}}
           />
         </Box>
       </Box>

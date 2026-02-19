@@ -34,6 +34,10 @@ export function translateGameOwner(isDanish: boolean): string {
   return isDanish ? "Du er spilejeren" : "You are the game owner";
 }
 
+export function translateChangeOrder(isDanish: boolean): string {
+  return isDanish ? "Ændr rækkefølgen" : "Change the order";
+}
+
 export function translateNeedPlayers(isDanish: boolean): string {
   return isDanish
     ? "Mindst 2 spillere er krævet før start!"

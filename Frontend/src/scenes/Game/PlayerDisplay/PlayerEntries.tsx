@@ -23,6 +23,8 @@ interface Props {
   currentName: (uid: string) => string;
   changingOwner: boolean;
   setChangingOwner: React.Dispatch<React.SetStateAction<boolean>>;
+  reordering: boolean;
+  setReordering: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const PlayerEntries = ({
@@ -31,6 +33,8 @@ const PlayerEntries = ({
   currentName,
   changingOwner,
   setChangingOwner,
+  reordering,
+  setReordering,
 }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -47,7 +51,7 @@ const PlayerEntries = ({
 
   const [hovered, setHovered] = useState("");
 
-  const [disableDnD, setDisableDnD] = useState(false);
+  const [disableDnD, setDisableDnD] = useState(true);
 
   const {
     attributes,
@@ -234,6 +238,19 @@ const PlayerEntries = ({
     );
   };
 
+  function properlySetDisableDnD() {
+    if (
+      SocketState.thisGame.owner === SocketState.uid &&
+      !toggleEditName &&
+      !changingOwner &&
+      reordering
+    ) {
+      setDisableDnD(false);
+    } else {
+      setDisableDnD(true);
+    }
+  }
+
   useEffect(() => {
     if (toggleEditName) {
       const input = document.getElementById(
@@ -245,15 +262,26 @@ const PlayerEntries = ({
       input?.focus();
       input?.setSelectionRange(input?.value.length, input?.value.length);
     }
+    properlySetDisableDnD();
   }, [toggleEditName]);
 
-  useEffect(() => {
-    setDisableDnD(changingOwner);
-  }, [changingOwner]);
+  // useEffect(() => {
+  //   if (isDragging) {
+  //     setToggleEditName(false);
+  //   }
+  // }, [isDragging]);
 
   useEffect(() => {
-    setDisableDnD(SocketState.thisGame.owner !== SocketState.uid);
-  }, [SocketState.thisGame.owner]);
+    properlySetDisableDnD();
+  }, [SocketState.thisGame.owner, changingOwner]);
+
+  useEffect(() => {
+    if (reordering) {
+      setDisableDnD(false);
+    } else {
+      setDisableDnD(true);
+    }
+  }, [reordering]);
 
   return (
     <Box
@@ -403,6 +431,7 @@ const PlayerEntries = ({
                         index,
                       )}
                       {!changingOwner &&
+                        !reordering &&
                         SocketState.thisGame.gamePlayers[index] ===
                           SocketState.uid &&
                         !SocketState.thisGame.isInProgress &&
@@ -415,6 +444,7 @@ const PlayerEntries = ({
                       SocketState.uid &&
                     InputNameElement(index)}
                   {!changingOwner &&
+                    !reordering &&
                     SocketState.thisGame.owner === SocketState.uid &&
                     SocketState.thisGame.gamePlayers[index] !==
                       SocketState.uid &&

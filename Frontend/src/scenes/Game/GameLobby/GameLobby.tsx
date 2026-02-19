@@ -4,6 +4,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import useTheme from "@mui/material/styles/useTheme";
 import StarOutlined from "@mui/icons-material/StarOutlined";
+import FormatListNumbered from "@mui/icons-material/FormatListNumbered";
 import IosShareOutlined from "@mui/icons-material/IosShareOutlined";
 import GameLobbyName from "./GameLobbyName";
 import { useGlobalContext } from "../../../contexts/Socket/SocketContext";
@@ -22,6 +23,7 @@ import {
   translateShareLobby,
   translateStartGame,
   translateWaiting,
+  translateChangeOrder,
 } from "../../../utils/lang/Game/GameLobby/langGameLobby";
 import { tokens } from "../../../theme";
 import GameLobbyPlayers from "./GameLobbyPlayers";
@@ -43,6 +45,7 @@ const GameLobby = ({ isDanish }: Props) => {
 
   const { SocketState, SocketDispatch } = useGlobalContext();
   const [changingOwner, setChangingOwner] = useState(false);
+  const [reordering, setReordering] = useState(false);
 
   const queryMatches = useMediaQuery("only screen and (min-width: 400px)");
 
@@ -94,6 +97,20 @@ const GameLobby = ({ isDanish }: Props) => {
           }}
         />
       )}
+      {reordering && (
+        <Box
+          sx={{
+            inset: 0,
+            opacity: reordering ? 0.5 : 0,
+            pointerEvents: "fill",
+            position: "fixed",
+            backgroundColor: reordering
+              ? colors.grey[100]
+              : colors.primary[500],
+            zIndex: 1,
+          }}
+        />
+      )}
       <Box display="flex" justifyContent="center" flexDirection="column">
         {/* HEADING */}
         <Box
@@ -101,7 +118,7 @@ const GameLobby = ({ isDanish }: Props) => {
           flexDirection="column"
           sx={{
             inset: 0,
-            opacity: changingOwner ? 0.5 : 1,
+            opacity: changingOwner || reordering ? 0.5 : 1,
           }}
         >
           <GameLobbyName
@@ -119,7 +136,7 @@ const GameLobby = ({ isDanish }: Props) => {
           justifyContent="center"
           sx={{
             inset: 0,
-            opacity: changingOwner ? 0.5 : 1,
+            opacity: changingOwner || reordering ? 0.5 : 1,
           }}
         >
           {translateGameId(isDanish)} <Box paddingLeft="5px" />
@@ -132,7 +149,7 @@ const GameLobby = ({ isDanish }: Props) => {
           justifyContent="center"
           sx={{
             inset: 0,
-            opacity: changingOwner ? 0.5 : 1,
+            opacity: changingOwner || reordering ? 0.5 : 1,
           }}
         >
           <Box
@@ -170,7 +187,15 @@ const GameLobby = ({ isDanish }: Props) => {
 
         {/* YOU ARE GAME OWNER - (if you are) */}
         {isOwner() && (
-          <Box display="flex" justifyContent="center" zIndex={3}>
+          <Box
+            display="flex"
+            justifyContent="center"
+            zIndex={changingOwner ? 3 : 0}
+            sx={{
+              inset: 0,
+              opacity: reordering ? 0.5 : 1,
+            }}
+          >
             <Box
               display="flex"
               justifyContent="center"
@@ -207,6 +232,52 @@ const GameLobby = ({ isDanish }: Props) => {
           </Box>
         )}
 
+        {/* CHANGE ORDER */}
+        {isOwner() && (
+          <Box
+            display="flex"
+            justifyContent="center"
+            zIndex={reordering ? 3 : 0}
+            sx={{
+              inset: 0,
+              opacity: changingOwner ? 0.5 : 1,
+            }}
+          >
+            <Box
+              display="flex"
+              justifyContent="center"
+              sx={{ backgroundColor: colors.primary[500] }}
+            >
+              <Box
+                display="flex"
+                justifyContent="center"
+                flexDirection="column"
+                paddingTop="5px"
+                paddingBottom="5px"
+              >
+                {translateChangeOrder(isDanish)}
+              </Box>
+              <IconButton
+                onClick={() => {
+                  setReordering((prev) => !prev);
+                }}
+                sx={{
+                  position: "relative",
+                }}
+              >
+                <FormatListNumbered
+                  style={{
+                    color:
+                      SocketState.thisGame.gamePlayers.length <= 1
+                        ? colors.grey[700]
+                        : colors.blackAccent[100],
+                  }}
+                />
+              </IconButton>
+            </Box>
+          </Box>
+        )}
+
         <Box p={2} />
 
         {/* LEAVE GAME BUTTON */}
@@ -216,7 +287,7 @@ const GameLobby = ({ isDanish }: Props) => {
           flexDirection="column"
           sx={{
             inset: 0,
-            opacity: changingOwner ? 0.5 : 1,
+            opacity: changingOwner || reordering ? 0.5 : 1,
           }}
         >
           <LeaveGameButton
@@ -236,7 +307,7 @@ const GameLobby = ({ isDanish }: Props) => {
               maxWidth="360px"
               sx={{
                 inset: 0,
-                opacity: changingOwner ? 0.5 : 1,
+                opacity: changingOwner || reordering ? 0.5 : 1,
               }}
             >
               <SetHealthRollRuleSet
@@ -274,7 +345,7 @@ const GameLobby = ({ isDanish }: Props) => {
           flexDirection="column"
           sx={{
             inset: 0,
-            opacity: changingOwner ? 0.5 : 1,
+            opacity: changingOwner || reordering ? 0.5 : 1,
           }}
         >
           <GameLobbyPlayers
@@ -304,6 +375,8 @@ const GameLobby = ({ isDanish }: Props) => {
               currentName={(uid: string) => thisPlayerName()}
               changingOwner={changingOwner}
               setChangingOwner={setChangingOwner}
+              reordering={reordering}
+              setReordering={setReordering}
             />
           </Box>
         </Box>
@@ -316,7 +389,7 @@ const GameLobby = ({ isDanish }: Props) => {
             justifyContent="center"
             sx={{
               inset: 0,
-              opacity: changingOwner ? 0.5 : 1,
+              opacity: changingOwner || reordering ? 0.5 : 1,
             }}
           >
             {translateNeedPlayers(isDanish)}
@@ -330,7 +403,7 @@ const GameLobby = ({ isDanish }: Props) => {
             justifyContent="center"
             sx={{
               inset: 0,
-              opacity: changingOwner ? 0.5 : 1,
+              opacity: changingOwner || reordering ? 0.5 : 1,
             }}
           >
             {translateNeedName(isDanish)}
@@ -347,7 +420,7 @@ const GameLobby = ({ isDanish }: Props) => {
             justifyContent="center"
             sx={{
               inset: 0,
-              opacity: changingOwner ? 0.5 : 1,
+              opacity: changingOwner || reordering ? 0.5 : 1,
             }}
           >
             <Button

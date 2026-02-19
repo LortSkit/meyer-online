@@ -19,12 +19,16 @@ interface Props {
   currentName: (uid: string) => string;
   changingOwner: boolean;
   setChangingOwner: React.Dispatch<React.SetStateAction<boolean>>;
+  reordering: boolean;
+  setReordering: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const PlayerDisplay = ({
   currentName,
   changingOwner,
   setChangingOwner,
+  reordering,
+  setReordering,
 }: Props) => {
   const { SocketState, SocketDispatch } = useGlobalContext();
 
@@ -74,6 +78,8 @@ const PlayerDisplay = ({
               currentName={currentName}
               changingOwner={changingOwner}
               setChangingOwner={setChangingOwner}
+              reordering={reordering}
+              setReordering={setReordering}
               key={index}
             />
           ))}
