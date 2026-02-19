@@ -255,8 +255,6 @@ const PlayerEntries = ({
             (value) => value === SocketState.uid,
           )
         ] - 1;
-      // console.log("Got player-name-bar" + playerIndex);
-      // document.getElementById("player-name-bar" + playerIndex)?.focus();
       const input = document.getElementById(
         "player-name-bar" + playerIndex,
       ) as HTMLInputElement;

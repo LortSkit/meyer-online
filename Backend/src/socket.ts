@@ -197,23 +197,23 @@ export class ServerSocket {
               newOwner,
           );
           this.changeOwner(game, uid, newOwner);
-          if (this.gameIsInProgress(inGameId)) {
-            this.gameMeyer[inGameId].playerLeft(uid);
-            this.updateMeyerInfo(inGameId, true, false);
-          }
-          this.SendMessage("player_left", [inGameId], uid);
-          if (this.gameIsPublic(inGameId)) {
-            /* Find */
-            this.SendMessage(
-              "update_game_num_players",
-              ["Find"],
-              [inGameId, this.gamePlayers[inGameId].length],
-            );
-          } else {
-            delete this.gamesIdIndex[game?.id];
-            delete this.gameMeyer[game?.id];
-            delete this.playerInGame[game?.id];
-          }
+        } else if (inGameOwnerUid === uid) {
+          delete this.gamesIdIndex[game?.id];
+          delete this.gameMeyer[game?.id];
+          delete this.playerInGame[game?.id];
+        }
+        if (this.gameIsInProgress(inGameId)) {
+          this.gameMeyer[inGameId].playerLeft(uid);
+          this.updateMeyerInfo(inGameId, true, false);
+        }
+        this.SendMessage("player_left", [inGameId], uid);
+        if (this.gameIsPublic(inGameId)) {
+          /* Find */
+          this.SendMessage(
+            "update_game_num_players",
+            ["Find"],
+            [inGameId, this.gamePlayers[inGameId].length],
+          );
         }
       }
     }
