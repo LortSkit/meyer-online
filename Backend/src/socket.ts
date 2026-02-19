@@ -172,55 +172,49 @@ export class ServerSocket {
         (value) => value === uid,
       );
 
-      this.gamePlayers[inGameId] = this.gamePlayers[inGameId].filter(
-        (value, index) => index !== playerIndex,
-      );
-      this.gamePlayersNames[inGameId] = this.gamePlayersNames[inGameId].filter(
-        (value, index) => index !== playerIndex,
-      );
-      this.subtract1ToOrders(
-        inGameId,
-        this.gamePlayersOrder[inGameId][playerIndex],
-      );
-      this.gamePlayersOrder[inGameId] = this.gamePlayersOrder[inGameId].filter(
-        (value, index) => index !== playerIndex,
-      );
-
-      if (inGameOwnerUid === uid && this.gamePlayers[inGameId].length > 0) {
-        const restPlayers = this.gamePlayers[inGameId].filter(
-          (value) => value !== inGameOwnerUid,
-        );
-        /* Game */
-        const newOwner = this.gamePlayers[inGameId][0];
-        console.info(
-          "Owner with uid " + uid + " left, changing ownership to " + newOwner,
-        );
-        this.changeOwner(game, uid, newOwner);
-      } else {
-        /* Game */
+      if (playerIndex) {
         this.gamePlayers[inGameId] = this.gamePlayers[inGameId].filter(
           (value, index) => index !== playerIndex,
         );
         this.gamePlayersNames[inGameId] = this.gamePlayersNames[
           inGameId
         ].filter((value, index) => index !== playerIndex);
-
-        delete this.gamesIdIndex[game?.id];
-        delete this.gameMeyer[game?.id];
-        delete this.playerInGame[game?.id];
-      }
-      if (this.gameIsInProgress(inGameId)) {
-        this.gameMeyer[inGameId].playerLeft(uid);
-        this.updateMeyerInfo(inGameId, true, false);
-      }
-      this.SendMessage("player_left", [inGameId], uid);
-      if (this.gameIsPublic(inGameId)) {
-        /* Find */
-        this.SendMessage(
-          "update_game_num_players",
-          ["Find"],
-          [inGameId, this.gamePlayers[inGameId].length],
+        this.subtract1ToOrders(
+          inGameId,
+          this.gamePlayersOrder[inGameId][playerIndex],
         );
+        this.gamePlayersOrder[inGameId] = this.gamePlayersOrder[
+          inGameId
+        ].filter((value, index) => index !== playerIndex);
+
+        if (inGameOwnerUid === uid && this.gamePlayers[inGameId].length > 0) {
+          /* Game */
+          const newOwner = this.gamePlayers[inGameId][0];
+          console.info(
+            "Owner with uid " +
+              uid +
+              " left, changing ownership to " +
+              newOwner,
+          );
+          this.changeOwner(game, uid, newOwner);
+          if (this.gameIsInProgress(inGameId)) {
+            this.gameMeyer[inGameId].playerLeft(uid);
+            this.updateMeyerInfo(inGameId, true, false);
+          }
+          this.SendMessage("player_left", [inGameId], uid);
+          if (this.gameIsPublic(inGameId)) {
+            /* Find */
+            this.SendMessage(
+              "update_game_num_players",
+              ["Find"],
+              [inGameId, this.gamePlayers[inGameId].length],
+            );
+          } else {
+            delete this.gamesIdIndex[game?.id];
+            delete this.gameMeyer[game?.id];
+            delete this.playerInGame[game?.id];
+          }
+        }
       }
     }
 
@@ -816,16 +810,18 @@ export class ServerSocket {
               (value) => value === uid,
             );
 
-            this.gamePlayersNames[inGameId][playerIndex] = givenPlayerName;
+            if (playerIndex) {
+              this.gamePlayersNames[inGameId][playerIndex] = givenPlayerName;
 
-            callback(givenPlayerName);
+              callback(givenPlayerName);
 
-            /* Game */
-            this.SendMessage(
-              "player_name_changed",
-              [inGameId],
-              [uid, givenPlayerName],
-            );
+              /* Game */
+              this.SendMessage(
+                "player_name_changed",
+                [inGameId],
+                [uid, givenPlayerName],
+              );
+            }
           }
         }
       },
