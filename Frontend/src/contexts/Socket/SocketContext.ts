@@ -115,8 +115,6 @@ export interface ISocketContextActions {
 }
 
 function subtract1ToOrders(order: number[], cutoff: number) {
-  console.log(order);
-  console.log(cutoff);
   for (let i = 0; i < order.length; i++) {
     if (
       (cutoff > 0 && order[i] > cutoff) ||
@@ -310,29 +308,16 @@ export const SocketReducer = (
         },
       };
 
-    // case "owner_change": {
-    //   let newowner = action.payload as string;
-    //   return {
-    //     ...state,
-    //     thisGame: {
-    //       ...state.thisGame,
-    //       owner: newowner,
-    //     },
-    //   };
-    // }
-
     case "remove_game_player": {
       let playerIndex = state.thisGame.gamePlayers.findIndex(
         (value) => value === (action.payload as string),
       );
-      console.log(state.thisGame.gamePlayersOrder);
       let newOrder = subtract1ToOrders(
         state.thisGame.gamePlayersOrder.filter(
           (value, index) => index !== playerIndex,
         ),
         state.thisGame.gamePlayersOrder[playerIndex],
       );
-      console.log(newOrder);
       return {
         ...state,
         thisGame: {

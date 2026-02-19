@@ -26,6 +26,7 @@ interface Props {
   setChangingOwner: React.Dispatch<React.SetStateAction<boolean>>;
   reordering: boolean;
   setReordering: React.Dispatch<React.SetStateAction<boolean>>;
+  items: number[];
 }
 
 const PlayerEntries = ({
@@ -36,6 +37,7 @@ const PlayerEntries = ({
   setChangingOwner,
   reordering,
   setReordering,
+  items,
 }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -64,12 +66,12 @@ const PlayerEntries = ({
   } = useSortable({ id: nameindex, disabled: disableDnD });
 
   const style = {
-    transition,
+    //transition,
     transform: CSS.Transform.toString(transform),
   };
 
   function numberAfterName(name: string, index: number): string {
-    const actualNameOrder = SocketState.thisGame?.gamePlayersOrder.map(
+    const actualNameOrder = items.map(
       (value) => SocketState.thisGame?.gamePlayersNames[value - 1],
     );
     if (index === 0) {

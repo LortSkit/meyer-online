@@ -10,7 +10,10 @@ import { useEffect, useState } from "react";
 import {
   closestCorners,
   DndContext,
+  DragEndEvent,
   PointerSensor,
+  pointerWithin,
+  rectIntersection,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -35,20 +38,17 @@ const PlayerDisplay = ({
 
   const [items, setItems] = useState(SocketState.thisGame.gamePlayersOrder);
 
-  function handleDragEnd(event: { active: any; over: any }) {
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
-    if (active.id === over.id) return;
+    if (active.id === over?.id) return;
 
-    const originalPos = active.id - 1;
-    const newPos = over.id - 1;
+    const originalPos = items.findIndex((value) => value === Number(active.id));
+    const newPos = items.findIndex((value) => value === Number(over?.id));
 
-    const newOrder =
-      originalPos < newPos
-        ? arrayMove(items, originalPos, newPos)
-        : arrayMove(items, newPos, originalPos);
-
+    const newOrder = arrayMove(items, originalPos, newPos);
     SocketState.socket?.emit("change_order", newOrder);
+    setItems(newOrder);
   }
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const PlayerDisplay = ({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={pointerWithin}
       onDragEnd={handleDragEnd}
     >
       <Box
@@ -78,6 +78,7 @@ const PlayerDisplay = ({
               setChangingOwner={setChangingOwner}
               reordering={reordering}
               setReordering={setReordering}
+              items={items}
               key={index}
             />
           ))}
