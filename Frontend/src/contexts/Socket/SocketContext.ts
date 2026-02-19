@@ -114,6 +114,18 @@ export interface ISocketContextActions {
   payload?: TSocketContextPayload;
 }
 
+function subtract1ToOrders(order: number[], cutoff: number) {
+  for (let i = 0; i < order.length; i++) {
+    if (
+      (cutoff > 0 && order[i] > cutoff) ||
+      (cutoff < 0 && order[i] < cutoff)
+    ) {
+      order[i] -= 1;
+    }
+  }
+  return order;
+}
+
 export const SocketReducer = (
   state: ISocketContextState,
   action: ISocketContextActions,
@@ -204,6 +216,15 @@ export const SocketReducer = (
     case "add_game_player": {
       const uid = (action.payload as string[])[0];
       const playerName = (action.payload as string[])[1];
+      const order = (action.payload as string[])[2];
+      console.log(order);
+      console.log(state.thisGame.gamePlayers);
+      console.log(
+        state.thisGame.gamePlayers.includes(uid)
+          ? state.thisGame.gamePlayersOrder
+          : state.thisGame.gamePlayersOrder.concat([parseInt(order)]),
+      );
+
       return {
         ...state,
         thisGame: {
@@ -214,6 +235,9 @@ export const SocketReducer = (
           gamePlayersNames: state.thisGame.gamePlayers.includes(uid)
             ? state.thisGame.gamePlayersNames
             : state.thisGame.gamePlayersNames.concat([playerName]),
+          gamePlayersOrder: state.thisGame.gamePlayers.includes(uid)
+            ? state.thisGame.gamePlayersOrder
+            : state.thisGame.gamePlayersOrder.concat([parseInt(order)]),
         },
       };
     }
@@ -274,6 +298,9 @@ export const SocketReducer = (
       return { ...state, meyerInfo: action.payload as MeyerInfo };
 
     case "reopened_lobby":
+      console.log(state.thisGame.gamePlayers);
+      console.log(state.thisGame.gamePlayersNames);
+      console.log(state.thisGame.gamePlayersOrder);
       return {
         ...state,
         thisGame: { ...state.thisGame, isInProgress: false, isPublic: false },
@@ -316,8 +343,11 @@ export const SocketReducer = (
           gamePlayersNames: state.thisGame.gamePlayersNames.filter(
             (value, index) => index !== playerIndex,
           ),
-          gamePlayersOrder: state.thisGame.gamePlayersOrder.filter(
-            (value, index) => index !== playerIndex,
+          gamePlayersOrder: subtract1ToOrders(
+            state.thisGame.gamePlayersOrder.filter(
+              (value, index) => index !== playerIndex,
+            ),
+            state.thisGame.gamePlayersOrder[playerIndex],
           ),
         },
       };

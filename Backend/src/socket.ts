@@ -400,10 +400,6 @@ export class ServerSocket {
     }
   }
 
-  public add1ToOrders(gameId: string, cutoff: number) {
-    this.changeAllNumber(gameId, 1, cutoff);
-  }
-
   public subtract1ToOrders(gameId: string, cutoff: number) {
     console.info(
       "Subtracting 1 from [" +
@@ -701,7 +697,11 @@ export class ServerSocket {
               this.SendMessage(
                 "player_joined",
                 [gameId],
-                [joiningUid, givenPlayerName],
+                [
+                  joiningUid,
+                  givenPlayerName,
+                  "" + (this.gamePlayersNames[gameId].length + 1),
+                ],
               );
 
               this.leavePreviousRoom(socket, joiningUid);

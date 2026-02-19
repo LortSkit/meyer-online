@@ -33,6 +33,8 @@ const PlayerDisplay = ({
   const { SocketState, SocketDispatch } = useGlobalContext();
   const sensors = useSensors(useSensor(PointerSensor));
 
+  const [items, setItems] = useState(SocketState.thisGame.gamePlayersOrder);
+
   function handleDragEnd(event: { active: any; over: any }) {
     const { active, over } = event;
 
@@ -43,11 +45,15 @@ const PlayerDisplay = ({
 
     const newOrder =
       originalPos < newPos
-        ? arrayMove(SocketState.thisGame.gamePlayersOrder, originalPos, newPos)
-        : arrayMove(SocketState.thisGame.gamePlayersOrder, newPos, originalPos);
+        ? arrayMove(items, originalPos, newPos)
+        : arrayMove(items, newPos, originalPos);
 
     SocketState.socket?.emit("change_order", newOrder);
   }
+
+  useEffect(() => {
+    setItems(SocketState.thisGame.gamePlayersOrder);
+  }, [SocketState.thisGame]);
 
   return (
     <DndContext
@@ -62,11 +68,8 @@ const PlayerDisplay = ({
         width="273px"
         sx={{ touchAction: "none" }}
       >
-        <SortableContext
-          items={SocketState.thisGame.gamePlayersOrder}
-          strategy={verticalListSortingStrategy}
-        >
-          {SocketState.thisGame.gamePlayersOrder.map((nameindex, index) => (
+        <SortableContext items={items} strategy={verticalListSortingStrategy}>
+          {items.map((nameindex, index) => (
             <PlayerEntries
               nameindex={nameindex}
               index={index}
