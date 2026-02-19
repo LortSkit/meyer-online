@@ -973,7 +973,9 @@ export class ServerSocket {
           this.gamePlayers[owningGame.id].length > 1
         ) {
           this.gameMeyer[owningGame.id] = new Meyer(
-            this.gamePlayers[owningGame.id], //TODO: set according to order
+            this.gamePlayersOrder[owningGame.id].map(
+              (value) => this.gamePlayers[owningGame.id][value - 1],
+            ),
             this.gameBases[uid].healthRollRuleSet,
           );
           this.updateMeyerInfo(owningGame.id, true, true);

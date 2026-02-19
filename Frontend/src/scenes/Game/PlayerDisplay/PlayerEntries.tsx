@@ -3,6 +3,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import ArrowForwardOutlined from "@mui/icons-material/ArrowForwardOutlined";
 import CloseOutlined from "@mui/icons-material/CloseOutlined";
+import DragIndicator from "@mui/icons-material/DragIndicator";
 import Edit from "@mui/icons-material/Edit";
 import DoneOutlined from "@mui/icons-material/DoneOutlined";
 import StarOutlined from "@mui/icons-material/StarOutlined";
@@ -214,8 +215,8 @@ const PlayerEntries = ({
           id={"player-name-bar" + index}
           sx={{
             color: colors.blackAccent[100],
-            height: "25px",
-            fontSize: "16px",
+            height: "21.64px",
+            fontSize: "14px",
             paddingBottom: "3px",
           }}
           type="text"
@@ -223,7 +224,6 @@ const PlayerEntries = ({
           inputProps={{
             maxLength: 12,
           }}
-          fullWidth
           inputMode="text"
           value={nameChanger}
           onChange={onChange}
@@ -249,23 +249,22 @@ const PlayerEntries = ({
 
   useEffect(() => {
     if (toggleEditName) {
-      const input = document.getElementById(
-        "player-name-bar" +
+      const playerIndex =
+        SocketState.thisGame.gamePlayersOrder[
           SocketState.thisGame.gamePlayers.findIndex(
-            (uid) => uid === SocketState.uid,
-          ),
+            (value) => value === SocketState.uid,
+          )
+        ] - 1;
+      // console.log("Got player-name-bar" + playerIndex);
+      // document.getElementById("player-name-bar" + playerIndex)?.focus();
+      const input = document.getElementById(
+        "player-name-bar" + playerIndex,
       ) as HTMLInputElement;
       input?.focus();
       input?.setSelectionRange(input?.value.length, input?.value.length);
     }
     properlySetDisableDnD();
   }, [toggleEditName]);
-
-  // useEffect(() => {
-  //   if (isDragging) {
-  //     setToggleEditName(false);
-  //   }
-  // }, [isDragging]);
 
   useEffect(() => {
     properlySetDisableDnD();
@@ -274,6 +273,7 @@ const PlayerEntries = ({
   useEffect(() => {
     if (reordering) {
       setDisableDnD(false);
+      setToggleEditName(false);
     } else {
       setDisableDnD(true);
     }
@@ -331,10 +331,26 @@ const PlayerEntries = ({
             SocketState.thisGame.gamePlayersOrder[index] - 1
           ] === SocketState.meyerInfo.currentPlayer &&
           !SocketState.meyerInfo.isGameOver && (
-            <Box display="flex" bgcolor={colors.primary[500]}>
+            <Box display="flex" bgcolor={colors.primary[600]}>
               <ArrowForwardOutlined />
             </Box>
           )}
+        {/* DRAG SIX DOTS - (if wanted) */}
+        {!SocketState.thisGame.isInProgress && reordering && (
+          <Box position="absolute" marginInlineStart={"-25px"}>
+            <DragIndicator />
+          </Box>
+        )}
+        {/* NUMBERING - (if wanted) */}
+        {!SocketState.thisGame.isInProgress && !reordering && (
+          <Box
+            position="absolute"
+            marginInlineStart={"-15px"}
+            marginTop={"2.7px"}
+          >
+            {index + 1 + "."}
+          </Box>
+        )}
         {SocketState.meyerInfo &&
           !(
             SocketState.thisGame.gamePlayers[
@@ -383,9 +399,8 @@ const PlayerEntries = ({
           !SocketState.meyerInfo?.healths) && (
           <Box
             display="flex"
-            flexDirection="column"
-            justifyContent="center"
-            //height="24px"
+            flexDirection="row"
+            justifyContent="column"
             onDoubleClick={() => {
               if (
                 !changingOwner &&
@@ -428,79 +443,83 @@ const PlayerEntries = ({
               }
               component="span"
               children={
-                <Box>
-                  {(!toggleEditName ||
-                    SocketState.thisGame.gamePlayers[
-                      SocketState.thisGame.gamePlayersOrder[index] - 1
-                    ] !== SocketState.uid) && (
-                    <>
-                      {SocketState.thisGame.gamePlayersNames[nameindex - 1] !==
-                        "" &&
-                        SocketState.thisGame.gamePlayersNames[nameindex - 1]}
-                      {SocketState.thisGame.gamePlayersNames[nameindex - 1] ===
-                        "" && (
-                        <img
-                          src={loading}
-                          width="35px"
-                          style={{ paddingLeft: "5px" }}
-                        />
-                      )}
-                      {numberAfterName(
-                        SocketState.thisGame.gamePlayersNames[nameindex - 1],
-                        index,
-                      )}
-                      {!changingOwner &&
-                        !reordering &&
+                <Box display="flex" flexDirection="row">
+                  <Box>
+                    {(!toggleEditName ||
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ] !== SocketState.uid) && (
+                      <>
+                        {SocketState.thisGame.gamePlayersNames[
+                          nameindex - 1
+                        ] !== "" &&
+                          SocketState.thisGame.gamePlayersNames[nameindex - 1]}
+                        {SocketState.thisGame.gamePlayersNames[
+                          nameindex - 1
+                        ] === "" && (
+                          <img
+                            src={loading}
+                            width="35px"
+                            style={{ paddingLeft: "5px" }}
+                          />
+                        )}
+                        {numberAfterName(
+                          SocketState.thisGame.gamePlayersNames[nameindex - 1],
+                          index,
+                        )}
+                        {!changingOwner &&
+                          !reordering &&
+                          SocketState.thisGame.gamePlayers[
+                            SocketState.thisGame.gamePlayersOrder[index] - 1
+                          ] === SocketState.uid &&
+                          !SocketState.thisGame.isInProgress &&
+                          EditNameButton()}
+                      </>
+                    )}
+                    {toggleEditName &&
+                      !SocketState.thisGame.isInProgress &&
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ] === SocketState.uid &&
+                      InputNameElement(index)}
+                    {!changingOwner &&
+                      !reordering &&
+                      SocketState.thisGame.owner === SocketState.uid &&
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ] !== SocketState.uid &&
+                      KickPlayerButton(
                         SocketState.thisGame.gamePlayers[
                           SocketState.thisGame.gamePlayersOrder[index] - 1
-                        ] === SocketState.uid &&
-                        !SocketState.thisGame.isInProgress &&
-                        EditNameButton()}
-                    </>
-                  )}
+                        ],
+                      )}
+                    {SocketState.thisGame.owner ===
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ] &&
+                      !toggleEditName &&
+                      Star()}
+                    {changingOwner &&
+                      SocketState.thisGame.owner !==
+                        SocketState.thisGame.gamePlayers[
+                          SocketState.thisGame.gamePlayersOrder[index] - 1
+                        ] &&
+                      !toggleEditName &&
+                      hovered ===
+                        SocketState.thisGame.gamePlayers[
+                          SocketState.thisGame.gamePlayersOrder[index] - 1
+                        ] &&
+                      Star()}
+                  </Box>
                   {toggleEditName &&
                     !SocketState.thisGame.isInProgress &&
                     SocketState.thisGame.gamePlayers[
                       SocketState.thisGame.gamePlayersOrder[index] - 1
                     ] === SocketState.uid &&
-                    InputNameElement(index)}
-                  {!changingOwner &&
-                    !reordering &&
-                    SocketState.thisGame.owner === SocketState.uid &&
-                    SocketState.thisGame.gamePlayers[
-                      SocketState.thisGame.gamePlayersOrder[index] - 1
-                    ] !== SocketState.uid &&
-                    KickPlayerButton(
-                      SocketState.thisGame.gamePlayers[
-                        SocketState.thisGame.gamePlayersOrder[index] - 1
-                      ],
-                    )}
-                  {SocketState.thisGame.owner ===
-                    SocketState.thisGame.gamePlayers[
-                      SocketState.thisGame.gamePlayersOrder[index] - 1
-                    ] &&
-                    !toggleEditName &&
-                    Star()}
-                  {changingOwner &&
-                    SocketState.thisGame.owner !==
-                      SocketState.thisGame.gamePlayers[
-                        SocketState.thisGame.gamePlayersOrder[index] - 1
-                      ] &&
-                    !toggleEditName &&
-                    hovered ===
-                      SocketState.thisGame.gamePlayers[
-                        SocketState.thisGame.gamePlayersOrder[index] - 1
-                      ] &&
-                    Star()}
+                    ConfirmButton()}
                 </Box>
               }
             />
-            {toggleEditName &&
-              !SocketState.thisGame.isInProgress &&
-              SocketState.thisGame.gamePlayers[
-                SocketState.thisGame.gamePlayersOrder[index] - 1
-              ] === SocketState.uid &&
-              ConfirmButton()}
           </Box>
         )}
       </Box>
