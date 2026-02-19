@@ -85,6 +85,7 @@ const GameLobby = ({ isDanish }: Props) => {
     <Box display="flex" justifyContent="center">
       {changingOwner && (
         <Box
+          onClick={() => setChangingOwner(false)}
           sx={{
             inset: 0,
             opacity: changingOwner ? 0.5 : 0,
@@ -99,6 +100,7 @@ const GameLobby = ({ isDanish }: Props) => {
       )}
       {reordering && (
         <Box
+          onClick={() => setReordering(false)}
           sx={{
             inset: 0,
             opacity: reordering ? 0.5 : 0,

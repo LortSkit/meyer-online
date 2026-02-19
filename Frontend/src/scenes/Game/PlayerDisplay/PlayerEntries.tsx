@@ -51,6 +51,7 @@ const PlayerEntries = ({
   );
 
   const queryMatches = useMediaQuery("only screen and (min-width: 790px)");
+  const queryMatches400 = useMediaQuery("only screen and (min-width: 400px)");
 
   const [hovered, setHovered] = useState("");
 
@@ -63,10 +64,14 @@ const PlayerEntries = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: nameindex, disabled: disableDnD });
+  } = useSortable({
+    id: nameindex,
+    disabled: disableDnD,
+    transition: { duration: 0, easing: "linear(0.25, 1, 0.5, 1)" },
+  });
 
   const style = {
-    //transition,
+    transition,
     transform: CSS.Transform.toString(transform),
   };
 
@@ -311,10 +316,11 @@ const PlayerEntries = ({
       }}
       sx={{
         cursor:
-          changingOwner &&
-          SocketState.thisGame.gamePlayers[
-            SocketState.thisGame.gamePlayersOrder[index] - 1
-          ] !== SocketState.uid
+          (changingOwner &&
+            SocketState.thisGame.gamePlayers[
+              SocketState.thisGame.gamePlayersOrder[index] - 1
+            ] !== SocketState.uid) ||
+          reordering
             ? "pointer"
             : "auto",
         touchAction: "none",
@@ -337,7 +343,7 @@ const PlayerEntries = ({
           )}
         {/* DRAG SIX DOTS - (if wanted) */}
         {!SocketState.thisGame.isInProgress && reordering && (
-          <Box position="absolute" marginInlineStart={"-25px"}>
+          <Box position={"absolute"} marginInlineStart={"-25px"}>
             <DragIndicator />
           </Box>
         )}
@@ -404,6 +410,7 @@ const PlayerEntries = ({
             onDoubleClick={() => {
               if (
                 !changingOwner &&
+                !reordering &&
                 SocketState.thisGame.gamePlayers[
                   SocketState.thisGame.gamePlayersOrder[index] - 1
                 ] === SocketState.uid &&
