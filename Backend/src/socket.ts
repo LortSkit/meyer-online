@@ -987,6 +987,64 @@ export class ServerSocket {
       }
     });
 
+    /* CHANGE OWNER */
+    /* From Room: Game */
+    /* Sends to:  
+    Through updateMeyerInfo call: Game*/
+    socket.on("change_owner", (playerUid: string) => {
+      console.info("Received event: change_owner from " + socket.id);
+
+      const uid = this.GetUidFromSocketID(socket.id);
+      if (uid && uid !== playerUid) {
+        const owningGame = this.gameBases[uid];
+        if (
+          owningGame &&
+          !this.gameIsInProgress(owningGame.id) &&
+          this.gamePlayers[owningGame.id].length > 1
+        ) {
+          console.info("Owner changed from " + uid + " to " + playerUid);
+          this.changeOwner(owningGame, uid, playerUid);
+        }
+      }
+    });
+
+    /* CHANGE ORDER */
+    /* From Room: Game */
+    /* Sends to: Game*/
+    socket.on("change_order", (newOrder: number[]) => {
+      const uid = this.GetUidFromSocketID(socket.id);
+      const owningGame = this.gameBases[uid];
+      if (
+        owningGame &&
+        !this.gameIsInProgress(owningGame.id) &&
+        this.gamePlayers[owningGame.id].length > 1 &&
+        newOrder.length === this.gamePlayersOrder[owningGame.id].length
+      ) {
+        console.info(
+          "Order changed from " +
+            this.gamePlayersOrder[owningGame.id] +
+            " to " +
+            newOrder,
+        );
+        this.gamePlayersOrder[owningGame.id] = newOrder;
+        /* Game*/
+        this.SendMessage("order_changed", [owningGame.id], {
+          // same as joined_game
+          ...gameBaseToGameInfo(
+            this.gameBases[this.gamesIdIndex[owningGame.id]],
+          ),
+          gamePlayers: this.gamePlayers[owningGame.id],
+          gamePlayersNames: this.gamePlayersNames[owningGame.id],
+          gamePlayersOrder: this.gamePlayersOrder[owningGame.id],
+          gamePlayersTimeout: this.getTimedOutUsers(
+            this.gamePlayers[owningGame.id],
+          ),
+          isPublic: this.gameIsPublic(owningGame.id),
+          isInProgress: this.gameIsInProgress(owningGame.id),
+        } as GameInfo);
+      }
+    });
+
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
     /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%IN GAME%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
@@ -1158,23 +1216,6 @@ export class ServerSocket {
             ["Find"],
             [owningGame.id, selectedRuleSet],
           );
-        }
-      }
-    });
-
-    /* CHANGE OWNER */
-    /* From Room: Game */
-    /* Sends to:  
-    Through updateMeyerInfo call: Game*/
-    socket.on("change_owner", (playerUid: string) => {
-      console.info("Received event: change_owner from " + socket.id);
-
-      const uid = this.GetUidFromSocketID(socket.id);
-      if (uid && uid !== playerUid) {
-        const owningGame = this.gameBases[uid];
-        if (owningGame) {
-          console.info("Owner changed from " + uid + " to " + playerUid);
-          this.changeOwner(owningGame, uid, playerUid);
         }
       }
     });

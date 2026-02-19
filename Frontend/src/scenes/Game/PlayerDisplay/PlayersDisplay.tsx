@@ -31,34 +31,29 @@ const PlayerDisplay = ({
   setReordering,
 }: Props) => {
   const { SocketState, SocketDispatch } = useGlobalContext();
-
-  const [tasks, setTasks] = useState([
-    { id: 1, title: "Entry 1" },
-    { id: 2, title: "Entry 2" },
-    { id: 3, title: "Entry 3" },
-  ]);
   const sensors = useSensors(useSensor(PointerSensor));
 
-  const getTaskPos = (id: any) => tasks.findIndex((task) => task.id === id);
-
-  const handleDragEnd = (event: { active: any; over: any }) => {
+  function handleDragEnd(event: { active: any; over: any }) {
     const { active, over } = event;
 
     if (active.id === over.id) return;
 
-    setTasks((tasks) => {
-      const originalPos = getTaskPos(active.id);
-      const newPos = getTaskPos(over.id);
+    const originalPos = active.id - 1;
+    const newPos = over.id - 1;
 
-      return arrayMove(tasks, originalPos, newPos);
-    });
-  };
+    const newOrder =
+      originalPos < newPos
+        ? arrayMove(SocketState.thisGame.gamePlayersOrder, originalPos, newPos)
+        : arrayMove(SocketState.thisGame.gamePlayersOrder, newPos, originalPos);
+
+    SocketState.socket?.emit("change_order", newOrder);
+  }
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCorners}
-      //onDragEnd={handleDragEnd}
+      onDragEnd={handleDragEnd}
     >
       <Box
         display="flex"
@@ -83,9 +78,6 @@ const PlayerDisplay = ({
               key={index}
             />
           ))}
-          {/* {tasks.map((task) => (
-            <Task key={task.id} id={task.id} />
-          ))} */}
           <Box paddingBottom="2px" />
         </SortableContext>
       </Box>

@@ -91,7 +91,8 @@ export type TSocketContextActions =
   /* %%MIXED%% */
   | "change_healthroll_rule_set"
   | "remove_game_player"
-  | "owner_change"
+  //| "owner_change"
+  //| "order_change"
   | "add_user_timeout"
   | "remove_user_timeout";
 
@@ -290,16 +291,16 @@ export const SocketReducer = (
         },
       };
 
-    case "owner_change": {
-      let newowner = action.payload as string;
-      return {
-        ...state,
-        thisGame: {
-          ...state.thisGame,
-          owner: newowner,
-        },
-      };
-    }
+    // case "owner_change": {
+    //   let newowner = action.payload as string;
+    //   return {
+    //     ...state,
+    //     thisGame: {
+    //       ...state.thisGame,
+    //       owner: newowner,
+    //     },
+    //   };
+    // }
 
     case "remove_game_player": {
       let playerIndex = state.thisGame.gamePlayers.findIndex(
@@ -313,6 +314,9 @@ export const SocketReducer = (
             (value, index) => index !== playerIndex,
           ),
           gamePlayersNames: state.thisGame.gamePlayersNames.filter(
+            (value, index) => index !== playerIndex,
+          ),
+          gamePlayersOrder: state.thisGame.gamePlayersOrder.filter(
             (value, index) => index !== playerIndex,
           ),
         },

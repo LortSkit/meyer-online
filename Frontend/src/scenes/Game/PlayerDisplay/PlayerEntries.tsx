@@ -68,17 +68,15 @@ const PlayerEntries = ({
   };
 
   function numberAfterName(name: string, index: number): string {
+    const actualNameOrder = SocketState.thisGame?.gamePlayersOrder.map(
+      (value) => SocketState.thisGame?.gamePlayersNames[value - 1],
+    );
     if (index === 0) {
-      return SocketState.thisGame?.gamePlayersNames
-        .slice(1, SocketState.thisGame?.gamePlayersNames.length)
-        .includes(name)
+      return actualNameOrder.slice(1, actualNameOrder.length).includes(name)
         ? " (1)"
         : "";
     } else {
-      const previousNames = SocketState.thisGame?.gamePlayersNames.slice(
-        0,
-        index,
-      );
+      const previousNames = actualNameOrder.slice(0, index);
       if (previousNames.includes(name)) {
         let i = 0;
         previousNames.forEach((value) => {
@@ -89,9 +87,7 @@ const PlayerEntries = ({
 
         return " (" + (i + 1) + ")";
       } else if (
-        SocketState.thisGame?.gamePlayersNames
-          .slice(index + 1, SocketState.thisGame?.gamePlayersNames.length)
-          .includes(name)
+        actualNameOrder.slice(index + 1, actualNameOrder.length).includes(name)
       ) {
         return " (1)";
       }
@@ -287,26 +283,38 @@ const PlayerEntries = ({
     <Box
       display="flex"
       key={index}
-      onMouseEnter={() => setHovered(SocketState.thisGame.gamePlayers[index])}
+      onMouseEnter={() =>
+        setHovered(
+          SocketState.thisGame.gamePlayers[
+            SocketState.thisGame.gamePlayersOrder[index] - 1
+          ],
+        )
+      }
       onMouseLeave={() => {
         setHovered("");
       }}
       onClick={() => {
         if (
           changingOwner &&
-          SocketState.thisGame.gamePlayers[index] !== SocketState.uid
+          SocketState.thisGame.gamePlayers[
+            SocketState.thisGame.gamePlayersOrder[index] - 1
+          ] !== SocketState.uid
         ) {
           setChangingOwner(false);
           SocketState.socket?.emit(
             "change_owner",
-            SocketState.thisGame.gamePlayers[index],
+            SocketState.thisGame.gamePlayers[
+              SocketState.thisGame.gamePlayersOrder[index] - 1
+            ],
           );
         }
       }}
       sx={{
         cursor:
           changingOwner &&
-          SocketState.thisGame.gamePlayers[index] !== SocketState.uid
+          SocketState.thisGame.gamePlayers[
+            SocketState.thisGame.gamePlayersOrder[index] - 1
+          ] !== SocketState.uid
             ? "pointer"
             : "auto",
         touchAction: "none",
@@ -319,8 +327,9 @@ const PlayerEntries = ({
       <Box display="flex">
         {/* ARROW - (if wanted) */}
         {SocketState.meyerInfo &&
-          SocketState.thisGame.gamePlayers[index] ===
-            SocketState.meyerInfo.currentPlayer &&
+          SocketState.thisGame.gamePlayers[
+            SocketState.thisGame.gamePlayersOrder[index] - 1
+          ] === SocketState.meyerInfo.currentPlayer &&
           !SocketState.meyerInfo.isGameOver && (
             <Box display="flex" bgcolor={colors.primary[500]}>
               <ArrowForwardOutlined />
@@ -328,8 +337,9 @@ const PlayerEntries = ({
           )}
         {SocketState.meyerInfo &&
           !(
-            SocketState.thisGame.gamePlayers[index] ===
-              SocketState.meyerInfo.currentPlayer &&
+            SocketState.thisGame.gamePlayers[
+              SocketState.thisGame.gamePlayersOrder[index] - 1
+            ] === SocketState.meyerInfo.currentPlayer &&
             !SocketState.meyerInfo.isGameOver
           ) && <Box paddingLeft="calc(20.5px + 5px)" />}
         {/* DICE ICON */}
@@ -345,7 +355,9 @@ const PlayerEntries = ({
               sx={{
                 opacity:
                   changingOwner &&
-                  SocketState.thisGame.gamePlayers[index] === SocketState.uid
+                  SocketState.thisGame.gamePlayers[
+                    SocketState.thisGame.gamePlayersOrder[index] - 1
+                  ] === SocketState.uid
                     ? 0.5
                     : 1,
               }}
@@ -377,7 +389,9 @@ const PlayerEntries = ({
             onDoubleClick={() => {
               if (
                 !changingOwner &&
-                SocketState.thisGame.gamePlayers[index] === SocketState.uid &&
+                SocketState.thisGame.gamePlayers[
+                  SocketState.thisGame.gamePlayersOrder[index] - 1
+                ] === SocketState.uid &&
                 !SocketState.thisGame.isInProgress
               )
                 onEdit();
@@ -386,7 +400,9 @@ const PlayerEntries = ({
               inset: 0,
               opacity:
                 changingOwner &&
-                SocketState.thisGame.gamePlayers[index] === SocketState.uid
+                SocketState.thisGame.gamePlayers[
+                  SocketState.thisGame.gamePlayersOrder[index] - 1
+                ] === SocketState.uid
                   ? 0.5
                   : 1,
             }}
@@ -403,7 +419,9 @@ const PlayerEntries = ({
               }}
               color={
                 SocketState.thisGame.gamePlayersTimeout.includes(
-                  SocketState.thisGame.gamePlayers[index],
+                  SocketState.thisGame.gamePlayers[
+                    SocketState.thisGame.gamePlayersOrder[index] - 1
+                  ],
                 )
                   ? colors.grey[500]
                   : undefined
@@ -412,8 +430,9 @@ const PlayerEntries = ({
               children={
                 <Box>
                   {(!toggleEditName ||
-                    SocketState.thisGame.gamePlayers[index] !==
-                      SocketState.uid) && (
+                    SocketState.thisGame.gamePlayers[
+                      SocketState.thisGame.gamePlayersOrder[index] - 1
+                    ] !== SocketState.uid) && (
                     <>
                       {SocketState.thisGame.gamePlayersNames[nameindex - 1] !==
                         "" &&
@@ -432,39 +451,55 @@ const PlayerEntries = ({
                       )}
                       {!changingOwner &&
                         !reordering &&
-                        SocketState.thisGame.gamePlayers[index] ===
-                          SocketState.uid &&
+                        SocketState.thisGame.gamePlayers[
+                          SocketState.thisGame.gamePlayersOrder[index] - 1
+                        ] === SocketState.uid &&
                         !SocketState.thisGame.isInProgress &&
                         EditNameButton()}
                     </>
                   )}
                   {toggleEditName &&
                     !SocketState.thisGame.isInProgress &&
-                    SocketState.thisGame.gamePlayers[index] ===
-                      SocketState.uid &&
+                    SocketState.thisGame.gamePlayers[
+                      SocketState.thisGame.gamePlayersOrder[index] - 1
+                    ] === SocketState.uid &&
                     InputNameElement(index)}
                   {!changingOwner &&
                     !reordering &&
                     SocketState.thisGame.owner === SocketState.uid &&
-                    SocketState.thisGame.gamePlayers[index] !==
-                      SocketState.uid &&
-                    KickPlayerButton(SocketState.thisGame.gamePlayers[index])}
+                    SocketState.thisGame.gamePlayers[
+                      SocketState.thisGame.gamePlayersOrder[index] - 1
+                    ] !== SocketState.uid &&
+                    KickPlayerButton(
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ],
+                    )}
                   {SocketState.thisGame.owner ===
-                    SocketState.thisGame.gamePlayers[index] &&
+                    SocketState.thisGame.gamePlayers[
+                      SocketState.thisGame.gamePlayersOrder[index] - 1
+                    ] &&
                     !toggleEditName &&
                     Star()}
                   {changingOwner &&
                     SocketState.thisGame.owner !==
-                      SocketState.thisGame.gamePlayers[index] &&
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ] &&
                     !toggleEditName &&
-                    hovered === SocketState.thisGame.gamePlayers[index] &&
+                    hovered ===
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ] &&
                     Star()}
                 </Box>
               }
             />
             {toggleEditName &&
               !SocketState.thisGame.isInProgress &&
-              SocketState.thisGame.gamePlayers[index] === SocketState.uid &&
+              SocketState.thisGame.gamePlayers[
+                SocketState.thisGame.gamePlayersOrder[index] - 1
+              ] === SocketState.uid &&
               ConfirmButton()}
           </Box>
         )}

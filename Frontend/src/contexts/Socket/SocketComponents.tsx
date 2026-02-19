@@ -303,6 +303,12 @@ const SocketContextComponent: React.FunctionComponent<
       SocketDispatch({ type: "set_this_game", payload: payload });
     });
 
+    /* Order changed */
+    /* For Room: Game */
+    socket.on("order_changed", (payload: GameInfo) => {
+      SocketDispatch({ type: "set_this_game", payload: payload });
+    });
+
     /* When getting kicked */
     /* For Room: Game */
     socket.on("been_kicked", () => {

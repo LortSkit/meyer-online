@@ -258,6 +258,7 @@ const GameLobby = ({ isDanish }: Props) => {
                 {translateChangeOrder(isDanish)}
               </Box>
               <IconButton
+                disabled={SocketState.thisGame.gamePlayers.length <= 1}
                 onClick={() => {
                   setReordering((prev) => !prev);
                 }}
