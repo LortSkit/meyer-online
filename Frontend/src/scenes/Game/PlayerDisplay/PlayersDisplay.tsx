@@ -12,8 +12,6 @@ import {
   DndContext,
   DragEndEvent,
   PointerSensor,
-  pointerWithin,
-  rectIntersection,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -37,6 +35,7 @@ const PlayerDisplay = ({
   const sensors = useSensors(useSensor(PointerSensor));
 
   const [items, setItems] = useState(SocketState.thisGame.gamePlayersOrder);
+  const [globalIsDragging, setGlobalIsDragging] = useState(false);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -58,8 +57,12 @@ const PlayerDisplay = ({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={pointerWithin}
-      onDragEnd={handleDragEnd}
+      collisionDetection={closestCorners}
+      onDragEnd={(event) => {
+        setGlobalIsDragging(false);
+        handleDragEnd(event);
+      }}
+      onDragStart={() => setGlobalIsDragging(true)}
     >
       <Box
         display="flex"
@@ -79,6 +82,7 @@ const PlayerDisplay = ({
               reordering={reordering}
               setReordering={setReordering}
               items={items}
+              globalIsDragging={globalIsDragging}
               key={index}
             />
           ))}

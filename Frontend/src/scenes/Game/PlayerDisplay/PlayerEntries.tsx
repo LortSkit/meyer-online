@@ -27,6 +27,7 @@ interface Props {
   reordering: boolean;
   setReordering: React.Dispatch<React.SetStateAction<boolean>>;
   items: number[];
+  globalIsDragging: boolean;
 }
 
 const PlayerEntries = ({
@@ -38,6 +39,7 @@ const PlayerEntries = ({
   reordering,
   setReordering,
   items,
+  globalIsDragging,
 }: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
@@ -343,7 +345,12 @@ const PlayerEntries = ({
           )}
         {/* DRAG SIX DOTS - (if wanted) */}
         {!SocketState.thisGame.isInProgress && reordering && (
-          <Box position={"absolute"} marginInlineStart={"-25px"}>
+          <Box
+            position={"absolute"}
+            marginInlineStart={"-25px"}
+            zIndex={globalIsDragging ? -1 : 0}
+            draggable
+          >
             <DragIndicator />
           </Box>
         )}
