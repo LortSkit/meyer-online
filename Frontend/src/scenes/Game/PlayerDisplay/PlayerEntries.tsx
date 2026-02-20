@@ -2,11 +2,14 @@ import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import ArrowForwardOutlined from "@mui/icons-material/ArrowForwardOutlined";
-import CloseOutlined from "@mui/icons-material/CloseOutlined";
+import ArrowBackIosNew from "@mui/icons-material/ArrowBackIosNew";
 import DragIndicator from "@mui/icons-material/DragIndicator";
 import Edit from "@mui/icons-material/Edit";
 import DoneOutlined from "@mui/icons-material/DoneOutlined";
 import StarOutlined from "@mui/icons-material/StarOutlined";
+import StarBorder from "@mui/icons-material/StarBorder";
+import MoreVert from "@mui/icons-material/MoreVert";
+import DoNotStep from "@mui/icons-material/DoNotStep";
 import { Dice } from "../../../utils/diceUtils";
 import loading from "../../../assets/discordLoadingDotsDiscordLoading.gif";
 import { useGlobalContext } from "../../../contexts/Socket/SocketContext";
@@ -17,8 +20,13 @@ import { useEffect, useState } from "react";
 import useTheme from "@mui/material/styles/useTheme";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import {
+  translateCrown,
+  translateKick,
+} from "../../../utils/lang/Game/GameLobby/PlayerDisplay/langPlayerEntries";
 
 interface Props {
+  isDanish: boolean;
   nameindex: number;
   index: number;
   currentName: (uid: string) => string;
@@ -31,6 +39,7 @@ interface Props {
 }
 
 const PlayerEntries = ({
+  isDanish,
   nameindex,
   index,
   currentName,
@@ -71,6 +80,9 @@ const PlayerEntries = ({
     disabled: disableDnD,
     transition: { duration: 0, easing: "linear(0.25, 1, 0.5, 1)" },
   });
+
+  const [toggleOwnerActions, setToggleOwnerActions] = useState(false);
+  const [makeOwnerHover, setMakeOwnerHover] = useState(false);
 
   const style = {
     transition,
@@ -148,11 +160,86 @@ const PlayerEntries = ({
         onClick={onKick(uid)}
         style={{
           position: "relative",
-          width: "20px",
+          // width: "63px",
           height: "20px",
+          transform: "translate(0%,-5%)",
         }}
       >
-        <CloseOutlined sx={{ width: "18px", height: "18px" }} />
+        <Box display="flex" flexDirection="row">
+          {!SocketState.thisGame.isInProgress && (
+            <Box display="flex" flexDirection="column" justifyContent="center">
+              <Typography
+                fontSize={queryMatches400 ? "16px" : "12px"}
+                children={translateKick(isDanish)}
+              />
+            </Box>
+          )}
+          <Box display="flex" flexDirection="column" justifyContent="center">
+            <DoNotStep sx={{ width: "18px", height: "18px" }} />
+          </Box>
+        </Box>
+      </IconButton>
+    );
+  };
+
+  const MakeOwnerButton = (uid: string) => {
+    return (
+      <IconButton
+        onClick={() => {
+          SocketState.socket?.emit("change_owner", uid);
+        }}
+        onMouseEnter={() => {
+          setMakeOwnerHover(true);
+        }}
+        onMouseLeave={() => {
+          setMakeOwnerHover(false);
+        }}
+        style={{
+          position: "relative",
+          // width: "63px",
+          height: "20px",
+          transform: "translate(0%,-5%)",
+        }}
+      >
+        <Box display="flex" flexDirection="row">
+          <Box display="flex" flexDirection="column" justifyContent="center">
+            <Typography
+              fontSize={queryMatches400 ? "16px" : "12px"}
+              children={translateCrown(isDanish)}
+            />
+          </Box>
+          <Box display="flex" flexDirection="column" justifyContent="center">
+            {!makeOwnerHover && (
+              <StarBorder sx={{ width: "18px", height: "18px" }} />
+            )}
+            {makeOwnerHover && (
+              <StarOutlined sx={{ width: "18px", height: "18px" }} />
+            )}
+          </Box>
+        </Box>
+      </IconButton>
+    );
+  };
+
+  const OwnerActionsToggleButton = () => {
+    return (
+      <IconButton
+        onClick={() => {
+          setToggleOwnerActions((prev) => !prev);
+        }}
+        style={{
+          position: "relative",
+          width: "20px",
+          height: "20px",
+          transform: "translate(0%,-5%)",
+        }}
+      >
+        {!toggleOwnerActions && (
+          <MoreVert sx={{ width: "18px", height: "18px" }} />
+        )}
+        {toggleOwnerActions && (
+          <ArrowBackIosNew sx={{ width: "18px", height: "18px" }} />
+        )}
       </IconButton>
     );
   };
@@ -215,18 +302,19 @@ const PlayerEntries = ({
         display="flex"
         justifyContent="center"
         flexDirection="column"
-        bgcolor={colors.primary[600]}
+        bgcolor={colors.primary[700]}
         borderRadius="3px"
-        paddingTop="1px"
+        paddingTop="2.7px"
         onBlur={() => setTimeout(onBlur, 100)}
       >
         <InputBase
           id={"player-name-bar" + index}
           sx={{
             color: colors.blackAccent[100],
-            height: "21.64px",
+            height: "19.37px",
             fontSize: "14px",
             paddingBottom: "3px",
+            width: "170px",
           }}
           type="text"
           required={true}
@@ -375,7 +463,8 @@ const PlayerEntries = ({
         {((SocketState.meyerInfo?.healths &&
           (SocketState.meyerInfo.healths[index] > 0 ||
             SocketState.thisGame.owner === SocketState.uid)) ||
-          !SocketState.meyerInfo?.healths) && (
+          !SocketState.meyerInfo?.healths ||
+          SocketState.meyerInfo.isGameOver) && (
           <Box display="flex">
             <Box
               display="flex"
@@ -409,11 +498,12 @@ const PlayerEntries = ({
         {((SocketState.meyerInfo?.healths &&
           (SocketState.meyerInfo.healths[index] > 0 ||
             SocketState.thisGame.owner === SocketState.uid)) ||
-          !SocketState.meyerInfo?.healths) && (
+          !SocketState.meyerInfo?.healths ||
+          SocketState.meyerInfo.isGameOver) && (
           <Box
             display="flex"
-            flexDirection="row"
-            justifyContent="column"
+            flexDirection="column"
+            justifyContent="center"
             onDoubleClick={() => {
               if (
                 !changingOwner &&
@@ -456,6 +546,7 @@ const PlayerEntries = ({
                   : undefined
               }
               component="span"
+              onBlur={() => setTimeout(() => setToggleOwnerActions(false), 100)}
               children={
                 <Box display="flex" flexDirection="row">
                   <Box>
@@ -490,29 +581,6 @@ const PlayerEntries = ({
                           EditNameButton()}
                       </>
                     )}
-                    {toggleEditName &&
-                      !SocketState.thisGame.isInProgress &&
-                      SocketState.thisGame.gamePlayers[
-                        SocketState.thisGame.gamePlayersOrder[index] - 1
-                      ] === SocketState.uid &&
-                      InputNameElement(index)}
-                    {!changingOwner &&
-                      !reordering &&
-                      SocketState.thisGame.owner === SocketState.uid &&
-                      SocketState.thisGame.gamePlayers[
-                        SocketState.thisGame.gamePlayersOrder[index] - 1
-                      ] !== SocketState.uid &&
-                      KickPlayerButton(
-                        SocketState.thisGame.gamePlayers[
-                          SocketState.thisGame.gamePlayersOrder[index] - 1
-                        ],
-                      )}
-                    {SocketState.thisGame.owner ===
-                      SocketState.thisGame.gamePlayers[
-                        SocketState.thisGame.gamePlayersOrder[index] - 1
-                      ] &&
-                      !toggleEditName &&
-                      Star()}
                     {changingOwner &&
                       SocketState.thisGame.owner !==
                         SocketState.thisGame.gamePlayers[
@@ -524,6 +592,65 @@ const PlayerEntries = ({
                           SocketState.thisGame.gamePlayersOrder[index] - 1
                         ] &&
                       Star()}
+                    {toggleEditName &&
+                      !SocketState.thisGame.isInProgress &&
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ] === SocketState.uid &&
+                      InputNameElement(index)}
+                    {SocketState.thisGame.owner ===
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ] &&
+                      !toggleEditName &&
+                      Star()}
+                    {!changingOwner &&
+                      !reordering &&
+                      !SocketState.thisGame.isInProgress &&
+                      SocketState.thisGame.owner === SocketState.uid &&
+                      SocketState.thisGame.owner !==
+                        SocketState.thisGame.gamePlayers[
+                          SocketState.thisGame.gamePlayersOrder[index] - 1
+                        ] &&
+                      OwnerActionsToggleButton()}
+                    {!changingOwner &&
+                      !reordering &&
+                      !SocketState.thisGame.isInProgress &&
+                      toggleOwnerActions &&
+                      SocketState.thisGame.owner === SocketState.uid &&
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ] !== SocketState.uid &&
+                      KickPlayerButton(
+                        SocketState.thisGame.gamePlayers[
+                          SocketState.thisGame.gamePlayersOrder[index] - 1
+                        ],
+                      )}
+                    {!changingOwner &&
+                      !reordering &&
+                      toggleOwnerActions &&
+                      SocketState.thisGame.owner === SocketState.uid &&
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ] !== SocketState.uid &&
+                      MakeOwnerButton(
+                        SocketState.thisGame.gamePlayers[
+                          SocketState.thisGame.gamePlayersOrder[index] - 1
+                        ],
+                      )}
+                    {!changingOwner &&
+                      !reordering &&
+                      !toggleOwnerActions &&
+                      SocketState.thisGame.isInProgress &&
+                      SocketState.thisGame.owner === SocketState.uid &&
+                      SocketState.thisGame.gamePlayers[
+                        SocketState.thisGame.gamePlayersOrder[index] - 1
+                      ] !== SocketState.uid &&
+                      KickPlayerButton(
+                        SocketState.thisGame.gamePlayers[
+                          SocketState.thisGame.gamePlayersOrder[index] - 1
+                        ],
+                      )}
                   </Box>
                   {toggleEditName &&
                     !SocketState.thisGame.isInProgress &&

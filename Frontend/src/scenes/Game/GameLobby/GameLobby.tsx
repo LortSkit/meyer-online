@@ -375,6 +375,7 @@ const GameLobby = ({ isDanish }: Props) => {
             borderRadius="50px"
           >
             <PlayerDisplay
+              isDanish={isDanish}
               currentName={(uid: string) => thisPlayerName()}
               changingOwner={changingOwner}
               setChangingOwner={setChangingOwner}

@@ -17,6 +17,7 @@ import {
 } from "@dnd-kit/core";
 
 interface Props {
+  isDanish: boolean;
   currentName: (uid: string) => string;
   changingOwner: boolean;
   setChangingOwner: React.Dispatch<React.SetStateAction<boolean>>;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 const PlayerDisplay = ({
+  isDanish,
   currentName,
   changingOwner,
   setChangingOwner,
@@ -74,6 +76,7 @@ const PlayerDisplay = ({
         <SortableContext items={items} strategy={verticalListSortingStrategy}>
           {items.map((nameindex, index) => (
             <PlayerEntries
+              isDanish={isDanish}
               nameindex={nameindex}
               index={index}
               currentName={currentName}

@@ -446,6 +446,7 @@ const GameMeyer = ({ isDanish }: Props) => {
       >
         <Box display="flex" justifyContent="left">
           <PlayerDisplay
+            isDanish={isDanish}
             currentName={playernameFromUid}
             changingOwner={false}
             setChangingOwner={() => {}}

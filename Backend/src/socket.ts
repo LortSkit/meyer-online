@@ -172,7 +172,7 @@ export class ServerSocket {
         (value) => value === uid,
       );
 
-      if (playerIndex) {
+      if (playerIndex !== -1) {
         this.gamePlayers[inGameId] = this.gamePlayers[inGameId].filter(
           (value, index) => index !== playerIndex,
         );
@@ -807,10 +807,10 @@ export class ServerSocket {
             }
 
             const playerIndex = this.gamePlayers[inGameId].findIndex(
-              (value) => value === uid,
+              (value) => value == uid,
             );
 
-            if (playerIndex) {
+            if (playerIndex !== -1) {
               this.gamePlayersNames[inGameId][playerIndex] = givenPlayerName;
 
               callback(givenPlayerName);
@@ -820,6 +820,15 @@ export class ServerSocket {
                 "player_name_changed",
                 [inGameId],
                 [uid, givenPlayerName],
+              );
+            } else {
+              console.info(
+                "Player with uid " +
+                  uid +
+                  " apprently does not exist? gamePlayers = " +
+                  this.gamePlayers[inGameId] +
+                  " " +
+                  this.gamePlayers[inGameId][0],
               );
             }
           }
