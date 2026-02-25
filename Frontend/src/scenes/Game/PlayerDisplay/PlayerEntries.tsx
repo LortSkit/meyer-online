@@ -169,7 +169,9 @@ const PlayerEntries = ({
           {!SocketState.thisGame.isInProgress && (
             <Box display="flex" flexDirection="column" justifyContent="center">
               <Typography
-                fontSize={queryMatches400 ? "16px" : "12px"}
+                fontSize={
+                  queryMatches400 ? (isDanish ? "14px" : "16px") : "12px"
+                }
                 children={translateKick(isDanish)}
               />
             </Box>
@@ -204,7 +206,7 @@ const PlayerEntries = ({
         <Box display="flex" flexDirection="row">
           <Box display="flex" flexDirection="column" justifyContent="center">
             <Typography
-              fontSize={queryMatches400 ? "16px" : "12px"}
+              fontSize={queryMatches400 ? (isDanish ? "14px" : "16px") : "12px"}
               children={translateCrown(isDanish)}
             />
           </Box>
@@ -436,12 +438,13 @@ const PlayerEntries = ({
           <Box
             position={"absolute"}
             marginInlineStart={"-25px"}
-            zIndex={globalIsDragging ? -1 : 0}
+            zIndex={!queryMatches400 && globalIsDragging ? -1 : 0}
             draggable
           >
             <DragIndicator />
           </Box>
         )}
+
         {/* NUMBERING - (if wanted) */}
         {!SocketState.thisGame.isInProgress && !reordering && (
           <Box

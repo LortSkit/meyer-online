@@ -61,8 +61,8 @@ const PlayerDisplay = ({
       sensors={sensors}
       collisionDetection={closestCorners}
       onDragEnd={(event) => {
-        setGlobalIsDragging(false);
         handleDragEnd(event);
+        setGlobalIsDragging(false);
       }}
       onDragStart={() => setGlobalIsDragging(true)}
     >
