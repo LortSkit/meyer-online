@@ -159,13 +159,11 @@ const PlayerEntries = ({
       <IconButton
         onClick={onKick(uid)}
         style={{
-          position: "relative",
-          // width: "63px",
           height: "20px",
           transform: "translate(0%,-5%)",
         }}
       >
-        <Box display="flex" flexDirection="row">
+        <Box display="flex" flexDirection="row" flexBasis="100%">
           {!SocketState.thisGame.isInProgress && (
             <Box display="flex" flexDirection="column" justifyContent="center">
               <Typography
@@ -197,13 +195,11 @@ const PlayerEntries = ({
           setMakeOwnerHover(false);
         }}
         style={{
-          position: "relative",
-          // width: "63px",
           height: "20px",
           transform: "translate(0%,-5%)",
         }}
       >
-        <Box display="flex" flexDirection="row">
+        <Box display="flex" flexDirection="row" flexBasis="100%">
           <Box display="flex" flexDirection="column" justifyContent="center">
             <Typography
               fontSize={queryMatches400 ? (isDanish ? "14px" : "16px") : "12px"}
@@ -230,7 +226,6 @@ const PlayerEntries = ({
           setToggleOwnerActions((prev) => !prev);
         }}
         style={{
-          position: "relative",
           width: "20px",
           height: "20px",
           transform: "translate(0%,-5%)",
@@ -529,7 +524,8 @@ const PlayerEntries = ({
               }
               style={{
                 wordBreak: "break-all",
-                textAlign: "center",
+                textAlign: "left",
+                maxHeight: "27px",
               }}
               color={
                 SocketState.thisGame.gamePlayersTimeout.includes(
@@ -541,12 +537,17 @@ const PlayerEntries = ({
               component="span"
               onBlur={() => setTimeout(() => setToggleOwnerActions(false), 100)}
               children={
-                <Box display="flex" flexDirection="row">
-                  <Box>
+                <Box
+                  display="flex"
+                  flexDirection="row"
+                  maxHeight="21px"
+                  overflow="hidden"
+                >
+                  <Box display="flex" flexShrink="1">
                     {(!toggleEditName ||
                       SocketState.thisGame.gamePlayers[items[index] - 1] !==
                         SocketState.uid) && (
-                      <>
+                      <Box display="flex">
                         {SocketState.thisGame.gamePlayersNames[
                           nameindex - 1
                         ] !== "" &&
@@ -570,7 +571,7 @@ const PlayerEntries = ({
                             SocketState.uid &&
                           !SocketState.thisGame.isInProgress &&
                           EditNameButton()}
-                      </>
+                      </Box>
                     )}
                     {changingOwner &&
                       SocketState.thisGame.owner !==
@@ -595,6 +596,32 @@ const PlayerEntries = ({
                       SocketState.thisGame.owner !==
                         SocketState.thisGame.gamePlayers[items[index] - 1] &&
                       OwnerActionsToggleButton()}
+                    {toggleEditName &&
+                      !SocketState.thisGame.isInProgress &&
+                      SocketState.thisGame.gamePlayers[items[index] - 1] ===
+                        SocketState.uid &&
+                      ConfirmButton()}
+                  </Box>
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    flexBasis={
+                      changingOwner ||
+                      reordering ||
+                      SocketState.thisGame.owner !== SocketState.uid ||
+                      SocketState.thisGame.gamePlayers[items[index] - 1] !==
+                        SocketState.uid ||
+                      (SocketState.thisGame.owner === SocketState.uid &&
+                        SocketState.thisGame.gamePlayers[items[index] - 1] ===
+                          SocketState.uid &&
+                        !changingOwner &&
+                        !reordering)
+                        ? "none"
+                        : "100%"
+                    }
+                    flexGrow="1"
+                    flexShrink="0"
+                  >
                     {!changingOwner &&
                       !reordering &&
                       !SocketState.thisGame.isInProgress &&
@@ -625,11 +652,6 @@ const PlayerEntries = ({
                         SocketState.thisGame.gamePlayers[items[index] - 1],
                       )}
                   </Box>
-                  {toggleEditName &&
-                    !SocketState.thisGame.isInProgress &&
-                    SocketState.thisGame.gamePlayers[items[index] - 1] ===
-                      SocketState.uid &&
-                    ConfirmButton()}
                 </Box>
               }
             />
