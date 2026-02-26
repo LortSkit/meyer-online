@@ -50,6 +50,7 @@ const PlayerDisplay = ({
     const newOrder = arrayMove(items, originalPos, newPos);
     SocketState.socket?.emit("change_order", newOrder);
     setItems(newOrder);
+    setGlobalIsDragging(false);
   }
 
   useEffect(() => {
@@ -62,7 +63,6 @@ const PlayerDisplay = ({
       collisionDetection={closestCorners}
       onDragEnd={(event) => {
         handleDragEnd(event);
-        setGlobalIsDragging(false);
       }}
       onDragStart={() => setGlobalIsDragging(true)}
     >

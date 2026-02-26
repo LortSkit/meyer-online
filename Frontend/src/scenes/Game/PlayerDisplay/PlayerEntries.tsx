@@ -602,9 +602,7 @@ const PlayerEntries = ({
                       ] === SocketState.uid &&
                       InputNameElement(index)}
                     {SocketState.thisGame.owner ===
-                      SocketState.thisGame.gamePlayers[
-                        SocketState.thisGame.gamePlayersOrder[index] - 1
-                      ] &&
+                      SocketState.thisGame.gamePlayers[items[index] - 1] &&
                       !toggleEditName &&
                       Star()}
                     {!changingOwner &&
