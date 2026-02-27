@@ -39,6 +39,16 @@ const PlayerDisplay = ({
   const [items, setItems] = useState(SocketState.thisGame.gamePlayersOrder);
   const [globalIsDragging, setGlobalIsDragging] = useState(false);
 
+  function checkSum(order: number[]) {
+    const len = order.length;
+    let calcsum = 0;
+    for (let i = 0; i < len; i++) {
+      calcsum += order[i];
+    }
+    const checksum = (len * (len + 1)) / 2;
+    return calcsum === checksum;
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
@@ -49,13 +59,15 @@ const PlayerDisplay = ({
 
     const newOrder = arrayMove(items, originalPos, newPos);
     SocketState.socket?.emit("change_order", newOrder);
-    setItems(newOrder);
     setGlobalIsDragging(false);
+    if (checkSum(newOrder)) {
+      setItems(newOrder);
+    }
   }
 
   useEffect(() => {
     setItems(SocketState.thisGame.gamePlayersOrder);
-  }, [SocketState.thisGame]);
+  }, [SocketState.thisGame, SocketState.thisGame.gamePlayersOrder]);
 
   return (
     <DndContext

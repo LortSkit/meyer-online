@@ -116,10 +116,7 @@ export interface ISocketContextActions {
 
 function subtract1ToOrders(order: number[], cutoff: number) {
   for (let i = 0; i < order.length; i++) {
-    if (
-      (cutoff > 0 && order[i] > cutoff) ||
-      (cutoff < 0 && order[i] < cutoff)
-    ) {
+    if (order[i] > cutoff) {
       order[i] -= 1;
     }
   }
@@ -312,25 +309,33 @@ export const SocketReducer = (
       let playerIndex = state.thisGame.gamePlayers.findIndex(
         (value) => value === (action.payload as string),
       );
-      let newOrder = subtract1ToOrders(
-        state.thisGame.gamePlayersOrder.filter(
-          (value, index) => index !== playerIndex,
-        ),
-        state.thisGame.gamePlayersOrder[playerIndex],
-      );
-      return {
-        ...state,
-        thisGame: {
-          ...state.thisGame,
-          gamePlayers: state.thisGame.gamePlayers.filter(
-            (value, index) => index !== playerIndex,
+      if (playerIndex !== -1) {
+        let newOrder = subtract1ToOrders(
+          state.thisGame.gamePlayersOrder.filter(
+            (value, index) => value !== playerIndex + 1,
           ),
-          gamePlayersNames: state.thisGame.gamePlayersNames.filter(
-            (value, index) => index !== playerIndex,
-          ),
-          gamePlayersOrder: newOrder,
-        },
-      };
+          playerIndex + 1,
+        );
+        return {
+          ...state,
+          thisGame: {
+            ...state.thisGame,
+            gamePlayers: state.thisGame.gamePlayers.filter(
+              (value, index) => index !== playerIndex,
+            ),
+            gamePlayersNames: state.thisGame.gamePlayersNames.filter(
+              (value, index) => index !== playerIndex,
+            ),
+            gamePlayersOrder: newOrder,
+          },
+        };
+      } else
+        return {
+          ...state,
+          thisGame: {
+            ...state.thisGame,
+          },
+        };
     }
     case "add_user_timeout":
       return {

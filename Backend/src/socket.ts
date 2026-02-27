@@ -179,13 +179,11 @@ export class ServerSocket {
         this.gamePlayersNames[inGameId] = this.gamePlayersNames[
           inGameId
         ].filter((value, index) => index !== playerIndex);
-        this.subtract1ToOrders(
-          inGameId,
-          this.gamePlayersOrder[inGameId][playerIndex],
-        );
+        const cutoff = playerIndex + 1;
         this.gamePlayersOrder[inGameId] = this.gamePlayersOrder[
           inGameId
-        ].filter((value, index) => index !== playerIndex);
+        ].filter((value, index) => value !== cutoff);
+        this.subtract1ToOrders(inGameId, cutoff);
 
         if (inGameOwnerUid === uid && this.gamePlayers[inGameId].length > 0) {
           /* Game */
@@ -385,10 +383,7 @@ export class ServerSocket {
 
   private changeAllNumber(gameId: string, amount: number, cutoff: number) {
     for (let i = 0; i < this.gamePlayersOrder[gameId].length; i++) {
-      if (
-        (cutoff > 0 && this.gamePlayersOrder[gameId][i] > cutoff) ||
-        (cutoff < 0 && this.gamePlayersOrder[gameId][i] < cutoff)
-      ) {
+      if (this.gamePlayersOrder[gameId][i] > cutoff) {
         this.gamePlayersOrder[gameId][i] += amount;
       }
     }
@@ -403,6 +398,36 @@ export class ServerSocket {
     );
     this.changeAllNumber(gameId, -1, cutoff);
     console.info("We now have [" + this.gamePlayersOrder[gameId] + "]");
+  }
+
+  public checkSum(order: number[]) {
+    const len = order.length;
+    let calcsum = 0;
+    for (let i = 0; i < len; i++) {
+      if (
+        order.slice(i + 1).find((value) => value === order[i]) !== undefined
+      ) {
+        console.info(
+          "Checksum on order " +
+            order +
+            " found that " +
+            order[i] +
+            " occurs multiple times!",
+        );
+        return false;
+      }
+      calcsum += order[i];
+    }
+    const checksum = (len * (len + 1)) / 2;
+    console.info(
+      "Checksum on order " +
+        order +
+        " with calcsum " +
+        calcsum +
+        " and checksum " +
+        checksum,
+    );
+    return calcsum === checksum;
   }
   ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1019,13 +1044,15 @@ export class ServerSocket {
     /* From Room: Game */
     /* Sends to: Game*/
     socket.on("change_order", (newOrder: number[]) => {
+      console.info("Received event: change_order from " + socket.id);
       const uid = this.GetUidFromSocketID(socket.id);
       const owningGame = this.gameBases[uid];
       if (
         owningGame &&
         !this.gameIsInProgress(owningGame.id) &&
         this.gamePlayers[owningGame.id].length > 1 &&
-        newOrder.length === this.gamePlayersOrder[owningGame.id].length
+        newOrder.length === this.gamePlayersOrder[owningGame.id].length &&
+        this.checkSum(newOrder)
       ) {
         console.info(
           "Order changed from " +
