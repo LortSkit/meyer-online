@@ -50,7 +50,11 @@ const GameMeyer = ({ isDanish }: Props) => {
   const queryMatches = useMediaQuery("only screen and (min-width: 400px)");
 
   function isGameOverMobile(): boolean {
-    if (!queryMatches && SocketState.meyerInfo.isGameOver) {
+    if (
+      !queryMatches &&
+      SocketState.meyerInfo !== null &&
+      SocketState.meyerInfo?.isGameOver
+    ) {
       return true;
     }
 
@@ -189,7 +193,7 @@ const GameMeyer = ({ isDanish }: Props) => {
         <LeaveGameButton isDanish={isDanish} socket={SocketState.socket} />
       </Box>
       {/* IN GAME */}
-      {!SocketState.meyerInfo?.isGameOver && (
+      {SocketState.meyerInfo !== null && !SocketState.meyerInfo?.isGameOver && (
         <Box display="flex" flexDirection="column">
           <Box display="flex" justifyContent="center">
             <GameHeading
@@ -199,130 +203,163 @@ const GameMeyer = ({ isDanish }: Props) => {
                   ? SocketState.meyerInfo.currentPlayer
                   : "",
               )}
-              round={SocketState.meyerInfo.round}
-              turn={SocketState.meyerInfo.turn}
+              round={
+                SocketState.meyerInfo !== null ? SocketState.meyerInfo.round : 0
+              }
+              turn={
+                SocketState.meyerInfo !== null ? SocketState.meyerInfo.turn : 0
+              }
             />
           </Box>
           {/* CURRENT PLAYER DISPLAY */}
-          {SocketState.meyerInfo?.currentPlayer === SocketState.uid && (
-            <Box display="flex" flexDirection="column">
-              {SocketState.meyerInfo.roll !== -1 && (
-                <Typography
-                  fontSize="25px"
-                  fontStyle="normal"
-                  textTransform="none"
-                  component="span"
-                  sx={{ display: "flex", justifyContent: "center" }}
-                >
-                  <RollWithName
-                    isDanish={isDanish}
-                    roll={SocketState.meyerInfo.roll}
-                    color={colors.blueAccent[100]}
-                    sideLength={30}
-                  />
-                </Typography>
-              )}
-              {/* ACTION */}
-              {SocketState.meyerInfo.bluffChoices.length === 0 && (
-                <Box display="flex" justifyContent="center" flexWrap="wrap">
-                  {SocketState.meyerInfo.actionChoices.map((action) => (
-                    <Box display="flex" justifyContent="center" key={action}>
-                      <ActionButton
+          {SocketState.meyerInfo !== null &&
+            SocketState.meyerInfo?.currentPlayer === SocketState.uid && (
+              <Box display="flex" flexDirection="column">
+                {SocketState.meyerInfo !== null &&
+                  SocketState.meyerInfo?.roll !== -1 && (
+                    <Typography
+                      fontSize="25px"
+                      fontStyle="normal"
+                      textTransform="none"
+                      component="span"
+                      sx={{ display: "flex", justifyContent: "center" }}
+                    >
+                      <RollWithName
                         isDanish={isDanish}
-                        action={action}
+                        roll={
+                          SocketState.meyerInfo !== null
+                            ? SocketState.meyerInfo.roll
+                            : -1
+                        }
+                        color={colors.blueAccent[100]}
+                        sideLength={30}
+                      />
+                    </Typography>
+                  )}
+                {/* ACTION */}
+                {SocketState.meyerInfo !== null &&
+                  SocketState.meyerInfo?.bluffChoices.length === 0 && (
+                    <Box display="flex" justifyContent="center" flexWrap="wrap">
+                      {SocketState.meyerInfo?.actionChoices.map((action) => (
+                        <Box
+                          display="flex"
+                          justifyContent="center"
+                          key={action}
+                        >
+                          <ActionButton
+                            isDanish={isDanish}
+                            action={action}
+                            onClick={() => {
+                              SocketState.socket?.emit(
+                                "take_action_bluff",
+                                action,
+                                -1,
+                              );
+                            }}
+                          />
+                        </Box>
+                      ))}
+                    </Box>
+                  )}
+                {/* BLUFF */}
+                {SocketState.meyerInfo.bluffChoices.length !== 0 && (
+                  <Box display="flex" flexDirection="column">
+                    <Box display="flex" justifyContent="center">
+                      <Button
+                        variant="contained"
+                        color="secondary"
                         onClick={() => {
                           SocketState.socket?.emit(
                             "take_action_bluff",
-                            action,
+                            "Error",
                             -1,
                           );
                         }}
-                      />
+                      >
+                        <ArrowBackIosNew />
+                        {translateBack(isDanish)}
+                      </Button>
                     </Box>
-                  ))}
-                </Box>
-              )}
-              {/* BLUFF */}
-              {SocketState.meyerInfo.bluffChoices.length !== 0 && (
-                <Box display="flex" flexDirection="column">
-                  <Box display="flex" justifyContent="center">
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={() => {
-                        SocketState.socket?.emit(
-                          "take_action_bluff",
-                          "Error",
-                          -1,
-                        );
-                      }}
-                    >
-                      <ArrowBackIosNew />
-                      {translateBack(isDanish)}
-                    </Button>
+                    <Box paddingTop="5px" />
+                    <Box display="flex" justifyContent="center" flexWrap="wrap">
+                      {SocketState.meyerInfo !== null &&
+                        SocketState.meyerInfo.bluffChoices.map((bluff) => (
+                          <Box
+                            display="flex"
+                            justifyContent="center"
+                            key={bluff}
+                          >
+                            <BluffButton
+                              isDanish={isDanish}
+                              bluff={bluff}
+                              onClick={() => {
+                                SocketState.socket?.emit(
+                                  "take_action_bluff",
+                                  "Error",
+                                  bluff,
+                                );
+                              }}
+                            />
+                          </Box>
+                        ))}
+                    </Box>
                   </Box>
-                  <Box paddingTop="5px" />
-                  <Box display="flex" justifyContent="center" flexWrap="wrap">
-                    {SocketState.meyerInfo.bluffChoices.map((bluff) => (
-                      <Box display="flex" justifyContent="center" key={bluff}>
-                        <BluffButton
-                          isDanish={isDanish}
-                          bluff={bluff}
-                          onClick={() => {
-                            SocketState.socket?.emit(
-                              "take_action_bluff",
-                              "Error",
-                              bluff,
-                            );
-                          }}
-                        />
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              )}
-            </Box>
-          )}
+                )}
+              </Box>
+            )}
           {/* NOT CURRENT PLAYER DISPLAY */}
-          {SocketState.meyerInfo?.currentPlayer !== SocketState.uid && (
-            <Typography
-              fontSize="12px"
-              fontStyle="normal"
-              textTransform="none"
-              component="span"
-              style={{
-                wordBreak: "break-word",
-                textAlign: "center",
-              }}
-              sx={{ display: "flex", justifyContent: "center" }}
-              children={
-                <Box>
-                  {translateWaitingTurn(
-                    isDanish,
-                    playernameFromUid(SocketState.meyerInfo.currentPlayer),
-                  )}
-                  <img
-                    src={loading}
-                    width="35px"
-                    style={{ paddingLeft: "5px" }}
-                  />
-                </Box>
-              }
-            />
-          )}
+          {SocketState.meyerInfo !== null &&
+            SocketState.meyerInfo?.currentPlayer !== SocketState.uid && (
+              <Typography
+                fontSize="12px"
+                fontStyle="normal"
+                textTransform="none"
+                component="span"
+                style={{
+                  wordBreak: "break-word",
+                  textAlign: "center",
+                }}
+                sx={{ display: "flex", justifyContent: "center" }}
+                children={
+                  <Box>
+                    {translateWaitingTurn(
+                      isDanish,
+                      SocketState.meyerInfo !== null
+                        ? playernameFromUid(SocketState.meyerInfo.currentPlayer)
+                        : "",
+                    )}
+                    <img
+                      src={loading}
+                      width="35px"
+                      style={{ paddingLeft: "5px" }}
+                    />
+                  </Box>
+                }
+              />
+            )}
           {toggleTimerButton()}
         </Box>
       )}
       {/* GAME OVER */}
-      {SocketState.meyerInfo.isGameOver && (
+      {SocketState.meyerInfo !== null && SocketState.meyerInfo.isGameOver && (
         <Box display="flex" flexDirection="column" overflow="hidden">
           <GameOverHeading
             isDanish={isDanish}
-            currentPlayer={playernameFromUid(
-              SocketState.meyerInfo.currentPlayer,
-            )}
-            round={SocketState.meyerInfo.round + 1}
-            turnsTotal={SocketState.meyerInfo.turnTotal + 1}
+            currentPlayer={
+              SocketState.meyerInfo !== null
+                ? playernameFromUid(SocketState.meyerInfo.currentPlayer)
+                : ""
+            }
+            round={
+              SocketState.meyerInfo !== null
+                ? SocketState.meyerInfo.round + 1
+                : 0
+            }
+            turnsTotal={
+              SocketState.meyerInfo !== null
+                ? SocketState.meyerInfo.turnTotal + 1
+                : 0
+            }
           />
           {SocketState.thisGame.owner === SocketState.uid && (
             <Box display="flex" justifyContent="center">
@@ -414,10 +451,16 @@ const GameMeyer = ({ isDanish }: Props) => {
             isDanish={isDanish}
             playerNames={SocketState.thisGame.gamePlayersNames}
             playerOrder={SocketState.thisGame.gamePlayersOrder}
-            round={SocketState.meyerInfo.round}
+            round={
+              SocketState.meyerInfo !== null ? SocketState.meyerInfo.round : 0
+            }
             showTimer={showTimer}
             setTurnInformation={function (update: TurnInfo[]) {}}
-            turnInformation={SocketState.meyerInfo.turnInformation}
+            turnInformation={
+              SocketState.meyerInfo !== null
+                ? SocketState.meyerInfo.turnInformation
+                : []
+            }
           />
         </Box>
       </Box>
