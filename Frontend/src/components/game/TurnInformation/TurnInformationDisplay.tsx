@@ -20,6 +20,7 @@ interface Props {
   isClicked: boolean[];
   isTimed?: boolean;
   playerNames?: string[];
+  playerOrder?: number[];
   showTimer: boolean;
   turnInfoList: TurnInfo[];
   onClick?:
@@ -35,6 +36,7 @@ const TurnInformationDisplay = ({
   isClicked,
   isTimed,
   playerNames,
+  playerOrder,
   showTimer,
   turnInfoList,
   onClick,
@@ -79,8 +81,8 @@ const TurnInformationDisplay = ({
                 backgroundColor: !isTimed
                   ? colors.greenAccent[800]
                   : !isClicked[index]
-                  ? colors.primary[700]
-                  : colors.greenAccent[600],
+                    ? colors.primary[700]
+                    : colors.greenAccent[600],
               }}
             >
               <Box display="flex" justifyContent="center">
@@ -91,7 +93,11 @@ const TurnInformationDisplay = ({
                   children={translateTurnInfo(
                     isDanish,
                     value,
-                    playerNames ? playerNames : undefined
+                    playerNames
+                      ? playerOrder
+                        ? playerOrder.map((v) => playerNames[v - 1])
+                        : undefined
+                      : undefined,
                   )}
                 />
               </Box>

@@ -413,6 +413,7 @@ const GameMeyer = ({ isDanish }: Props) => {
           <TurnInformation
             isDanish={isDanish}
             playerNames={SocketState.thisGame.gamePlayersNames}
+            playerOrder={SocketState.thisGame.gamePlayersOrder}
             round={SocketState.meyerInfo.round}
             showTimer={showTimer}
             setTurnInformation={function (update: TurnInfo[]) {}}
